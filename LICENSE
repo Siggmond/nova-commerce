@@ -1,8 +1,8 @@
 NOVA COMMERCE COMMERCIAL SOFTWARE LICENSE
 
-(Proprietary, Production Use)
+(Proprietary, Production)
 
-Copyright (c) 2026 NovaCommerce / Author
+Copyright (c) 2026 NovaCommerce
 All rights reserved.
 
 This software and associated materials (the “Software”) are proprietary and protected by copyright laws and international treaties.
@@ -11,8 +11,10 @@ This software and associated materials (the “Software”) are proprietary and 
 
 Subject to the terms and conditions of this License, NovaCommerce (“Licensor”) grants you a limited, non-exclusive, non-transferable, revocable license to:
 
-a) install and use the Software for commercial and production purposes, and
-b) operate the Software in local, private, or hosted production environments for your internal business use.
+a) install and use the Software for commercial and production purposes,
+b) operate the Software in local, private, or hosted production environments for internal business use.
+
+Notwithstanding the restrictions below, the Licensor may publish the Software source code in a public repository solely for demonstration, evaluation, or portfolio purposes. Such publication does not grant any rights beyond those expressly stated in this License.
 
 No ownership rights are transferred under this License.
 
@@ -22,21 +24,21 @@ Unless expressly authorized in writing by the Licensor, you may NOT:
 
 a) copy, reproduce, redistribute, sublicense, sell, lease, or share the Software (in whole or in part),
 b) make the Software available to third parties as a standalone product or service,
-c) publish, disclose, or expose the source code to any third party,
-d) reverse engineer, decompile, disassemble, or attempt to derive the source code, except where such restriction is prohibited by law,
+c) use the Software or its source code for commercial redistribution,
+d) reverse engineer, decompile, disassemble, or attempt to derive the source code, except where prohibited by law,
 e) remove, modify, or obscure any copyright, trademark, or license notices,
 f) use the Software in a manner that violates applicable laws or regulations.
 
 3. DERIVATIVE WORKS
 
-You may modify the Software solely for internal use.
+You may modify the Software solely for internal or evaluative purposes.
 Any modifications, enhancements, or derivative works remain the exclusive property of the Licensor unless otherwise agreed in writing.
 Distribution of derivative works is strictly prohibited without explicit written authorization.
 
 4. THIRD-PARTY COMPONENTS
 
 The Software may include third-party components governed by their own licenses.
-Those licenses apply only to the respective third-party components and do not grant any additional rights to the Software as a whole.
+Those licenses apply only to the respective third-party components and do not grant rights to the Software as a whole.
 
 5. DISCLAIMER OF WARRANTY
 
@@ -55,8 +57,9 @@ Upon termination, you must immediately cease all use of the Software and destroy
 
 8. GOVERNING LAW
 
-This License shall be governed by and construed in accordance with the laws of the applicable jurisdiction of the Licensor, without regard to conflict-of-law principles.
+This License shall be governed by and construed in accordance with the laws of the Licensor’s jurisdiction, without regard to conflict-of-law principles.
 
 9. CONTACT / COMMERCIAL PERMISSIONS
 
 For redistribution rights, sublicensing, white-label use, or extended commercial permissions, contact the Licensor to obtain explicit written authorization.
+

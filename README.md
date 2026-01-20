@@ -190,12 +190,14 @@ flutter run --dart-define=USE_FAKE_REPOS=true
 
 ---
 
-## Security + License (Important)
+## License & Usage
 
-This repository is provided for **portfolio review**.  
-It is **not** open-source. **No commercial use, redistribution, or deployment** is allowed.
+This project represents a commercial-grade application delivered as part of professional work.
 
-See [LICENSE](LICENSE).
+The source code is shared for **review and evaluation purposes only**.
+It is **not open-source** and may not be reused, redistributed, or deployed without explicit written permission.
+
+See [LICENSE](LICENSE) for full terms.
 
 ---
 

@@ -1,0 +1,73 @@
+####################################
+# General / OS
+####################################
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+Thumbs.db
+.history/
+.svn/
+.swiftpm/
+migrate_working_dir/
+
+####################################
+# IDEs
+####################################
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+
+####################################
+# Flutter / Dart
+####################################
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub/
+.pub-cache/
+build/
+**/doc/api/
+
+####################################
+# Coverage
+####################################
+coverage/
+
+####################################
+# Environment / config
+####################################
+.env
+.env.*
+.firebase/
+.flutterfire/
+
+####################################
+# Android build outputs
+####################################
+android/app/debug/
+android/app/profile/
+android/app/release/
+
+####################################
+# Android signing (NEVER commit)
+####################################
+**/key.properties
+**/*.jks
+**/*.keystore
+
+####################################
+# Firebase emulator logs
+####################################
+firebase-debug.log
+firestore-debug.log
+
+####################################
+# OS / misc
+####################################
+app.*.symbols
+app.*.map.json
+

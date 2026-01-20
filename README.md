@@ -5,113 +5,113 @@
 ![State](https://img.shields.io/badge/State-Riverpod-3C873A)
 ![Routing](https://img.shields.io/badge/Routing-GoRouter-6E56CF)
 ![Backend](https://img.shields.io/badge/Backend-Firebase-FFCA28?logo=firebase&logoColor=000)
-![Firestore](https://img.shields.io/badge/DB-Firestore-FFA000?logo=firebase&logoColor=000)
-![Auth](https://img.shields.io/badge/Auth-Firebase%20Auth-FFCA28?logo=firebase&logoColor=000)
-![Images](https://img.shields.io/badge/Images-cached__network__image-2E7D32)
-![CI](https://img.shields.io/badge/CI-GitHub%20Actions-2088FF?logo=githubactions&logoColor=white)
-![Tests](https://img.shields.io/badge/Tests-Passing-2E7D32)
+![DB](https://img.shields.io/badge/DB-Firestore-FFA000?logo=firebase&logoColor=000)
 
-A production-ready mobile commerce application built with Flutter and Firebase, featuring a modern shopping experience, real-time backend integration, and a scalable architecture suitable for real-world use.
+A Flutter + Firebase commerce app showcasing end‑to‑end shopping flows with a clean, scalable architecture: product discovery, variants, cart, checkout, orders, authentication, and an optional AI assistant layer.
 
-Nova Commerce demonstrates end-to-end product discovery, cart management, checkout, order tracking, authentication, and AI-assisted shopping, implemented with performance, reliability, and maintainability in mind.
+> **Scope:** Payments and logistics integrations are intentionally out of scope.
 
-## Scope
+---
 
-NovaCommerce focuses on mobile commerce flows, performance, and architecture.
-Payment processing and logistics integrations are intentionally out of scope for this implementation.
+## Contents
+
+- [Features](#features)
+- [Screenshots](#screenshots)
+- [Tech Stack](#tech-stack)
+- [Project Structure](#project-structure)
+- [Getting Started](#getting-started)
+- [Firebase Setup](#firebase-setup)
+- [Emulators](#emulators)
+- [Demo Mode](#demo-mode)
+- [License](#license)
 
 ---
 
 ## Features
 
-### Core Commerce
-- Product catalog with featured products and pagination
-- Product variants (size, color) with stock validation
+### Core commerce
+- Product catalog with pagination and featured products
+- Product variants (size/color) with stock validation
 - Cart with quantity management and persistence
 - Wishlist with local + remote sync
-- Secure checkout flow with transactional stock updates
-- Orders history and order details
+- Checkout with transactional stock decrement
+- Orders list + order details
 
 ### Authentication
-- Email & password authentication
+- Email/password sign-in
 - Google sign-in
 - Anonymous (guest) sessions with upgrade to authenticated accounts
 
-### Backend & Data
-- Firebase Firestore for products, orders, and user data
-- Firestore transactions for atomic checkout and stock decrement
-- Firebase Authentication integration
-- Emulator support for local development
+### Backend & data
+- Firestore for products, orders, and user data
+- Firestore transactions for atomic checkout and stock updates
 - Offline persistence enabled for Firestore
+- Emulator support for local development
 
-### UX & Performance
-- Responsive layout using flutter_screenutil
-- Optimized scrolling and rebuild minimization
-- Cached network images with decode-size hints
+### UX & performance
+- Responsive layout (flutter_screenutil)
+- Cached images (cached_network_image)
 - Skeleton loaders for perceived performance
 - Consistent, user-friendly error handling
-- Tested overflow-safe UI components
 
-### AI Assistant
-- Integrated AI chat assistant (Nova AI) for product-related queries and guidance
-- Modular AI repository design (real or fake implementations)
+### AI assistant (optional)
+- “Nova AI” chat assistant for product-related queries
+- Repository is modular (supports real or fake implementations)
 
 ---
 
 ## Screenshots
 
-<div>
-  <img src="assets/screenshots/Img1.jpeg" width="48%" alt="Home" />
-  <img src="assets/screenshots/Img2.jpeg" width="48%" alt="Home content" />
+<!-- 4-column grid using HTML (renders well on GitHub) -->
+<div align="center">
+  <img src="assets/screenshots/Img1.jpeg" width="22%" alt="Home" />
+  <img src="assets/screenshots/Img2.jpeg" width="22%" alt="Home feed" />
+  <img src="assets/screenshots/Img3.jpeg" width="22%" alt="Product details" />
+  <img src="assets/screenshots/Img4.jpeg" width="22%" alt="Nova AI" />
 </div>
 
-<div>
-  <img src="assets/screenshots/Img3.jpeg" width="48%" alt="Product details" />
-  <img src="assets/screenshots/Img4.jpeg" width="48%" alt="Nova AI" />
+<br/>
+
+<div align="center">
+  <img src="assets/screenshots/Img5.jpeg" width="22%" alt="Cart" />
+  <img src="assets/screenshots/Img6.jpeg" width="22%" alt="Checkout" />
+  <img src="assets/screenshots/Img7.jpeg" width="22%" alt="Profile" />
+  <img src="assets/screenshots/Img8.jpeg" width="22%" alt="Wishlist empty" />
 </div>
 
-<div>
-  <img src="assets/screenshots/Img5.jpeg" width="48%" alt="Cart" />
-  <img src="assets/screenshots/Img6.jpeg" width="48%" alt="Checkout" />
-</div>
+<br/>
 
-<div>
-  <img src="assets/screenshots/Img7.jpeg" width="48%" alt="Profile" />
-  <img src="assets/screenshots/Img8.jpeg" width="48%" alt="Wishlist empty" />
-</div>
-
-<div>
-  <img src="assets/screenshots/Img9.jpeg" width="48%" alt="Wishlist with item" />
-  <img src="assets/screenshots/Img10.jpeg" width="48%" alt="Orders empty" />
-</div>
-
-<div>
-  <img src="assets/screenshots/Img11.jpeg" width="48%" alt="Sign in" />
+<div align="center">
+  <img src="assets/screenshots/Img9.jpeg" width="22%" alt="Wishlist with item" />
+  <img src="assets/screenshots/Img10.jpeg" width="22%" alt="Orders empty" />
+  <img src="assets/screenshots/Img11.jpeg" width="22%" alt="Sign in" />
 </div>
 
 ---
 
 ## Tech Stack
 
-- **Flutter / Dart**
-- **Material 3**
-- **Riverpod 2.x**
-- **GoRouter**
-- **Firebase**: Firestore, Firebase Auth
-- **cached_network_image**
-- **flutter_screenutil** (responsive sizing)
+- Flutter / Dart
+- Material 3
+- Riverpod
+- GoRouter
+- Firebase Auth + Firestore
+- cached_network_image
+- flutter_screenutil
 
 ---
 
-## Project Structure (high level)
+## Project Structure
 
-```
+High-level layout:
+
+```text
 lib/
-  app.dart
   main.dart
-  core/          # routing, theme, widgets, config, error mapping
+  app.dart
+  core/          # routing, theme, shared widgets, config, error mapping
   domain/        # entities + repository interfaces
-  data/          # repos + datasources (Firestore/SharedPrefs/etc.)
+  data/          # repository implementations + datasources
   features/      # home, product, cart, checkout, wishlist, orders, auth, ai_assistant, profile
 ```
 
@@ -119,13 +119,17 @@ lib/
 
 ## Getting Started
 
-### 1) Install dependencies
+### Prerequisites
+- Flutter SDK (3.x)
+- Dart SDK (3.x)
+
+Install dependencies:
 
 ```bash
 flutter pub get
 ```
 
-### 2) Run code quality checks
+Run quality checks:
 
 ```bash
 dart format .
@@ -133,7 +137,7 @@ flutter analyze
 flutter test
 ```
 
-### 3) Run the app
+Run the app:
 
 ```bash
 flutter run
@@ -143,52 +147,67 @@ flutter run
 
 ## Firebase Setup
 
-This app expects Firebase config generated by **FlutterFire**.
-> This project uses client-side Firebase configuration only. No server-side secrets are included.
+This app uses **client-side Firebase configuration** (no server-side secrets are included in this repository).
 
 ### Option A — Use your own Firebase project (recommended)
 
-1. Create a Firebase project in the Firebase console.
-2. Enable **Authentication** providers (Anonymous / Email-Password / Google).
+1. Create a Firebase project.
+2. Enable Authentication providers (Anonymous / Email-Password / Google).
 3. Create Firestore collections:
-   - `products` (catalog)
-   - `orders` (created by checkout)
-4. From your repo root:
+   - `products`
+   - `orders`
+4. From the repo root, run:
 
 ```bash
 flutterfire configure
 ```
 
-This will generate platform config, including:
+This generates:
 - `android/app/google-services.json`
 - `ios/Runner/GoogleService-Info.plist`
 - `lib/firebase_options.dart`
 
-> **Tip:** Make sure each product document contains `featured: true` and a `createdAt` timestamp if your query orders by it.
+> Tip: If your product query orders by `createdAt`, make sure product docs contain `createdAt` and any flags you filter on (e.g. `featured: true`).
 
 ---
 
-## Firestore Emulator (optional)
+## Emulators (optional)
 
-Run the emulator:
+Start emulators:
 
 ```bash
 firebase emulators:start --only firestore,auth
 ```
 
-Run the app pointing to emulators:
+Run app using emulators (examples):
 
+### iOS Simulator
 ```bash
-flutter run   --dart-define=USE_FIRESTORE_EMULATOR=true   --dart-define=FIRESTORE_HOST=localhost   --dart-define=FIRESTORE_PORT=8080   --dart-define=AUTH_PORT=9099
+flutter run \
+  --dart-define=USE_FIRESTORE_EMULATOR=true \
+  --dart-define=FIRESTORE_HOST=localhost \
+  --dart-define=FIRESTORE_PORT=8080 \
+  --dart-define=AUTH_PORT=9099
 ```
 
-Android emulator note: `localhost` is automatically mapped to `10.0.2.2`.
+### Android Emulator
+```bash
+flutter run \
+  --dart-define=USE_FIRESTORE_EMULATOR=true \
+  --dart-define=FIRESTORE_HOST=10.0.2.2 \
+  --dart-define=FIRESTORE_PORT=8080 \
+  --dart-define=AUTH_PORT=9099
+```
+
+> Notes:
+> - On Android Emulator, `10.0.2.2` routes to your host machine.
+> - On a physical device, use your machine’s LAN IP (e.g., `192.168.x.x`).
 
 ---
 
-## Demo / Offline Mode
+## Demo Mode
 
-Run with in-memory repositories (no Firebase needed):
+Run with in-memory repositories (no Firebase required):
 
 ```bash
 flutter run --dart-define=USE_FAKE_REPOS=true
@@ -196,17 +215,10 @@ flutter run --dart-define=USE_FAKE_REPOS=true
 
 ---
 
-## License & Usage
+## License
 
-This project represents a commercial-grade application delivered as part of professional work.
-
-The source code is shared for **review and evaluation purposes only**.
+This repository is provided for **review and evaluation purposes only**.
 It is **not open-source** and may not be reused, redistributed, or deployed without explicit written permission.
 
-See [LICENSE](LICENSE) for full terms.
+See [LICENSE](LICENSE).
 
----
-
-## Contact
-
-If you’d like a walkthrough (architecture, tradeoffs, performance decisions), feel free to reach out.

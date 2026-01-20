@@ -1,4 +1,4 @@
-# NovaCommerce (Flutter + Firebase) — Portfolio Project
+# NovaCommerce
 
 ![Flutter](https://img.shields.io/badge/Flutter-3.x-02569B?logo=flutter&logoColor=white)
 ![Dart](https://img.shields.io/badge/Dart-3.x-0175C2?logo=dart&logoColor=white)
@@ -11,27 +11,45 @@
 ![CI](https://img.shields.io/badge/CI-GitHub%20Actions-2088FF?logo=githubactions&logoColor=white)
 ![Tests](https://img.shields.io/badge/Tests-Passing-2E7D32)
 
-NovaCommerce is a **portfolio-grade Flutter e-commerce MVP** featuring:
-- a modern storefront UX (browse → details → variants → cart → checkout),
-- a **Nova AI** chat-style assistant experience,
-- and a **Firebase backend** (Firestore + Auth) with **transactional checkout**.
+A production-ready mobile commerce application built with Flutter and Firebase, featuring a modern shopping experience, real-time backend integration, and a scalable architecture suitable for real-world use.
 
-> **Portfolio note:** This repository is shared for evaluation/review of engineering work.  
-> See the **License** section below for usage restrictions.
+Nova Commerce demonstrates end-to-end product discovery, cart management, checkout, order tracking, authentication, and AI-assisted shopping, implemented with performance, reliability, and maintainability in mind.
 
 ---
 
-## Highlights
+## Features
 
-- **Feature-first structure** with clean layering (domain / data / presentation)
-- **Riverpod** state management (ViewModels via StateNotifier)
-- **GoRouter ShellRoute** app shell (tabs + nested routes)
-- **Firestore-backed catalog + orders**
-- **Transactional checkout** (validates + decrements variant stock atomically)
-- **Wishlist + Cart persistence**
-- **Auth**: Anonymous, Email/Password, Google
-- **Performance work**: paging, cached images, reduced rebuilds, skeleton loaders
-- **Defensive UI**: overflow-safe cards, consistent error mapping, retry states
+### Core Commerce
+- Product catalog with featured products and pagination
+- Product variants (size, color) with stock validation
+- Cart with quantity management and persistence
+- Wishlist with local + remote sync
+- Secure checkout flow with transactional stock updates
+- Orders history and order details
+
+### Authentication
+- Email & password authentication
+- Google sign-in
+- Anonymous (guest) sessions with upgrade to authenticated accounts
+
+### Backend & Data
+- Firebase Firestore for products, orders, and user data
+- Firestore transactions for atomic checkout and stock decrement
+- Firebase Authentication integration
+- Emulator support for local development
+- Offline persistence enabled for Firestore
+
+### UX & Performance
+- Responsive layout using flutter_screenutil
+- Optimized scrolling and rebuild minimization
+- Cached network images with decode-size hints
+- Skeleton loaders for perceived performance
+- Consistent, user-friendly error handling
+- Tested overflow-safe UI components
+
+### AI Assistant
+- Integrated AI chat assistant (Nova AI) for product-related queries
+- Modular AI repository design (real or fake implementations)
 
 ---
 

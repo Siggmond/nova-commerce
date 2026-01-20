@@ -1,45 +1,62 @@
-NOVA COMMERCE PORTFOLIO LICENSE (NON-COMMERCIAL, NO-REDISTRIBUTION)
+NOVA COMMERCE COMMERCIAL SOFTWARE LICENSE
+
+(Proprietary, Production Use)
 
 Copyright (c) 2026 NovaCommerce / Author
 All rights reserved.
 
-This software and associated materials (the “Software”) are made available for the
-limited purpose of portfolio review and evaluation.
+This software and associated materials (the “Software”) are proprietary and protected by copyright laws and international treaties.
 
-1. GRANT OF LIMITED RIGHTS
-You are granted a limited, non-exclusive, non-transferable, revocable license to:
-  a) view the source code for evaluation/review purposes, and
-  b) run the Software locally for evaluation, provided it is not distributed.
+1. GRANT OF LICENSE
+
+Subject to the terms and conditions of this License, NovaCommerce (“Licensor”) grants you a limited, non-exclusive, non-transferable, revocable license to:
+
+a) install and use the Software for commercial and production purposes, and
+b) operate the Software in local, private, or hosted production environments for your internal business use.
+
+No ownership rights are transferred under this License.
 
 2. RESTRICTIONS
-You may NOT, without explicit written permission from the copyright holder:
-  a) copy, reproduce, republish, redistribute, or share the Software (in whole or part),
-  b) use the Software (or any substantial portion) in any product, service, or client work,
-  c) deploy the Software to any public environment (stores, hosted backends, public web),
-  d) create derivative works for distribution or production use,
-  e) remove or alter copyright, attribution, or license notices.
 
-3. THIRD-PARTY COMPONENTS
-The Software may include third-party dependencies governed by their own licenses.
-Those licenses apply only to the third-party components and do not grant rights to
-this Software beyond the permissions in this license.
+Unless expressly authorized in writing by the Licensor, you may NOT:
 
-4. DISCLAIMER OF WARRANTY
-THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
-INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
-PURPOSE, AND NON-INFRINGEMENT. YOU ASSUME ALL RISK ARISING FROM ITS USE.
+a) copy, reproduce, redistribute, sublicense, sell, lease, or share the Software (in whole or in part),
+b) make the Software available to third parties as a standalone product or service,
+c) publish, disclose, or expose the source code to any third party,
+d) reverse engineer, decompile, disassemble, or attempt to derive the source code, except where such restriction is prohibited by law,
+e) remove, modify, or obscure any copyright, trademark, or license notices,
+f) use the Software in a manner that violates applicable laws or regulations.
 
-5. LIMITATION OF LIABILITY
-IN NO EVENT SHALL THE COPYRIGHT HOLDER(S) BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT, OR OTHERWISE, ARISING FROM, OUT OF,
-OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+3. DERIVATIVE WORKS
 
-6. TERMINATION
-This license terminates automatically if you violate any term. Upon termination you must
-cease all use and destroy any copies in your possession.
+You may modify the Software solely for internal use.
+Any modifications, enhancements, or derivative works remain the exclusive property of the Licensor unless otherwise agreed in writing.
+Distribution of derivative works is strictly prohibited without explicit written authorization.
 
-7. PERMISSIONS / CONTACT
-For permission to use, redistribute, or deploy any part of the Software, contact the
-copyright holder and obtain explicit written authorization.
+4. THIRD-PARTY COMPONENTS
 
---- END OF LICENSE ---
+The Software may include third-party components governed by their own licenses.
+Those licenses apply only to the respective third-party components and do not grant any additional rights to the Software as a whole.
+
+5. DISCLAIMER OF WARRANTY
+
+THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT.
+THE ENTIRE RISK AS TO THE USE AND PERFORMANCE OF THE SOFTWARE IS ASSUMED BY YOU.
+
+6. LIMITATION OF LIABILITY
+
+TO THE MAXIMUM EXTENT PERMITTED BY LAW, IN NO EVENT SHALL THE LICENSOR BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, INCLUDING BUT NOT LIMITED TO LOSS OF PROFITS, DATA, OR BUSINESS INTERRUPTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR INABILITY TO USE THE SOFTWARE.
+
+7. TERMINATION
+
+This License is effective until terminated.
+It terminates automatically if you breach any term of this License.
+Upon termination, you must immediately cease all use of the Software and destroy all copies in your possession or control.
+
+8. GOVERNING LAW
+
+This License shall be governed by and construed in accordance with the laws of the applicable jurisdiction of the Licensor, without regard to conflict-of-law principles.
+
+9. CONTACT / COMMERCIAL PERMISSIONS
+
+For redistribution rights, sublicensing, white-label use, or extended commercial permissions, contact the Licensor to obtain explicit written authorization.

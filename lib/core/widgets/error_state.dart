@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../theme/app_tokens.dart';
+import 'app_button.dart';
+
 class AppErrorState extends StatelessWidget {
   const AppErrorState({
     super.key,
@@ -19,7 +22,7 @@ class AppErrorState extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Padding(
-        padding: EdgeInsets.all(20.r),
+        padding: AppInsets.state,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -30,7 +33,7 @@ class AppErrorState extends StatelessWidget {
                 context,
               ).colorScheme.onSurface.withValues(alpha: 0.6),
             ),
-            SizedBox(height: 12.h),
+            SizedBox(height: AppSpace.sm),
             Text(
               title,
               style: Theme.of(
@@ -38,7 +41,7 @@ class AppErrorState extends StatelessWidget {
               ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w900),
               textAlign: TextAlign.center,
             ),
-            SizedBox(height: 6.h),
+            SizedBox(height: AppSpace.xs),
             Text(
               subtitle,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -48,8 +51,8 @@ class AppErrorState extends StatelessWidget {
               ),
               textAlign: TextAlign.center,
             ),
-            SizedBox(height: 12.h),
-            FilledButton(onPressed: onAction, child: Text(actionText)),
+            SizedBox(height: AppSpace.sm),
+            AppButton.primary(label: actionText, onPressed: onAction),
           ],
         ),
       ),

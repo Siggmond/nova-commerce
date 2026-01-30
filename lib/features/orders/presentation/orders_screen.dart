@@ -1,66 +1,32 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/config/app_env.dart';
 import '../../../core/config/app_routes.dart';
 import '../../../core/config/auth_providers.dart';
 import '../../../core/errors/app_error_mapper.dart';
 import '../../../core/widgets/error_state.dart';
+import '../../../core/widgets/nova_app_bar.dart';
+import '../../../core/widgets/nova_button.dart';
+import '../../../core/widgets/nova_surface.dart';
 import '../../../core/widgets/shimmer.dart';
-import '../../../data/datasources/device_id_datasource.dart';
-import '../../../domain/entities/order.dart' as domain;
-
-final deviceIdProvider = FutureProvider<String>((ref) async {
-  return DeviceIdDataSource().getOrCreate();
-});
-
-final ordersProvider = StreamProvider<List<domain.Order>>((ref) {
-  final userAsync = ref.watch(authStateProvider);
-  final deviceIdAsync = ref.watch(deviceIdProvider);
-
-  return userAsync.when(
-    loading: () => const Stream<List<domain.Order>>.empty(),
-    error: (_, __) => const Stream<List<domain.Order>>.empty(),
-    data: (user) {
-      return deviceIdAsync.when(
-        loading: () => const Stream<List<domain.Order>>.empty(),
-        error: (_, __) => const Stream<List<domain.Order>>.empty(),
-        data: (deviceId) {
-          final orders = FirebaseFirestore.instance.collection('orders');
-          final q = user == null
-              ? orders.where('deviceId', isEqualTo: deviceId)
-              : orders.where('uid', isEqualTo: user.uid);
-
-          return q.snapshots().map((snap) {
-            final list = snap.docs
-                .map(domain.Order.fromDoc)
-                .toList(growable: true);
-            list.sort((a, b) {
-              final aTime =
-                  a.createdAt ?? DateTime.fromMillisecondsSinceEpoch(0);
-              final bTime =
-                  b.createdAt ?? DateTime.fromMillisecondsSinceEpoch(0);
-              return bTime.compareTo(aTime);
-            });
-            return list;
-          });
-        },
-      );
-    },
-  );
-});
+import 'order_status_ui.dart';
+import 'orders_controller.dart';
 
 class OrdersScreen extends ConsumerWidget {
   const OrdersScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final ordersAsync = ref.watch(ordersProvider);
-    final userAsync = ref.watch(authStateProvider);
+    final ordersAsync = ref.watch(ordersControllerProvider);
+    final userAsync = ref.watch(authUserProvider);
+    final useNovaUi = AppEnv.enableNovaUi;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Orders')),
+      appBar: useNovaUi
+          ? NovaAppBar(titleText: 'Orders')
+          : AppBar(title: const Text('Orders')),
       body: ordersAsync.when(
         loading: () => const _OrdersSkeleton(),
         error: (e, _) {
@@ -71,7 +37,10 @@ class OrdersScreen extends ConsumerWidget {
               title: msg.title,
               subtitle: msg.subtitle,
               actionText: 'Retry',
-              onAction: () => ref.invalidate(ordersProvider),
+              onAction: () =>
+                  ref.read(ordersControllerProvider.notifier).refresh(
+                        showLoading: true,
+                      ),
             ),
             data: (user) {
               if (user == null) {
@@ -88,10 +57,16 @@ class OrdersScreen extends ConsumerWidget {
                           textAlign: TextAlign.center,
                         ),
                         const SizedBox(height: 12),
-                        FilledButton(
-                          onPressed: () => context.push(AppRoutes.signIn),
-                          child: const Text('Sign in'),
-                        ),
+                        useNovaUi
+                            ? NovaButton.primary(
+                                onPressed: () => context.push(AppRoutes.signIn),
+                                label: 'Sign in',
+                              )
+                            : FilledButton(
+                                onPressed: () =>
+                                    context.push(AppRoutes.signIn),
+                                child: const Text('Sign in'),
+                              ),
                       ],
                     ),
                   ),
@@ -101,7 +76,10 @@ class OrdersScreen extends ConsumerWidget {
                 title: msg.title,
                 subtitle: msg.subtitle,
                 actionText: 'Retry',
-                onAction: () => ref.invalidate(ordersProvider),
+                onAction: () =>
+                    ref.read(ordersControllerProvider.notifier).refresh(
+                          showLoading: true,
+                        ),
               );
             },
           );
@@ -111,11 +89,27 @@ class OrdersScreen extends ConsumerWidget {
             return Center(
               child: Padding(
                 padding: const EdgeInsets.all(20),
-                child: Text(
-                  'No orders yet.',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w800,
-                  ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'No orders yet.',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w800,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 12),
+                    useNovaUi
+                        ? NovaButton.primary(
+                            onPressed: () => context.go(AppRoutes.home),
+                            label: 'Start shopping',
+                          )
+                        : FilledButton(
+                            onPressed: () => context.go(AppRoutes.home),
+                            child: const Text('Start shopping'),
+                          ),
+                  ],
                 ),
               ),
             );
@@ -128,29 +122,34 @@ class OrdersScreen extends ConsumerWidget {
             itemBuilder: (context, index) {
               final o = orders[index];
               final created = o.createdAt;
+              final statusLabel = orderStatusLabel(o.status, o.statusRaw);
               final subtitle = created == null
-                  ? 'Status: ${o.status}'
-                  : '${created.toLocal()} • ${o.status}';
+                  ? 'Status: $statusLabel'
+                  : '${created.toLocal()} • $statusLabel';
 
-              return Card(
-                child: ListTile(
-                  title: Text(
-                    '${o.currency.toUpperCase()} ${o.total.toStringAsFixed(0)}',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w900,
-                    ),
+              final tile = ListTile(
+                title: Text(
+                  '${o.currency.toUpperCase()} ${o.total.toStringAsFixed(0)}',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w900,
                   ),
-                  subtitle: Text(
-                    subtitle,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () => context.push('${AppRoutes.orders}/${o.id}'),
                 ),
+                subtitle: Text(
+                  subtitle,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => context.push('${AppRoutes.orders}/${o.id}'),
               );
+
+              if (useNovaUi) {
+                return NovaSurface(padding: EdgeInsets.zero, child: tile);
+              }
+
+              return Card(child: tile);
             },
           );
         },

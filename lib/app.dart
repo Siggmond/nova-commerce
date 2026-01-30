@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import 'core/config/app_router.dart';
+import 'core/config/theme_mode_provider.dart';
 import 'core/config/performance_mode.dart';
 import 'core/theme/app_theme.dart';
 
@@ -30,6 +31,8 @@ class NovaCommerceApp extends ConsumerWidget {
       debugPrintRebuildDirtyWidgets = perfEnabled;
     }
 
+    final themeMode = ref.watch(themeModeProvider);
+
     return ScreenUtilInit(
       designSize: const Size(375, 812),
       minTextAdapt: true,
@@ -39,7 +42,7 @@ class NovaCommerceApp extends ConsumerWidget {
           title: 'NovaCommerce',
           theme: AppTheme.light,
           darkTheme: AppTheme.dark,
-          themeMode: ThemeMode.system,
+          themeMode: themeMode,
           showPerformanceOverlay: perfEnabled,
           routerConfig: router,
           builder: (context, child) {

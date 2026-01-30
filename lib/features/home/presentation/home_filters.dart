@@ -115,7 +115,7 @@ final homeCatalogMetaProvider = Provider<HomeCatalogMeta>((ref) {
       .when(
         loading: () => const <Product>[],
         error: (_) => const <Product>[],
-        data: (items, __, ___) => items,
+        data: (items, __, ___, ____) => items,
       );
 
   final brands =
@@ -146,7 +146,7 @@ final homeFilteredProductsProvider = Provider<List<Product>>((ref) {
       .when(
         loading: () => const <Product>[],
         error: (_) => const <Product>[],
-        data: (items, __, ___) => items,
+        data: (items, __, ___, ____) => items,
       );
 
   final filters = ref.watch(homeBrowseFiltersProvider);
@@ -189,4 +189,13 @@ final homeFilteredProductsProvider = Provider<List<Product>>((ref) {
   }
 
   return filtered;
+});
+
+final homePersonalizationEnabledProvider = Provider<bool>((ref) {
+  return false;
+});
+
+final homeUnder50ProductsProvider = Provider<List<Product>>((ref) {
+  final items = ref.watch(homeFilteredProductsProvider);
+  return items.where((p) => p.price <= 50).toList(growable: false);
 });

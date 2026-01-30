@@ -7,6 +7,7 @@ class ChatMessage {
     required this.text,
     required this.createdAt,
     this.intent,
+    this.isStreaming = false,
   });
 
   final String id;
@@ -15,4 +16,20 @@ class ChatMessage {
   final DateTime createdAt;
 
   final String? intent;
+  final bool isStreaming;
+
+  ChatMessage copyWith({
+    String? text,
+    String? intent,
+    bool? isStreaming,
+  }) {
+    return ChatMessage(
+      id: id,
+      role: role,
+      text: text ?? this.text,
+      createdAt: createdAt,
+      intent: intent ?? this.intent,
+      isStreaming: isStreaming ?? this.isStreaming,
+    );
+  }
 }

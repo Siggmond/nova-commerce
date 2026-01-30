@@ -31,6 +31,7 @@ migrate_working_dir/
 .pub-cache/
 build/
 **/doc/api/
+.metadata
 
 ####################################
 # Coverage
@@ -46,11 +47,24 @@ coverage/
 .flutterfire/
 
 ####################################
-# Android build outputs
+# Firebase platform config (DO NOT COMMIT)
 ####################################
+ios/Runner/GoogleService-Info.plist
+macos/Runner/GoogleService-Info.plist
+
+android/app/src/dev/google-services.json
+android/app/src/stage/google-services.json
+android/app/src/prod/google-services.json
+
+####################################
+# Android
+####################################
+android/.gradle/
 android/app/debug/
 android/app/profile/
 android/app/release/
+android/app/build/
+android/local.properties
 
 ####################################
 # Android signing (NEVER commit)
@@ -60,14 +74,38 @@ android/app/release/
 **/*.keystore
 
 ####################################
-# Firebase emulator logs
+# iOS
 ####################################
+ios/Pods/
+ios/DerivedData/
+ios/Flutter/ephemeral/
+
+####################################
+# Logs & crash dumps
+####################################
+flutter_*.log
 firebase-debug.log
 firestore-debug.log
+hs_err_pid*.log
+
+####################################
+# Temp / local work dirs
+####################################
+.tmp/
+tmp/
+
+####################################
+# Backend (future – keep ignored until implemented)
+####################################
+functions/
+
+####################################
+# Local scripts / tools
+####################################
+audit_unused.ps1
 
 ####################################
 # OS / misc
 ####################################
 app.*.symbols
 app.*.map.json
-

@@ -1,46 +1,50 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /products/{productId} {
-      allow read: if true;
-      allow create, delete: if false;
-      allow update: if request.resource.data.title == resource.data.title
-        && request.resource.data.brand == resource.data.brand
-        && request.resource.data.price == resource.data.price
-        && request.resource.data.currency == resource.data.currency
-        && request.resource.data.description == resource.data.description
-        && request.resource.data.imageUrls == resource.data.imageUrls
-        && request.resource.data.variants is list
-        && resource.data.variants is list
-        && request.resource.data.variants.size() == resource.data.variants.size()
-        && request.resource.data.variants.all(v,
-          v is map
-          && v.color is string
-          && v.size is string
-          && v.stock is int
-          && v.stock >= 0
-        );
+    function isSignedIn() {
+      return request.auth != null && request.auth.uid is string && request.auth.uid.size() > 0;
     }
 
-    match /carts/{cartId} {
-      allow read: if resource.data.deviceId == cartId;
-      allow create: if request.resource.data.deviceId == cartId;
-      allow update: if resource.data.deviceId == cartId
-        && request.resource.data.deviceId == cartId;
+    function isAdmin() {
+      return isSignedIn() && request.auth.token.admin == true;
+    }
+
+    function isNonEmptyString(v) {
+      return v is string && v.size() > 0;
+    }
+
+    match /products/{productId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /home_config/{docId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /carts/{uid} {
+      allow read: if isSignedIn() && request.auth.uid == uid;
+      allow create, update: if isSignedIn()
+        && request.auth.uid == uid
+        && request.resource.data.uid == uid
+        && request.resource.data.items is list
+        && request.resource.data.items.all(i,
+          i is map
+          && isNonEmptyString(i.productId)
+          && i.quantity is int
+          && i.quantity > 0
+          && isNonEmptyString(i.selectedColor)
+          && isNonEmptyString(i.selectedSize)
+        );
       allow delete: if false;
     }
 
     match /orders/{orderId} {
-      allow create: if request.auth != null
-        && request.resource.data.uid == request.auth.uid
-        && request.resource.data.deviceId is string
-        && request.resource.data.status is string
-        && request.resource.data.currency is string
-        && request.resource.data.items is list
-        && request.resource.data.createdAt == request.time;
-      allow read: if request.auth != null
-        && resource.data.uid == request.auth.uid;
-      allow update, delete: if false;
+      // Orders are created by Cloud Functions (Admin SDK). Clients cannot create.
+      allow create: if false;
+      allow read: if isAdmin() || (isSignedIn() && resource.data.uid == request.auth.uid);
+      allow update, delete: if isAdmin();
     }
 
     match /{document=**} {

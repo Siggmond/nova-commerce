@@ -81,6 +81,76 @@ class FakeProductRepository implements ProductRepository {
         Variant(color: 'Black', size: '36', stock: 4),
       ],
     ),
+    Product(
+      id: 'deal_1',
+      title: 'Ribbed Knit Top',
+      brand: 'Nova Studio',
+      price: 9.99,
+      currency: 'USD',
+      imageUrls: [
+        'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=1200&q=60',
+      ],
+      description: _lorem,
+      variants: [
+        Variant(color: 'Ivory', size: 'XS', stock: 6),
+        Variant(color: 'Ivory', size: 'S', stock: 10),
+        Variant(color: 'Ivory', size: 'M', stock: 12),
+        Variant(color: 'Black', size: 'S', stock: 8),
+        Variant(color: 'Black', size: 'M', stock: 9),
+      ],
+    ),
+    Product(
+      id: 'deal_2',
+      title: 'Wide Leg Trousers',
+      brand: 'Nova Essentials',
+      price: 16.5,
+      currency: 'USD',
+      imageUrls: [
+        'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&w=1200&q=60',
+      ],
+      description: _lorem,
+      variants: [
+        Variant(color: 'Taupe', size: 'S', stock: 7),
+        Variant(color: 'Taupe', size: 'M', stock: 9),
+        Variant(color: 'Taupe', size: 'L', stock: 5),
+        Variant(color: 'Black', size: 'M', stock: 8),
+        Variant(color: 'Black', size: 'L', stock: 6),
+      ],
+    ),
+    Product(
+      id: 'deal_3',
+      title: 'Studio Zip Hoodie',
+      brand: 'Nova Street',
+      price: 22.0,
+      currency: 'USD',
+      imageUrls: [
+        'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=1200&q=60',
+      ],
+      description: _lorem,
+      variants: [
+        Variant(color: 'Heather', size: 'S', stock: 8),
+        Variant(color: 'Heather', size: 'M', stock: 11),
+        Variant(color: 'Heather', size: 'L', stock: 7),
+        Variant(color: 'Black', size: 'M', stock: 9),
+      ],
+    ),
+    Product(
+      id: 'deal_4',
+      title: 'Soft Denim Jacket',
+      brand: 'Nova Utility',
+      price: 28.5,
+      currency: 'USD',
+      imageUrls: [
+        'https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=1200&q=60',
+      ],
+      description: _lorem,
+      variants: [
+        Variant(color: 'Indigo', size: 'S', stock: 6),
+        Variant(color: 'Indigo', size: 'M', stock: 8),
+        Variant(color: 'Indigo', size: 'L', stock: 6),
+        Variant(color: 'Blue', size: 'M', stock: 7),
+      ],
+    ),
   ];
 
   @override

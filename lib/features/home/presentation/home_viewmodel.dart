@@ -9,6 +9,7 @@ sealed class HomeState {
   const factory HomeState.loading() = HomeLoading;
   const factory HomeState.data({
     required List<Product> items,
+    required bool isRefreshing,
     required bool isLoadingMore,
     required bool hasMore,
   }) = HomeData;
@@ -16,13 +17,19 @@ sealed class HomeState {
 
   T when<T>({
     required T Function() loading,
-    required T Function(List<Product> items, bool isLoadingMore, bool hasMore)
-    data,
+    required T Function(
+      List<Product> items,
+      bool isRefreshing,
+      bool isLoadingMore,
+      bool hasMore,
+    ) data,
     required T Function(Object error) error,
   }) {
     final s = this;
     if (s is HomeLoading) return loading();
-    if (s is HomeData) return data(s.items, s.isLoadingMore, s.hasMore);
+    if (s is HomeData) {
+      return data(s.items, s.isRefreshing, s.isLoadingMore, s.hasMore);
+    }
     return error((s as HomeError).error);
   }
 }
@@ -34,21 +41,25 @@ class HomeLoading extends HomeState {
 class HomeData extends HomeState {
   const HomeData({
     required this.items,
+    required this.isRefreshing,
     required this.isLoadingMore,
     required this.hasMore,
   });
 
   final List<Product> items;
+  final bool isRefreshing;
   final bool isLoadingMore;
   final bool hasMore;
 
   HomeData copyWith({
     List<Product>? items,
+    bool? isRefreshing,
     bool? isLoadingMore,
     bool? hasMore,
   }) {
     return HomeData(
       items: items ?? this.items,
+      isRefreshing: isRefreshing ?? this.isRefreshing,
       isLoadingMore: isLoadingMore ?? this.isLoadingMore,
       hasMore: hasMore ?? this.hasMore,
     );
@@ -69,7 +80,7 @@ final homeViewModelProvider = StateNotifierProvider<HomeViewModel, HomeState>((
 
 class HomeViewModel extends StateNotifier<HomeState> {
   HomeViewModel(this._ref) : super(const HomeState.loading()) {
-    refresh();
+    refresh(showLoading: true);
   }
 
   final Ref _ref;
@@ -89,8 +100,13 @@ class HomeViewModel extends StateNotifier<HomeState> {
     return out;
   }
 
-  Future<void> refresh() async {
-    state = const HomeState.loading();
+  Future<void> refresh({bool showLoading = false}) async {
+    final current = state;
+    if (current is HomeData && !showLoading) {
+      state = current.copyWith(isRefreshing: true);
+    } else {
+      state = const HomeState.loading();
+    }
     _cursor = null;
     try {
       final repo = _ref.read(productRepositoryProvider);
@@ -99,6 +115,7 @@ class HomeViewModel extends StateNotifier<HomeState> {
       final items = _dedupeById(page.items);
       state = HomeState.data(
         items: items,
+        isRefreshing: false,
         isLoadingMore: false,
         hasMore: page.items.length == _pageSize && _cursor != null,
       );

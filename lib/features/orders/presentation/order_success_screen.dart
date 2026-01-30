@@ -3,11 +3,17 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/config/app_routes.dart';
+import '../../checkout/domain/checkout_cart_summary.dart';
 
 class OrderSuccessScreen extends StatelessWidget {
-  const OrderSuccessScreen({super.key, required this.orderId});
+  const OrderSuccessScreen({
+    super.key,
+    required this.orderId,
+    this.summary,
+  });
 
   final String orderId;
+  final CheckoutCartSummary? summary;
 
   @override
   Widget build(BuildContext context) {
@@ -49,6 +55,18 @@ class OrderSuccessScreen extends StatelessWidget {
                 ),
                 textAlign: TextAlign.center,
               ),
+              if (summary != null) ...[
+                SizedBox(height: 12.h),
+                Text(
+                  '${summary!.items.length} items • '
+                  '${summary!.currency.toUpperCase()} '
+                  '${summary!.total.toStringAsFixed(0)} total',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
               SizedBox(height: 16.h),
               SizedBox(
                 width: double.infinity,

@@ -2,8 +2,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-
-
 import '../../core/config/app_env.dart';
 
 import '../../core/security/secure_store.dart';
@@ -78,179 +76,104 @@ import '../../domain/repositories/wishlist_repository.dart';
 
 import 'auth_providers.dart';
 
-
-
 final deviceIdDataSourceProvider = Provider<DeviceIdDataSource>((ref) {
-
   return DeviceIdDataSource();
-
 });
 
-
-
 final secureStoreProvider = Provider<SecureStore>((ref) {
-
   if (AppEnv.useFakeRepos) {
-
     return InMemorySecureStore();
-
   }
 
   return FlutterSecureStore();
-
 });
-
-
 
 final telemetryProvider = Provider<Telemetry>((ref) {
-
   return NoopTelemetry();
-
 });
 
-
-
 final homeConfigRepositoryProvider = Provider<HomeConfigRepository>((ref) {
-
   if (AppEnv.useFakeRepos) {
-
     return FakeHomeConfigRepository();
-
   }
 
   return FirestoreHomeConfigRepository(
-
     FirestoreHomeConfigDataSource(FirebaseFirestore.instance),
-
   );
-
 });
 
-
-
-final homeSuperDealsRepositoryProvider = Provider<HomeSuperDealsRepository>((ref) {
-
+final homeSuperDealsRepositoryProvider = Provider<HomeSuperDealsRepository>((
+  ref,
+) {
   if (AppEnv.useFakeRepos) {
-
     return FakeHomeSuperDealsRepository();
-
   }
 
   return FirestoreHomeSuperDealsRepository(
-
     FirestoreHomeSuperDealsDataSource(FirebaseFirestore.instance),
-
   );
-
 });
-
-
 
 final productRepositoryProvider = Provider<ProductRepository>((ref) {
-
   if (AppEnv.useFakeRepos) {
-
     return FakeProductRepository();
-
   }
 
-
-
   return FirestoreProductRepository(
-
     FirestoreProductDataSource(FirebaseFirestore.instance),
-
   );
-
 });
 
-
-
 final cartRepositoryProvider = Provider<CartRepository>((ref) {
-
   final local = SharedPrefsCartRepository(SharedPrefsCartDataSource());
 
   if (AppEnv.useFakeRepos) {
-
     return local;
-
   }
-
-
 
   final uid = ref.watch(currentUidProvider);
 
   if (uid == null || uid.trim().isEmpty) {
-
     return local;
-
   }
 
-
-
   final remote = FirestoreCartRepository(
-
     FirestoreCartDataSource(FirebaseFirestore.instance),
 
     uid.trim(),
-
   );
 
-
-
   return SyncingCartRepository(local: local, remote: remote);
-
 });
 
-
-
 final orderRepositoryProvider = Provider<OrderRepository>((ref) {
-
   if (AppEnv.useFakeRepos) {
-
     return FakeOrderRepository();
-
   }
 
   return FirestoreOrderRepository(FirebaseFirestore.instance);
-
 });
 
-
-
 final ordersRepositoryProvider = Provider<OrdersRepository>((ref) {
-
   if (AppEnv.useFakeRepos) {
-
     return FakeOrdersRepository();
-
   }
 
   return FirestoreOrdersRepository(FirebaseFirestore.instance);
-
 });
-
-
 
 final aiRepositoryProvider = Provider<AiRepository>((ref) {
-
   return FakeAiRepository();
-
 });
-
-
 
 final wishlistRepositoryProvider = Provider<WishlistRepository>((ref) {
-
   return SharedPrefsWishlistRepository(SharedPrefsWishlistDataSource());
-
 });
 
-
-
-final recentlyViewedRepositoryProvider = Provider<RecentlyViewedRepository>((ref) {
-
-  return SharedPrefsRecentlyViewedRepository(SharedPrefsRecentlyViewedDataSource());
-
+final recentlyViewedRepositoryProvider = Provider<RecentlyViewedRepository>((
+  ref,
+) {
+  return SharedPrefsRecentlyViewedRepository(
+    SharedPrefsRecentlyViewedDataSource(),
+  );
 });
-

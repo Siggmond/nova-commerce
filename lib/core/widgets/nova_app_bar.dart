@@ -6,8 +6,5 @@ class NovaAppBar extends AppBar {
     required String titleText,
     super.actions,
     super.leading,
-  }) : super(
-          title: Text(titleText),
-          elevation: 0,
-        );
+  }) : super(title: Text(titleText), elevation: 0);
 }

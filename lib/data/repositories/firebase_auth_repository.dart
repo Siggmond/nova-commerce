@@ -84,7 +84,9 @@ class FirebaseAuthRepository implements AuthRepository {
             await user.updatePhoneNumber(credential);
             await user.reload();
             if (!completer.isCompleted) {
-              completer.complete(const PhoneVerificationSession(verificationId: ''));
+              completer.complete(
+                const PhoneVerificationSession(verificationId: ''),
+              );
             }
           } on FirebaseAuthException catch (e) {
             if (!completer.isCompleted) {
@@ -116,7 +118,9 @@ class FirebaseAuthRepository implements AuthRepository {
       );
     } on FirebaseAuthException catch (e) {
       if (!completer.isCompleted) {
-        completer.completeError(AuthException(message: e.message ?? e.code, code: e.code));
+        completer.completeError(
+          AuthException(message: e.message ?? e.code, code: e.code),
+        );
       }
     }
 

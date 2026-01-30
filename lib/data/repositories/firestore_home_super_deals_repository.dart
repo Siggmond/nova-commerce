@@ -8,7 +8,9 @@ class FirestoreHomeSuperDealsRepository implements HomeSuperDealsRepository {
 
   final FirestoreHomeSuperDealsDataSource _dataSource;
 
-  factory FirestoreHomeSuperDealsRepository.fromFirestore(FirebaseFirestore firestore) {
+  factory FirestoreHomeSuperDealsRepository.fromFirestore(
+    FirebaseFirestore firestore,
+  ) {
     return FirestoreHomeSuperDealsRepository(
       FirestoreHomeSuperDealsDataSource(firestore),
     );

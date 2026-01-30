@@ -18,11 +18,7 @@ class ChatMessage {
   final String? intent;
   final bool isStreaming;
 
-  ChatMessage copyWith({
-    String? text,
-    String? intent,
-    bool? isStreaming,
-  }) {
+  ChatMessage copyWith({String? text, String? intent, bool? isStreaming}) {
     return ChatMessage(
       id: id,
       role: role,

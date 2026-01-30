@@ -38,9 +38,7 @@ class NovaSectionHeader extends StatelessWidget {
           if (trailing != null) ...[
             SizedBox(width: AppSpace.sm),
             IconTheme(
-              data: IconThemeData(
-                color: cs.primary.withValues(alpha: 0.90),
-              ),
+              data: IconThemeData(color: cs.primary.withValues(alpha: 0.90)),
               child: trailing!,
             ),
           ],

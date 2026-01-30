@@ -9,8 +9,8 @@ class FallbackAuthRepository implements AuthRepository {
   FallbackAuthRepository({
     required AuthRepository primary,
     required FakeAuthRepository fallback,
-  })  : _primary = primary,
-        _fallback = fallback;
+  }) : _primary = primary,
+       _fallback = fallback;
 
   final _authStateController = StreamController<AuthUser?>.broadcast();
   StreamSubscription<AuthUser?>? _authStateSub;
@@ -32,9 +32,9 @@ class FallbackAuthRepository implements AuthRepository {
   void _attachAuthState(AuthRepository repo) {
     _authStateSub?.cancel();
     _authStateSub = repo.authStateChanges().listen(
-          _authStateController.add,
-          onError: _authStateController.addError,
-        );
+      _authStateController.add,
+      onError: _authStateController.addError,
+    );
   }
 
   @override
@@ -106,10 +106,9 @@ class FallbackAuthRepository implements AuthRepository {
     required String email,
     required String password,
   }) async {
-    return _guard(() => _primary.createAccount(
-          email: email,
-          password: password,
-        ));
+    return _guard(
+      () => _primary.createAccount(email: email, password: password),
+    );
   }
 
   @override
@@ -117,10 +116,7 @@ class FallbackAuthRepository implements AuthRepository {
     required String email,
     required String password,
   }) async {
-    return _guard(() => _primary.signInEmail(
-          email: email,
-          password: password,
-        ));
+    return _guard(() => _primary.signInEmail(email: email, password: password));
   }
 
   @override

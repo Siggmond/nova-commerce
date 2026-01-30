@@ -85,24 +85,24 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     final state = ref.watch(checkoutViewModelProvider);
     final vm = ref.read(checkoutViewModelProvider.notifier);
 
-    ref.listen<int>(
-      checkoutViewModelProvider.select((s) => s.eventId),
-      (previous, next) {
-        final event = ref.read(checkoutViewModelProvider).event;
-        if (event is CheckoutShowSnack) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(event.message)),
-          );
-        } else if (event is CheckoutGoToSignIn) {
-          context.push(AppRoutes.signIn);
-        } else if (event is CheckoutGoToSuccess) {
-          context.go(
-            '${AppRoutes.orderSuccess}/${event.orderId}',
-            extra: summary,
-          );
-        }
-      },
-    );
+    ref.listen<int>(checkoutViewModelProvider.select((s) => s.eventId), (
+      previous,
+      next,
+    ) {
+      final event = ref.read(checkoutViewModelProvider).event;
+      if (event is CheckoutShowSnack) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(event.message)));
+      } else if (event is CheckoutGoToSignIn) {
+        context.push(AppRoutes.signIn);
+      } else if (event is CheckoutGoToSuccess) {
+        context.go(
+          '${AppRoutes.orderSuccess}/${event.orderId}',
+          extra: summary,
+        );
+      }
+    });
 
     return PopScope(
       canPop: !state.isSubmitting,
@@ -118,94 +118,98 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
             MediaQuery.of(context).viewInsets.bottom + 20.h,
           ),
           children: [
-          Text(
-            'Shipping',
-            style: Theme.of(
-              context,
-            ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w900),
-          ),
-          SizedBox(height: 8.h),
-          Text(
-            'Enter delivery details to place your order.',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Theme.of(
+            Text(
+              'Shipping',
+              style: Theme.of(
                 context,
-              ).colorScheme.onSurface.withValues(alpha: 0.75),
+              ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w900),
             ),
-          ),
-          SizedBox(height: 16.h),
-          (useNovaUi
-              ? NovaSurface(
-                  padding: EdgeInsets.all(14.r),
-                  child: _deliveryForm(context, state, vm, useNovaUi),
-                )
-              : Card(
-                  child: Padding(
+            SizedBox(height: 8.h),
+            Text(
+              'Enter delivery details to place your order.',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Theme.of(
+                  context,
+                ).colorScheme.onSurface.withValues(alpha: 0.75),
+              ),
+            ),
+            SizedBox(height: 16.h),
+            (useNovaUi
+                ? NovaSurface(
                     padding: EdgeInsets.all(14.r),
                     child: _deliveryForm(context, state, vm, useNovaUi),
-                  ),
-                )),
-          SizedBox(height: 12.h),
-          (useNovaUi
-              ? NovaSurface(
-                  padding: EdgeInsets.all(14.r),
-                  child: _subtotalRow(context, summary),
-                )
-              : Card(
-                  child: Padding(
+                  )
+                : Card(
+                    child: Padding(
+                      padding: EdgeInsets.all(14.r),
+                      child: _deliveryForm(context, state, vm, useNovaUi),
+                    ),
+                  )),
+            SizedBox(height: 12.h),
+            (useNovaUi
+                ? NovaSurface(
                     padding: EdgeInsets.all(14.r),
                     child: _subtotalRow(context, summary),
-                  ),
-                )),
-          if (!summary.hasItems || !state.isSignedIn) ...[
+                  )
+                : Card(
+                    child: Padding(
+                      padding: EdgeInsets.all(14.r),
+                      child: _subtotalRow(context, summary),
+                    ),
+                  )),
+            if (!summary.hasItems || !state.isSignedIn) ...[
+              SizedBox(height: 12.h),
+              _CheckoutHint(
+                message: !summary.hasItems
+                    ? 'Select items in cart to continue'
+                    : 'Sign in to place your order',
+                useNovaUi: useNovaUi,
+              ),
+            ],
             SizedBox(height: 12.h),
-            _CheckoutHint(
-              message: !summary.hasItems
-                  ? 'Select items in cart to continue'
-                  : 'Sign in to place your order',
-              useNovaUi: useNovaUi,
-            ),
-          ],
-          SizedBox(height: 12.h),
-          SafeArea(
-            top: false,
-            child: useNovaUi
-                ? SizedBox(
-                    width: double.infinity,
-                    child: NovaButton.primary(
+            SafeArea(
+              top: false,
+              child: useNovaUi
+                  ? SizedBox(
+                      width: double.infinity,
+                      child: NovaButton.primary(
+                        onPressed: state.isSubmitting || !summary.hasItems
+                            ? null
+                            : () => vm.submit(),
+                        label: state.isSubmitting
+                            ? 'Placing order…'
+                            : 'Place order',
+                        isLoading: state.isSubmitting,
+                      ),
+                    )
+                  : FilledButton(
                       onPressed: state.isSubmitting || !summary.hasItems
                           ? null
                           : () => vm.submit(),
-                      label: state.isSubmitting ? 'Placing order…' : 'Place order',
-                      isLoading: state.isSubmitting,
-                    ),
-                  )
-                : FilledButton(
-                    onPressed: state.isSubmitting || !summary.hasItems
-                        ? null
-                        : () => vm.submit(),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        if (state.isSubmitting) ...[
-                          SizedBox(
-                            width: 16.r,
-                            height: 16.r,
-                            child: const CircularProgressIndicator(
-                              strokeWidth: 2,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          if (state.isSubmitting) ...[
+                            SizedBox(
+                              width: 16.r,
+                              height: 16.r,
+                              child: const CircularProgressIndicator(
+                                strokeWidth: 2,
+                              ),
                             ),
+                            SizedBox(width: 10.w),
+                          ],
+                          Text(
+                            state.isSubmitting
+                                ? 'Placing order…'
+                                : 'Place order',
                           ),
-                          SizedBox(width: 10.w),
                         ],
-                        Text(
-                          state.isSubmitting ? 'Placing order…' : 'Place order',
-                        ),
-                      ],
+                      ),
                     ),
-                  ),
-          ),
-        ],
-      ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -221,9 +225,9 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
       children: [
         Text(
           'Delivery',
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.w800,
-          ),
+          style: Theme.of(
+            context,
+          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
         ),
         SizedBox(height: 12.h),
         _Field(
@@ -348,17 +352,18 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                 'Subtotal',
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: Theme.of(context).textTheme.titleMedium
-                    ?.copyWith(fontWeight: FontWeight.w800),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
               ),
             ),
             Text(
               '$currency ${summary.subtotal.toStringAsFixed(0)}',
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w900,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900),
             ),
           ],
         ),
@@ -375,9 +380,9 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
             ),
             Text(
               'Free shipping',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700),
             ),
           ],
         ),
@@ -391,18 +396,18 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                 'Total',
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w900,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900),
               ),
             ),
             Text(
               '$currency ${summary.total.toStringAsFixed(0)}',
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.w900,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w900),
             ),
           ],
         ),
@@ -444,20 +449,16 @@ class _CheckoutHint extends StatelessWidget {
         Expanded(
           child: Text(
             message,
-            style: Theme.of(context)
-                .textTheme
-                .labelLarge
-                ?.copyWith(fontWeight: FontWeight.w700),
+            style: Theme.of(
+              context,
+            ).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w700),
           ),
         ),
       ],
     );
 
     if (useNovaUi) {
-      return NovaSurface(
-        padding: EdgeInsets.all(12.r),
-        child: child,
-      );
+      return NovaSurface(padding: EdgeInsets.all(12.r), child: child);
     }
 
     return Container(
@@ -466,10 +467,9 @@ class _CheckoutHint extends StatelessWidget {
         color: Theme.of(context).colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(14.r),
         border: Border.all(
-          color: Theme.of(context)
-              .colorScheme
-              .outlineVariant
-              .withValues(alpha: 0.6),
+          color: Theme.of(
+            context,
+          ).colorScheme.outlineVariant.withValues(alpha: 0.6),
         ),
       ),
       child: child,
@@ -478,10 +478,7 @@ class _CheckoutHint extends StatelessWidget {
 }
 
 class _PhoneCountryPrefix extends StatelessWidget {
-  const _PhoneCountryPrefix({
-    required this.dialCode,
-    required this.onTap,
-  });
+  const _PhoneCountryPrefix({required this.dialCode, required this.onTap});
 
   final String dialCode;
   final VoidCallback onTap;
@@ -494,9 +491,9 @@ class _PhoneCountryPrefix extends StatelessWidget {
         padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
         child: Text(
           dialCode,
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.w700,
-              ),
+          style: Theme.of(
+            context,
+          ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700),
         ),
       ),
     );
@@ -533,10 +530,7 @@ class _AddressSuggestions extends StatelessWidget {
               child: const CircularProgressIndicator(strokeWidth: 2),
             ),
             SizedBox(width: 8.w),
-            Text(
-              'Searching…',
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
+            Text('Searching…', style: Theme.of(context).textTheme.bodySmall),
           ],
         ),
       );
@@ -553,11 +547,10 @@ class _AddressSuggestions extends StatelessWidget {
               child: Text(
                 'Address suggestions unavailable — you can enter manually.',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context)
-                          .colorScheme
-                          .onSurface
-                          .withValues(alpha: 0.7),
-                    ),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.onSurface.withValues(alpha: 0.7),
+                ),
               ),
             ),
           ...suggestions.map(

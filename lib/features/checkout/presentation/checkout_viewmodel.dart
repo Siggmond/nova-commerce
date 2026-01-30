@@ -17,20 +17,14 @@ import '../domain/checkout_cart_summary.dart';
 import '../../cart/presentation/cart_viewmodel.dart';
 
 class PlaceSuggestion {
-  const PlaceSuggestion({
-    required this.placeId,
-    required this.description,
-  });
+  const PlaceSuggestion({required this.placeId, required this.description});
 
   final String placeId;
   final String description;
 }
 
 abstract class PhoneNormalizer {
-  Future<String?> toE164({
-    required String input,
-    required String regionCode,
-  });
+  Future<String?> toE164({required String input, required String regionCode});
 }
 
 class PhoneNumberNormalizer implements PhoneNormalizer {
@@ -255,8 +249,9 @@ class CheckoutState {
       addressError: clearErrors ? null : (addressError ?? this.addressError),
       cityError: clearErrors ? null : (cityError ?? this.cityError),
       stateError: clearErrors ? null : (stateError ?? this.stateError),
-      postalCodeError:
-          clearErrors ? null : (postalCodeError ?? this.postalCodeError),
+      postalCodeError: clearErrors
+          ? null
+          : (postalCodeError ?? this.postalCodeError),
       countryError: clearErrors ? null : (countryError ?? this.countryError),
       isSubmitting: isSubmitting ?? this.isSubmitting,
       hasSelectedItems: hasSelectedItems ?? this.hasSelectedItems,
@@ -277,21 +272,24 @@ class CheckoutViewModel extends StateNotifier<CheckoutState> {
     this._ref, {
     PhoneNormalizer? phoneNormalizer,
     http.Client? httpClient,
-  })  : _phoneNormalizer = phoneNormalizer ?? PhoneNumberNormalizer(),
-        _httpClient = httpClient ?? http.Client(),
-        _addressStore = SharedPrefsCheckoutAddressDataSource(),
-        super(
-          CheckoutState(
-            placesAvailable: AppEnv.enablePlacesAutocomplete &&
-                AppEnv.googlePlacesApiKey.isNotEmpty,
-            placesConfigured: AppEnv.enablePlacesAutocomplete,
-          ),
-        ) {
+  }) : _phoneNormalizer = phoneNormalizer ?? PhoneNumberNormalizer(),
+       _httpClient = httpClient ?? http.Client(),
+       _addressStore = SharedPrefsCheckoutAddressDataSource(),
+       super(
+         CheckoutState(
+           placesAvailable:
+               AppEnv.enablePlacesAutocomplete &&
+               AppEnv.googlePlacesApiKey.isNotEmpty,
+           placesConfigured: AppEnv.enablePlacesAutocomplete,
+         ),
+       ) {
     _ref.listen<List<CartItem>>(selectedCartItemsProvider, (_, next) {
       state = state.copyWith(hasSelectedItems: next.isNotEmpty);
     });
     _ref.listen<String?>(currentUidProvider, (_, next) {
-      state = state.copyWith(isSignedIn: next != null && next.trim().isNotEmpty);
+      state = state.copyWith(
+        isSignedIn: next != null && next.trim().isNotEmpty,
+      );
     });
   }
 
@@ -345,7 +343,8 @@ class CheckoutViewModel extends StateNotifier<CheckoutState> {
     _autocompleteDebounce?.cancel();
     _placesSessionToken = null;
     state = CheckoutState(
-      placesAvailable: AppEnv.enablePlacesAutocomplete &&
+      placesAvailable:
+          AppEnv.enablePlacesAutocomplete &&
           AppEnv.googlePlacesApiKey.isNotEmpty,
       placesConfigured: AppEnv.enablePlacesAutocomplete,
       placesUnavailable: false,
@@ -412,10 +411,7 @@ class CheckoutViewModel extends StateNotifier<CheckoutState> {
     required String input,
     required String regionCode,
   }) async {
-    return _phoneNormalizer.toE164(
-      input: input,
-      regionCode: regionCode,
-    );
+    return _phoneNormalizer.toE164(input: input, regionCode: regionCode);
   }
 
   void _scheduleAutocomplete(String query) {
@@ -514,21 +510,18 @@ class CheckoutViewModel extends StateNotifier<CheckoutState> {
   Future<void> selectSuggestion(PlaceSuggestion suggestion) async {
     if (!state.placesAvailable || suggestion.placeId.trim().isEmpty) return;
     final requestId = ++_autocompleteRequestId;
-    final token = _placesSessionToken ??
-        DateTime.now().millisecondsSinceEpoch.toString();
+    final token =
+        _placesSessionToken ?? DateTime.now().millisecondsSinceEpoch.toString();
 
     state = state.copyWith(isFetchingSuggestions: true);
     try {
-      final uri = Uri.https(
-        'maps.googleapis.com',
-        '/maps/api/place/details/json',
-        {
-          'place_id': suggestion.placeId,
-          'key': AppEnv.googlePlacesApiKey,
-          'sessiontoken': token,
-          'fields': 'address_component,formatted_address',
-        },
-      );
+      final uri =
+          Uri.https('maps.googleapis.com', '/maps/api/place/details/json', {
+            'place_id': suggestion.placeId,
+            'key': AppEnv.googlePlacesApiKey,
+            'sessiontoken': token,
+            'fields': 'address_component,formatted_address',
+          });
 
       final response = await _httpClient.get(uri);
       if (response.statusCode != 200) {
@@ -602,10 +595,10 @@ class CheckoutViewModel extends StateNotifier<CheckoutState> {
       }
     }
 
-    final streetLine = [streetNumber, route]
-        .where((e) => e.trim().isNotEmpty)
-        .join(' ')
-        .trim();
+    final streetLine = [
+      streetNumber,
+      route,
+    ].where((e) => e.trim().isNotEmpty).join(' ').trim();
     if (streetLine.isEmpty && locality.isEmpty && country.isEmpty) {
       return null;
     }
@@ -691,11 +684,15 @@ class CheckoutViewModel extends StateNotifier<CheckoutState> {
     state = state.copyWith(isSubmitting: true);
     try {
       final summary = _ref.read(checkoutCartSummaryProvider);
-      final deviceId = await _ref.read(deviceIdDataSourceProvider).getOrCreate();
+      final deviceId = await _ref
+          .read(deviceIdDataSourceProvider)
+          .getOrCreate();
 
       // Keep the server cart in sync before checkout (Cloud Function reads cart server-side).
       final allItems = _ref.read(cartItemsProvider);
-      await _ref.read(cartRepositoryProvider).saveCartLines(
+      await _ref
+          .read(cartRepositoryProvider)
+          .saveCartLines(
             allItems
                 .map(
                   (i) => CartLine(
@@ -733,7 +730,8 @@ class CheckoutViewModel extends StateNotifier<CheckoutState> {
       final selectedIds = _ref.read(selectedCartItemIdsProvider);
       final cartItems = _ref.read(cartItemsProvider);
       final allIds = cartItems.map((i) => i.product.id).toSet();
-      if (selectedIds.isEmpty || (allIds.isNotEmpty && selectedIds.length == allIds.length)) {
+      if (selectedIds.isEmpty ||
+          (allIds.isNotEmpty && selectedIds.length == allIds.length)) {
         _ref.read(cartClearProvider).call();
       } else {
         _ref
@@ -754,9 +752,11 @@ class CheckoutViewModel extends StateNotifier<CheckoutState> {
       _emit(const CheckoutEvent.goToSignIn());
     } catch (e) {
       if (requestId != _requestId) return;
-      _emit(const CheckoutEvent.showSnack(
-        'Something went wrong. Please try again.',
-      ));
+      _emit(
+        const CheckoutEvent.showSnack(
+          'Something went wrong. Please try again.',
+        ),
+      );
     } finally {
       if (requestId == _requestId) {
         state = state.copyWith(isSubmitting: false);

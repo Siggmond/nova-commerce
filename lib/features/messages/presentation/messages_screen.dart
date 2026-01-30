@@ -20,7 +20,9 @@ class _MessagesScreenState extends State<MessagesScreen> {
       required String label,
     }) {
       final isSelected = _selected == index;
-      final color = isSelected ? cs.primary : cs.onSurface.withValues(alpha: 0.72);
+      final color = isSelected
+          ? cs.primary
+          : cs.onSurface.withValues(alpha: 0.72);
 
       return Expanded(
         child: InkWell(
@@ -36,9 +38,9 @@ class _MessagesScreenState extends State<MessagesScreen> {
                 Text(
                   label,
                   style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                        fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
-                        color: color,
-                      ),
+                    fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+                    color: color,
+                  ),
                 ),
               ],
             ),
@@ -63,8 +65,16 @@ class _MessagesScreenState extends State<MessagesScreen> {
             Row(
               children: [
                 item(index: 0, icon: Icons.receipt_long, label: 'Order'),
-                item(index: 1, icon: Icons.notifications_none, label: 'Activity'),
-                item(index: 2, icon: Icons.local_offer_outlined, label: 'Promo'),
+                item(
+                  index: 1,
+                  icon: Icons.notifications_none,
+                  label: 'Activity',
+                ),
+                item(
+                  index: 2,
+                  icon: Icons.local_offer_outlined,
+                  label: 'Promo',
+                ),
                 item(index: 3, icon: Icons.newspaper_outlined, label: 'News'),
               ],
             ),
@@ -74,9 +84,9 @@ class _MessagesScreenState extends State<MessagesScreen> {
                 child: Text(
                   'Coming soon',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w800,
-                        color: cs.onSurface.withValues(alpha: 0.7),
-                      ),
+                    fontWeight: FontWeight.w800,
+                    color: cs.onSurface.withValues(alpha: 0.7),
+                  ),
                 ),
               ),
             ),

@@ -142,7 +142,11 @@ class _AiChatScreenState extends ConsumerState<AiChatScreen> {
     String? lastUserText;
     ChatRole? lastRole;
     for (final m in messages) {
-      final day = DateTime(m.createdAt.year, m.createdAt.month, m.createdAt.day);
+      final day = DateTime(
+        m.createdAt.year,
+        m.createdAt.month,
+        m.createdAt.day,
+      );
       if (lastDay == null || day.isAfter(lastDay)) {
         widgets.add(_DaySeparator(date: day));
         lastDay = day;
@@ -156,12 +160,7 @@ class _AiChatScreenState extends ConsumerState<AiChatScreen> {
       if (m.role == ChatRole.user) {
         lastUserText = m.text;
       }
-      widgets.add(
-        _MessageBubble(
-          message: m,
-          lastUserText: lastUserText,
-        ),
-      );
+      widgets.add(_MessageBubble(message: m, lastUserText: lastUserText));
 
       lastRole = m.role;
     }
@@ -170,10 +169,7 @@ class _AiChatScreenState extends ConsumerState<AiChatScreen> {
 }
 
 class _MessageBubble extends ConsumerWidget {
-  const _MessageBubble({
-    required this.message,
-    required this.lastUserText,
-  });
+  const _MessageBubble({required this.message, required this.lastUserText});
 
   final ChatMessage message;
   final String? lastUserText;
@@ -197,15 +193,21 @@ class _MessageBubble extends ConsumerWidget {
       _ => 'Clarifying',
     };
 
-    final bubbleBg = isUser ? cs.primary.withValues(alpha: 0.10) : cs.surfaceContainerHighest;
+    final bubbleBg = isUser
+        ? cs.primary.withValues(alpha: 0.10)
+        : cs.surfaceContainerHighest;
     final bubbleFg = isUser ? cs.onSurface : cs.onSurface;
-    final bubbleBorder = Border.all(color: cs.outlineVariant.withValues(alpha: 0.55));
+    final bubbleBorder = Border.all(
+      color: cs.outlineVariant.withValues(alpha: 0.55),
+    );
     final bubbleRadius = BorderRadius.circular(18);
 
     return Align(
       alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
       child: Column(
-        crossAxisAlignment: isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+        crossAxisAlignment: isUser
+            ? CrossAxisAlignment.end
+            : CrossAxisAlignment.start,
         children: [
           ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 340),
@@ -234,7 +236,8 @@ class _MessageBubble extends ConsumerWidget {
                               'Concierge • $assistantPhase',
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                              style: Theme.of(context).textTheme.labelMedium
+                                  ?.copyWith(
                                     fontWeight: FontWeight.w800,
                                     color: cs.onSurface.withValues(alpha: 0.78),
                                   ),
@@ -243,7 +246,9 @@ class _MessageBubble extends ConsumerWidget {
                         ],
                       ),
                     if (!isUser) const SizedBox(height: 8),
-                    if (showPlaceholders && message.isStreaming && message.text.isEmpty)
+                    if (showPlaceholders &&
+                        message.isStreaming &&
+                        message.text.isEmpty)
                       const _MessageSkeleton()
                     else
                       Text.rich(
@@ -260,9 +265,9 @@ class _MessageBubble extends ConsumerWidget {
                           ],
                         ),
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: bubbleFg,
-                              height: 1.28,
-                            ),
+                          color: bubbleFg,
+                          height: 1.28,
+                        ),
                       ),
                     if (showActions) ...[
                       const SizedBox(height: 10),
@@ -274,8 +279,9 @@ class _MessageBubble extends ConsumerWidget {
                     ],
                     if (showPlaceholders && !isUser && !message.isStreaming)
                       _SuggestedReplies(
-                        onSend: (text) =>
-                            ref.read(aiChatViewModelProvider.notifier).send(text),
+                        onSend: (text) => ref
+                            .read(aiChatViewModelProvider.notifier)
+                            .send(text),
                       ),
                   ],
                 ),
@@ -290,8 +296,8 @@ class _MessageBubble extends ConsumerWidget {
           Text(
             timeLabel,
             style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: cs.onSurface.withValues(alpha: 0.55),
-                ),
+              color: cs.onSurface.withValues(alpha: 0.55),
+            ),
           ),
         ],
       ),
@@ -353,9 +359,9 @@ class _ContextChip extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         child: RichText(
           text: TextSpan(
-            style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                  color: cs.onSurface,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.labelMedium?.copyWith(color: cs.onSurface),
             children: [
               TextSpan(
                 text: '$label: ',
@@ -387,7 +393,9 @@ class _PromptChips extends StatelessWidget {
           children: [
             ActionChip(
               label: const Text('Under \$50'),
-              onPressed: () => onSend('Under \$50 — what should I buy? I like minimal style.'),
+              onPressed: () => onSend(
+                'Under \$50 — what should I buy? I like minimal style.',
+              ),
             ),
             ActionChip(
               label: const Text('Work / office'),
@@ -396,13 +404,15 @@ class _PromptChips extends StatelessWidget {
             ),
             ActionChip(
               label: const Text('Weekend fit'),
-              onPressed: () =>
-                  onSend('Build me a weekend outfit. Budget \$150. Clean / minimal.'),
+              onPressed: () => onSend(
+                'Build me a weekend outfit. Budget \$150. Clean / minimal.',
+              ),
             ),
             ActionChip(
               label: const Text('One specific item'),
-              onPressed: () =>
-                  onSend('Black hoodie under \$50, oversized. Show me a few options.'),
+              onPressed: () => onSend(
+                'Black hoodie under \$50, oversized. Show me a few options.',
+              ),
             ),
           ],
         ),
@@ -484,9 +494,9 @@ class _ChatSessionsSheet extends ConsumerWidget {
               Expanded(
                 child: Text(
                   'Conversations',
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.w800,
-                      ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
                 ),
               ),
               TextButton.icon(
@@ -560,8 +570,9 @@ class _MessageActions extends ConsumerWidget {
         OutlinedButton.icon(
           onPressed: () {
             Clipboard.setData(ClipboardData(text: message.text));
-            ScaffoldMessenger.of(context)
-                .showSnackBar(const SnackBar(content: Text('Copied')));
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(const SnackBar(content: Text('Copied')));
           },
           icon: const Icon(Icons.copy, size: 16),
           label: const Text('Copy'),
@@ -574,15 +585,17 @@ class _MessageActions extends ConsumerWidget {
         ),
         if (showPlaceholders)
           OutlinedButton.icon(
-            onPressed: () => ScaffoldMessenger.of(context)
-                .showSnackBar(const SnackBar(content: Text('Saved to notes'))),
+            onPressed: () => ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(const SnackBar(content: Text('Saved to notes'))),
             icon: const Icon(Icons.bookmark_border, size: 16),
             label: const Text('Save'),
           ),
         if (showPlaceholders)
           OutlinedButton.icon(
-            onPressed: () => ScaffoldMessenger.of(context)
-                .showSnackBar(const SnackBar(content: Text('Shared'))),
+            onPressed: () => ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(const SnackBar(content: Text('Shared'))),
             icon: const Icon(Icons.share_outlined, size: 16),
             label: const Text('Share'),
           ),
@@ -654,9 +667,7 @@ class _InlineResultsSection extends ConsumerWidget {
                     Expanded(
                       child: Text(
                         'Suggested matches',
-                        style: Theme.of(context)
-                            .textTheme
-                            .labelMedium
+                        style: Theme.of(context).textTheme.labelMedium
                             ?.copyWith(fontWeight: FontWeight.w800),
                       ),
                     ),
@@ -792,16 +803,15 @@ class _InlineProductCard extends StatelessWidget {
               product.title,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: Theme.of(context)
-                  .textTheme
-                  .labelMedium
-                  ?.copyWith(fontWeight: FontWeight.w700),
+              style: Theme.of(
+                context,
+              ).textTheme.labelMedium?.copyWith(fontWeight: FontWeight.w700),
             ),
             Text(
               '${product.currency} ${product.price.toStringAsFixed(0)}',
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: cs.onSurface.withValues(alpha: 0.7),
-                  ),
+                color: cs.onSurface.withValues(alpha: 0.7),
+              ),
             ),
           ],
         ),
@@ -847,10 +857,9 @@ class _TypingIndicatorState extends State<_TypingIndicator>
           }
           return Text(
             'Typing$dots',
-            style: Theme.of(context)
-                .textTheme
-                .bodyMedium
-                ?.copyWith(color: cs.onSurface.withValues(alpha: 0.7)),
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: cs.onSurface.withValues(alpha: 0.7),
+            ),
           );
         },
       ),
@@ -879,9 +888,9 @@ class _DaySeparator extends StatelessWidget {
             child: Text(
               _formatDate(date),
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: cs.onSurface.withValues(alpha: 0.7),
-                    fontWeight: FontWeight.w700,
-                  ),
+                color: cs.onSurface.withValues(alpha: 0.7),
+                fontWeight: FontWeight.w700,
+              ),
             ),
           ),
         ),

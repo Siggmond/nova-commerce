@@ -6,11 +6,7 @@ import '../../../core/config/app_routes.dart';
 import '../../checkout/domain/checkout_cart_summary.dart';
 
 class OrderSuccessScreen extends StatelessWidget {
-  const OrderSuccessScreen({
-    super.key,
-    required this.orderId,
-    this.summary,
-  });
+  const OrderSuccessScreen({super.key, required this.orderId, this.summary});
 
   final String orderId;
   final CheckoutCartSummary? summary;
@@ -61,9 +57,9 @@ class OrderSuccessScreen extends StatelessWidget {
                   '${summary!.items.length} items • '
                   '${summary!.currency.toUpperCase()} '
                   '${summary!.total.toStringAsFixed(0)} total',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w700,
-                      ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700),
                   textAlign: TextAlign.center,
                 ),
               ],

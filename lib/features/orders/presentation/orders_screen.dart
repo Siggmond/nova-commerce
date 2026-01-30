@@ -37,10 +37,9 @@ class OrdersScreen extends ConsumerWidget {
               title: msg.title,
               subtitle: msg.subtitle,
               actionText: 'Retry',
-              onAction: () =>
-                  ref.read(ordersControllerProvider.notifier).refresh(
-                        showLoading: true,
-                      ),
+              onAction: () => ref
+                  .read(ordersControllerProvider.notifier)
+                  .refresh(showLoading: true),
             ),
             data: (user) {
               if (user == null) {
@@ -63,8 +62,7 @@ class OrdersScreen extends ConsumerWidget {
                                 label: 'Sign in',
                               )
                             : FilledButton(
-                                onPressed: () =>
-                                    context.push(AppRoutes.signIn),
+                                onPressed: () => context.push(AppRoutes.signIn),
                                 child: const Text('Sign in'),
                               ),
                       ],
@@ -76,10 +74,9 @@ class OrdersScreen extends ConsumerWidget {
                 title: msg.title,
                 subtitle: msg.subtitle,
                 actionText: 'Retry',
-                onAction: () =>
-                    ref.read(ordersControllerProvider.notifier).refresh(
-                          showLoading: true,
-                        ),
+                onAction: () => ref
+                    .read(ordersControllerProvider.notifier)
+                    .refresh(showLoading: true),
               );
             },
           );

@@ -24,8 +24,7 @@ class ProductDetailsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final useNovaUi =
-        AppEnv.enableNovaUi && AppEnv.enableNovaUiProductDetails;
+    final useNovaUi = AppEnv.enableNovaUi && AppEnv.enableNovaUiProductDetails;
     final state = ref.watch(productDetailsViewModelProvider(productId));
     final isSavedForProduct = productId == null
         ? false
@@ -51,7 +50,8 @@ class ProductDetailsScreen extends ConsumerWidget {
                   notFound: () => const SizedBox.shrink(),
                   error: (_) => const SizedBox.shrink(),
                   data: (data) {
-                    final canClear = (data.selectedColor != null &&
+                    final canClear =
+                        (data.selectedColor != null &&
                             data.selectedColor!.trim().isNotEmpty) ||
                         (data.selectedSize != null &&
                             data.selectedSize!.trim().isNotEmpty);
@@ -62,11 +62,12 @@ class ProductDetailsScreen extends ConsumerWidget {
                           tooltip: 'Clear selection',
                           onPressed: canClear
                               ? () => ref
-                                  .read(
-                                    productDetailsViewModelProvider(productId)
-                                        .notifier,
-                                  )
-                                  .clearSelection()
+                                    .read(
+                                      productDetailsViewModelProvider(
+                                        productId,
+                                      ).notifier,
+                                    )
+                                    .clearSelection()
                               : null,
                           icon: const Icon(Icons.clear),
                         ),
@@ -83,9 +84,8 @@ class ProductDetailsScreen extends ConsumerWidget {
                                 : Icons.favorite_border,
                             color: isSavedForProduct
                                 ? Theme.of(context).colorScheme.primary
-                                : Theme.of(
-                                    context,
-                                  ).colorScheme.onSurface.withValues(alpha: 0.8),
+                                : Theme.of(context).colorScheme.onSurface
+                                      .withValues(alpha: 0.8),
                           ),
                         ),
                       ],
@@ -114,7 +114,8 @@ class ProductDetailsScreen extends ConsumerWidget {
                   notFound: () => const SizedBox.shrink(),
                   error: (_) => const SizedBox.shrink(),
                   data: (data) {
-                    final canClear = (data.selectedColor != null &&
+                    final canClear =
+                        (data.selectedColor != null &&
                             data.selectedColor!.trim().isNotEmpty) ||
                         (data.selectedSize != null &&
                             data.selectedSize!.trim().isNotEmpty);
@@ -125,11 +126,12 @@ class ProductDetailsScreen extends ConsumerWidget {
                           tooltip: 'Clear selection',
                           onPressed: canClear
                               ? () => ref
-                                  .read(
-                                    productDetailsViewModelProvider(productId)
-                                        .notifier,
-                                  )
-                                  .clearSelection()
+                                    .read(
+                                      productDetailsViewModelProvider(
+                                        productId,
+                                      ).notifier,
+                                    )
+                                    .clearSelection()
                               : null,
                           icon: const Icon(Icons.clear),
                         ),
@@ -146,17 +148,16 @@ class ProductDetailsScreen extends ConsumerWidget {
                                 : Icons.favorite_border,
                             color: isSavedForProduct
                                 ? Theme.of(context).colorScheme.primary
-                                : Theme.of(
-                                    context,
-                                  ).colorScheme.onSurface.withValues(alpha: 0.8),
+                                : Theme.of(context).colorScheme.onSurface
+                                      .withValues(alpha: 0.8),
                           ),
                         ),
                       ],
                     );
                   },
                 ),
-          const SizedBox(width: 8),
-        ],
+                const SizedBox(width: 8),
+              ],
             ),
       body: state.when(
         loading: () => const _DetailsSkeleton(),
@@ -212,8 +213,8 @@ class ProductDetailsScreen extends ConsumerWidget {
                 Text(
                   product.title,
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.w900,
-                      ),
+                    fontWeight: FontWeight.w900,
+                  ),
                 ),
                 SizedBox(height: 12.h),
                 Text(
@@ -240,19 +241,17 @@ class ProductDetailsScreen extends ConsumerWidget {
                       children: [
                         Text(
                           'Out of stock',
-                          style: Theme.of(context)
-                              .textTheme
-                              .titleMedium
+                          style: Theme.of(context).textTheme.titleMedium
                               ?.copyWith(fontWeight: FontWeight.w900),
                         ),
                         SizedBox(height: 4.h),
                         Text(
                           'This item is currently unavailable in any variant.',
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .onSurface
-                                    .withValues(alpha: 0.72),
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurface.withValues(alpha: 0.72),
                               ),
                         ),
                       ],
@@ -341,19 +340,17 @@ class ProductDetailsScreen extends ConsumerWidget {
                       children: [
                         Text(
                           'Out of stock',
-                          style: Theme.of(context)
-                              .textTheme
-                              .titleMedium
+                          style: Theme.of(context).textTheme.titleMedium
                               ?.copyWith(fontWeight: FontWeight.w900),
                         ),
                         SizedBox(height: 4.h),
                         Text(
                           'This item is currently unavailable in any variant.',
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .onSurface
-                                    .withValues(alpha: 0.72),
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurface.withValues(alpha: 0.72),
                               ),
                         ),
                       ],
@@ -406,15 +403,20 @@ class ProductDetailsScreen extends ConsumerWidget {
               selectedSize: selectedSize,
               onAdd: canAdd
                   ? () {
-                      ref.read(cartViewModelProvider.notifier).add(
+                      ref
+                          .read(cartViewModelProvider.notifier)
+                          .add(
                             product: product,
                             selectedColor: selectedColor!,
                             selectedSize: selectedSize!,
                           );
                       final messenger = ScaffoldMessenger.of(context);
                       messenger.hideCurrentSnackBar();
-                      late final ScaffoldFeatureController<SnackBar,
-                          SnackBarClosedReason> controller;
+                      late final ScaffoldFeatureController<
+                        SnackBar,
+                        SnackBarClosedReason
+                      >
+                      controller;
                       controller = messenger.showSnackBar(
                         SnackBar(
                           content: const Text('Added to cart'),
@@ -569,9 +571,7 @@ class _AddToCartBar extends StatelessWidget {
 
     final helper = !inStock
         ? 'This item is currently unavailable.'
-        : (enabled
-            ? null
-            : 'Select a color and size to add to cart.');
+        : (enabled ? null : 'Select a color and size to add to cart.');
 
     final label = !inStock ? 'Out of stock' : 'Add to cart';
 
@@ -586,17 +586,17 @@ class _AddToCartBar extends StatelessWidget {
                 summary,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                      fontWeight: FontWeight.w800,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w800),
               ),
               if (helper != null) ...[
                 SizedBox(height: 4.h),
                 Text(
                   helper,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: cs.onSurface.withValues(alpha: 0.7),
-                      ),
+                    color: cs.onSurface.withValues(alpha: 0.7),
+                  ),
                 ),
               ],
             ],
@@ -625,10 +625,7 @@ class _AddToCartBar extends StatelessWidget {
     return Padding(
       padding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 12.h),
       child: useNovaUi
-          ? NovaSurface(
-              padding: EdgeInsets.all(12.r),
-              child: content,
-            )
+          ? NovaSurface(padding: EdgeInsets.all(12.r), child: content)
           : Container(
               padding: EdgeInsets.all(12.r),
               decoration: BoxDecoration(
@@ -742,7 +739,9 @@ class _VariantPicker extends StatelessWidget {
 String _formatPrice(String currency, double price) {
   final symbol = currency.trim();
   final hasCents = (price - price.truncateToDouble()).abs() > 0.00001;
-  final formatted = hasCents ? price.toStringAsFixed(2) : price.toStringAsFixed(0);
+  final formatted = hasCents
+      ? price.toStringAsFixed(2)
+      : price.toStringAsFixed(0);
   return '$symbol $formatted';
 }
 

@@ -37,7 +37,9 @@ class AppShell extends ConsumerWidget {
       isSignedIn: isSignedIn,
       hourOfDay: DateTime.now().hour,
     );
-    ref.read(aiNavControllerProvider.notifier).updateFeatures(features.toVector());
+    ref
+        .read(aiNavControllerProvider.notifier)
+        .updateFeatures(features.toVector());
 
     final suggestion = ref.watch(aiNavControllerProvider);
     final suggestedIndex = switch (suggestion?.intent) {
@@ -57,7 +59,9 @@ class AppShell extends ConsumerWidget {
         suggestedIndex: suggestedIndex,
         suggestedConfidence: suggestion?.confidence,
         onSelect: (index) {
-          ref.read(aiNavControllerProvider.notifier).consumeSuggestionAndCooldown();
+          ref
+              .read(aiNavControllerProvider.notifier)
+              .consumeSuggestionAndCooldown();
           if (index == currentIndex) return;
           navigationShell.goBranch(index);
         },
@@ -74,6 +78,7 @@ class AppShell extends ConsumerWidget {
   }
 
   static bool _shouldSuppressSuggestions(String location) {
-    return location.startsWith('/checkout') || location.startsWith('/order-success');
+    return location.startsWith('/checkout') ||
+        location.startsWith('/order-success');
   }
 }

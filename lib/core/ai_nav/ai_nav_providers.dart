@@ -6,13 +6,13 @@ import 'ai_nav_suggestion.dart';
 
 final aiNavControllerProvider =
     StateNotifierProvider<AiNavController, AiNavSuggestion?>((ref) {
-  final runner = AiNavModelRunner(
-    // Must match `pubspec.yaml`.
-    assetPath: 'assets/models/ai_nav_model_quant.tflite',
-  );
+      final runner = AiNavModelRunner(
+        // Must match `pubspec.yaml`.
+        assetPath: 'assets/models/ai_nav_model_quant.tflite',
+      );
 
-  final controller = AiNavController(modelRunner: runner);
-  ref.onDispose(controller.disposeController);
+      final controller = AiNavController(modelRunner: runner);
+      ref.onDispose(controller.disposeController);
 
-  return controller;
-});
+      return controller;
+    });

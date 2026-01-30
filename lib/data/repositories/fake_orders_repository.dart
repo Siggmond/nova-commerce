@@ -8,7 +8,10 @@ class FakeOrdersRepository implements OrdersRepository {
   }
 
   @override
-  Stream<List<Order>> watchOrders({required String? uid, required String deviceId}) {
+  Stream<List<Order>> watchOrders({
+    required String? uid,
+    required String deviceId,
+  }) {
     return const Stream<List<Order>>.empty();
   }
 }

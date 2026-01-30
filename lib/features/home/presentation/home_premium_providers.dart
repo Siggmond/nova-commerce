@@ -9,7 +9,9 @@ final homeConfigProvider = StreamProvider<HomeConfig>((ref) {
   return repo.watchHomeConfig().map(HomeConfig.fromMap);
 });
 
-final homeSuperDealsProductsProvider = FutureProvider<List<Product>>((ref) async {
+final homeSuperDealsProductsProvider = FutureProvider<List<Product>>((
+  ref,
+) async {
   final repo = ref.watch(homeSuperDealsRepositoryProvider);
   final ids = await repo.fetchSuperDealsProductIds();
   if (ids.isEmpty) return const <Product>[];

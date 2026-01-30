@@ -46,8 +46,8 @@ List<HomeSectionId> _order(ProviderContainer container) {
 
 void _triggerPersonalization(ProviderContainer container) {
   container.read(homeFeedControllerProvider);
-  final vm = container.read(homeViewModelProvider.notifier)
-      as TestHomeViewModel;
+  final vm =
+      container.read(homeViewModelProvider.notifier) as TestHomeViewModel;
   vm.emitData();
 }
 
@@ -58,8 +58,9 @@ ProviderContainer _container({
   return ProviderContainer(
     overrides: [
       homeViewModelProvider.overrideWith((ref) => TestHomeViewModel(ref)),
-      homePersonalizationEnabledProvider
-          .overrideWith((ref) => personalizationEnabled),
+      homePersonalizationEnabledProvider.overrideWith(
+        (ref) => personalizationEnabled,
+      ),
       wishlistIdsProvider.overrideWith((ref) => wishlistIds),
       homeUnder50ProductsProvider.overrideWith((ref) => const []),
     ],
@@ -92,12 +93,14 @@ void main() {
 
     final ids = _order(container);
     expect(
-      ids.indexOf(HomeSectionId.pickedHeader)
+      ids
+          .indexOf(HomeSectionId.pickedHeader)
           .compareTo(ids.indexOf(HomeSectionId.trendingHeader)),
       lessThan(0),
     );
     expect(
-      ids.indexOf(HomeSectionId.pickedFeed)
+      ids
+          .indexOf(HomeSectionId.pickedFeed)
           .compareTo(ids.indexOf(HomeSectionId.trendingFeed)),
       lessThan(0),
     );
@@ -114,17 +117,20 @@ void main() {
 
     final ids = _order(container);
     expect(
-      ids.indexOf(HomeSectionId.trendingHeader)
+      ids
+          .indexOf(HomeSectionId.trendingHeader)
           .compareTo(ids.indexOf(HomeSectionId.trendingFeed)),
       lessThan(0),
     );
     expect(
-      ids.indexOf(HomeSectionId.pickedHeader)
+      ids
+          .indexOf(HomeSectionId.pickedHeader)
           .compareTo(ids.indexOf(HomeSectionId.pickedFeed)),
       lessThan(0),
     );
     expect(
-      ids.indexOf(HomeSectionId.underHeader)
+      ids
+          .indexOf(HomeSectionId.underHeader)
           .compareTo(ids.indexOf(HomeSectionId.underFeed)),
       lessThan(0),
     );

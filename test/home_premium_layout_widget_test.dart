@@ -39,7 +39,9 @@ class TestHomeViewModel extends HomeViewModel {
 }
 
 void main() {
-  testWidgets('Premium Home sections render in order', (WidgetTester tester) async {
+  testWidgets('Premium Home sections render in order', (
+    WidgetTester tester,
+  ) async {
     final binding = TestWidgetsFlutterBinding.ensureInitialized();
     await binding.setSurfaceSize(const Size(375, 1800));
     addTearDown(() => binding.setSurfaceSize(null));

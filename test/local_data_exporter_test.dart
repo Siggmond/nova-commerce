@@ -14,7 +14,7 @@ void main() {
           'quantity': 1,
           'selectedColor': 'Black',
           'selectedSize': 'M',
-        }
+        },
       ]),
       'wishlist_ids_v1': ['p1', 'p2'],
     });

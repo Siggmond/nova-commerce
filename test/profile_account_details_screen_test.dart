@@ -35,11 +35,11 @@ class _RecordingAuthRepository implements AuthRepository {
 
   @override
   AuthUser? get currentUser => const AuthUser(
-        uid: 'u_real',
-        email: 'a@b.com',
-        isAnonymous: false,
-        isDemo: false,
-      );
+    uid: 'u_real',
+    email: 'a@b.com',
+    isAnonymous: false,
+    isDemo: false,
+  );
 
   @override
   Future<AuthAccountDetails?> getAccountDetails() async => _details();
@@ -140,7 +140,8 @@ Future<void> _pumpAccountDetails(
         designSize: const Size(375, 812),
         minTextAdapt: true,
         splitScreenMode: true,
-        builder: (_, __) => const MaterialApp(home: ProfileAccountDetailsScreen()),
+        builder: (_, __) =>
+            const MaterialApp(home: ProfileAccountDetailsScreen()),
       ),
     ),
   );
@@ -159,73 +160,75 @@ Future<void> _pumpUntilFound(
 }
 
 void main() {
-  testWidgets('Account details shows DEMO badge and demo email verification updates UI', (
-    tester,
-  ) async {
-    final repo = FakeAuthRepository();
-    await repo.createAccount(email: 'a@b.com', password: 'pw');
+  testWidgets(
+    'Account details shows DEMO badge and demo email verification updates UI',
+    (tester) async {
+      final repo = FakeAuthRepository();
+      await repo.createAccount(email: 'a@b.com', password: 'pw');
 
-    await _pumpAccountDetails(tester, repo: repo);
+      await _pumpAccountDetails(tester, repo: repo);
 
-    expect(find.text('DEMO'), findsOneWidget);
-    expect(find.text('Not verified'), findsWidgets);
+      expect(find.text('DEMO'), findsOneWidget);
+      expect(find.text('Not verified'), findsWidgets);
 
-    final verifyEmail = find.text('Verify email');
-    await tester.ensureVisible(verifyEmail);
-    await tester.tap(verifyEmail);
-    await tester.pump();
+      final verifyEmail = find.text('Verify email');
+      await tester.ensureVisible(verifyEmail);
+      await tester.tap(verifyEmail);
+      await tester.pump();
 
-    await _pumpUntilFound(tester, find.text('Verified ✅'));
-    expect(find.text('Verified ✅'), findsWidgets);
+      await _pumpUntilFound(tester, find.text('Verified ✅'));
+      expect(find.text('Verified ✅'), findsWidgets);
 
-    // Demo mode immediately verifies, so the verify/resend button disappears.
-    expect(find.textContaining('Resend in'), findsNothing);
-  });
+      // Demo mode immediately verifies, so the verify/resend button disappears.
+      expect(find.textContaining('Resend in'), findsNothing);
+    },
+  );
 
-  testWidgets('Account details triggers non-demo repo calls for email and phone flows', (
-    tester,
-  ) async {
-    final repo = _RecordingAuthRepository();
+  testWidgets(
+    'Account details triggers non-demo repo calls for email and phone flows',
+    (tester) async {
+      final repo = _RecordingAuthRepository();
 
-    await _pumpAccountDetails(tester, repo: repo);
+      await _pumpAccountDetails(tester, repo: repo);
 
-    expect(find.text('DEMO'), findsNothing);
+      expect(find.text('DEMO'), findsNothing);
 
-    final verifyEmail = find.text('Verify email');
-    await tester.ensureVisible(verifyEmail);
-    await tester.tap(verifyEmail);
-    await tester.pump();
+      final verifyEmail = find.text('Verify email');
+      await tester.ensureVisible(verifyEmail);
+      await tester.tap(verifyEmail);
+      await tester.pump();
 
-    expect(repo.sendEmailVerificationCalls, 1);
-    expect(repo.reloadCalls, greaterThanOrEqualTo(1));
-    final resendLabel = find.textContaining('Resend in');
-    await _pumpUntilFound(tester, resendLabel);
-    expect(resendLabel, findsOneWidget);
+      expect(repo.sendEmailVerificationCalls, 1);
+      expect(repo.reloadCalls, greaterThanOrEqualTo(1));
+      final resendLabel = find.textContaining('Resend in');
+      await _pumpUntilFound(tester, resendLabel);
+      expect(resendLabel, findsOneWidget);
 
-    final phoneField = find.widgetWithText(TextField, 'Phone number');
-    await tester.ensureVisible(phoneField);
-    await tester.enterText(phoneField, '+12025550123');
+      final phoneField = find.widgetWithText(TextField, 'Phone number');
+      await tester.ensureVisible(phoneField);
+      await tester.enterText(phoneField, '+12025550123');
 
-    final sendCode = find.text('Send code');
-    await tester.tap(sendCode);
-    await tester.pump();
+      final sendCode = find.text('Send code');
+      await tester.tap(sendCode);
+      await tester.pump();
 
-    expect(repo.startPhoneVerificationCalls, 1);
+      expect(repo.startPhoneVerificationCalls, 1);
 
-    final smsField = find.widgetWithText(TextField, 'SMS code');
-    await _pumpUntilFound(tester, smsField);
-    expect(smsField, findsOneWidget);
+      final smsField = find.widgetWithText(TextField, 'SMS code');
+      await _pumpUntilFound(tester, smsField);
+      expect(smsField, findsOneWidget);
 
-    await tester.enterText(smsField, '123456');
-    final verifyPhone = find.text('Verify phone');
-    await tester.ensureVisible(verifyPhone);
-    await tester.pump();
-    await tester.tap(verifyPhone);
-    await tester.pump();
+      await tester.enterText(smsField, '123456');
+      final verifyPhone = find.text('Verify phone');
+      await tester.ensureVisible(verifyPhone);
+      await tester.pump();
+      await tester.tap(verifyPhone);
+      await tester.pump();
 
-    expect(repo.linkPhoneWithSmsCodeCalls, 1);
+      expect(repo.linkPhoneWithSmsCodeCalls, 1);
 
-    await _pumpUntilFound(tester, find.text('Verified ✅'));
-    expect(find.text('Verified ✅'), findsWidgets);
-  });
+      await _pumpUntilFound(tester, find.text('Verified ✅'));
+      expect(find.text('Verified ✅'), findsWidgets);
+    },
+  );
 }

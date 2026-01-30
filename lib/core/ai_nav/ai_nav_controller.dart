@@ -15,9 +15,9 @@ class AiNavController extends StateNotifier<AiNavSuggestion?> {
     this.requiredConsecutive = 2,
     this.defaultCooldown = const Duration(milliseconds: 800),
     DateTime Function()? now,
-  })  : _modelRunner = modelRunner,
-        _now = (now ?? DateTime.now),
-        super(null);
+  }) : _modelRunner = modelRunner,
+       _now = (now ?? DateTime.now),
+       super(null);
 
   final AiNavRunner _modelRunner;
   final DateTime Function() _now;

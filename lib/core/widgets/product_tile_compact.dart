@@ -25,10 +25,7 @@ class ProductTileCompact extends StatelessWidget {
     final radius = BorderRadius.circular(AppRadii.md);
     final dpr = ScreenUtil().pixelRatio ?? 1.0;
 
-    final titleStrut = const StrutStyle(
-      forceStrutHeight: true,
-      height: 1.15,
-    );
+    final titleStrut = const StrutStyle(forceStrutHeight: true, height: 1.15);
 
     return InkWell(
       borderRadius: radius,
@@ -97,11 +94,12 @@ class ProductTileCompact extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                         softWrap: false,
                         strutStyle: titleStrut,
-                        style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                          fontWeight: FontWeight.w700,
-                          height: 1.15,
-                          color: cs.onSurface.withValues(alpha: 0.65),
-                        ),
+                        style: Theme.of(context).textTheme.labelMedium
+                            ?.copyWith(
+                              fontWeight: FontWeight.w700,
+                              height: 1.15,
+                              color: cs.onSurface.withValues(alpha: 0.65),
+                            ),
                       ),
                       SizedBox(height: AppSpace.xxs),
                     ],
@@ -113,10 +111,11 @@ class ProductTileCompact extends StatelessWidget {
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           strutStyle: titleStrut,
-                          style: Theme.of(context)
-                              .textTheme
-                              .titleSmall
-                              ?.copyWith(fontWeight: FontWeight.w900, height: 1.15),
+                          style: Theme.of(context).textTheme.titleSmall
+                              ?.copyWith(
+                                fontWeight: FontWeight.w900,
+                                height: 1.15,
+                              ),
                         ),
                       ),
                     ),
@@ -129,10 +128,10 @@ class ProductTileCompact extends StatelessWidget {
                         forceStrutHeight: true,
                         height: 1.1,
                       ),
-                      style: Theme.of(context)
-                          .textTheme
-                          .titleMedium
-                          ?.copyWith(fontWeight: FontWeight.w900, height: 1.1),
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w900,
+                        height: 1.1,
+                      ),
                     ),
                   ],
                 ),
@@ -163,10 +162,7 @@ class _CompactWishlistHeart extends StatelessWidget {
       child: IconButton(
         visualDensity: VisualDensity.compact,
         padding: EdgeInsets.zero,
-        constraints: BoxConstraints.tightFor(
-          width: 38.r,
-          height: 38.r,
-        ),
+        constraints: BoxConstraints.tightFor(width: 38.r, height: 38.r),
         onPressed: onPressed,
         icon: Icon(
           isSaved ? Icons.favorite : Icons.favorite_border,

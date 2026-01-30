@@ -23,38 +23,16 @@ void main() {
           'order': 2,
           'enabled': false,
         },
-        {
-          'id': 'y',
-          'title': 'Y',
-          'deeplink': '/y',
-          'order': 1,
-        },
-        {
-          'id': '',
-          'title': 'Bad',
-          'deeplink': '/bad',
-          'order': 0,
-        },
+        {'id': 'y', 'title': 'Y', 'deeplink': '/y', 'order': 1},
+        {'id': '', 'title': 'Bad', 'deeplink': '/bad', 'order': 0},
       ],
       'catalog': [],
       'styles': [
-        {
-          'id': 's2',
-          'title': 'Style 2',
-          'deeplink': '/s2',
-          'order': 2,
-        },
-        {
-          'id': 's1',
-          'title': 'Style 1',
-          'deeplink': '/s1',
-          'order': 1,
-        },
+        {'id': 's2', 'title': 'Style 2', 'deeplink': '/s2', 'order': 2},
+        {'id': 's1', 'title': 'Style 1', 'deeplink': '/s1', 'order': 1},
         {'bad': true},
       ],
-      'superDeals': {
-        'limit': 5,
-      },
+      'superDeals': {'limit': 5},
     });
 
     expect(c.quickSquares.length, 1);

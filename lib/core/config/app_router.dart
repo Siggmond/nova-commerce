@@ -141,7 +141,10 @@ GoRouter createAppRouter({String initialLocation = AppRoutes.home}) {
               GoRoute(
                 path: AppRoutes.orders,
                 pageBuilder: (context, state) {
-                  return _fadeSlidePage(state: state, child: const OrdersScreen());
+                  return _fadeSlidePage(
+                    state: state,
+                    child: const OrdersScreen(),
+                  );
                 },
                 routes: [
                   GoRoute(
@@ -230,9 +233,7 @@ GoRouter createAppRouter({String initialLocation = AppRoutes.home}) {
         pageBuilder: (context, state) {
           return _fadeSlidePage(
             state: state,
-            child: const Scaffold(
-              body: Center(child: Text('Coming soon')),
-            ),
+            child: const Scaffold(body: Center(child: Text('Coming soon'))),
           );
         },
       ),
@@ -242,9 +243,7 @@ GoRouter createAppRouter({String initialLocation = AppRoutes.home}) {
         pageBuilder: (context, state) {
           return _fadeSlidePage(
             state: state,
-            child: const Scaffold(
-              body: Center(child: Text('Coming soon')),
-            ),
+            child: const Scaffold(body: Center(child: Text('Coming soon'))),
           );
         },
       ),
@@ -254,9 +253,7 @@ GoRouter createAppRouter({String initialLocation = AppRoutes.home}) {
         pageBuilder: (context, state) {
           return _fadeSlidePage(
             state: state,
-            child: const Scaffold(
-              body: Center(child: Text('Coming soon')),
-            ),
+            child: const Scaffold(body: Center(child: Text('Coming soon'))),
           );
         },
       ),
@@ -266,9 +263,7 @@ GoRouter createAppRouter({String initialLocation = AppRoutes.home}) {
         pageBuilder: (context, state) {
           return _fadeSlidePage(
             state: state,
-            child: const Scaffold(
-              body: Center(child: Text('Coming soon')),
-            ),
+            child: const Scaffold(body: Center(child: Text('Coming soon'))),
           );
         },
       ),
@@ -278,9 +273,7 @@ GoRouter createAppRouter({String initialLocation = AppRoutes.home}) {
         pageBuilder: (context, state) {
           return _fadeSlidePage(
             state: state,
-            child: const Scaffold(
-              body: Center(child: Text('Coming soon')),
-            ),
+            child: const Scaffold(body: Center(child: Text('Coming soon'))),
           );
         },
       ),
@@ -290,9 +283,7 @@ GoRouter createAppRouter({String initialLocation = AppRoutes.home}) {
         pageBuilder: (context, state) {
           return _fadeSlidePage(
             state: state,
-            child: const Scaffold(
-              body: Center(child: Text('Coming soon')),
-            ),
+            child: const Scaffold(body: Center(child: Text('Coming soon'))),
           );
         },
       ),
@@ -302,9 +293,7 @@ GoRouter createAppRouter({String initialLocation = AppRoutes.home}) {
         pageBuilder: (context, state) {
           return _fadeSlidePage(
             state: state,
-            child: const Scaffold(
-              body: Center(child: Text('Coming soon')),
-            ),
+            child: const Scaffold(body: Center(child: Text('Coming soon'))),
           );
         },
       ),
@@ -314,9 +303,7 @@ GoRouter createAppRouter({String initialLocation = AppRoutes.home}) {
         pageBuilder: (context, state) {
           return _fadeSlidePage(
             state: state,
-            child: const Scaffold(
-              body: Center(child: Text('Coming soon')),
-            ),
+            child: const Scaffold(body: Center(child: Text('Coming soon'))),
           );
         },
       ),
@@ -326,9 +313,7 @@ GoRouter createAppRouter({String initialLocation = AppRoutes.home}) {
         pageBuilder: (context, state) {
           return _fadeSlidePage(
             state: state,
-            child: const Scaffold(
-              body: Center(child: Text('Coming soon')),
-            ),
+            child: const Scaffold(body: Center(child: Text('Coming soon'))),
           );
         },
       ),
@@ -338,9 +323,7 @@ GoRouter createAppRouter({String initialLocation = AppRoutes.home}) {
         pageBuilder: (context, state) {
           return _fadeSlidePage(
             state: state,
-            child: const Scaffold(
-              body: Center(child: Text('Coming soon')),
-            ),
+            child: const Scaffold(body: Center(child: Text('Coming soon'))),
           );
         },
       ),

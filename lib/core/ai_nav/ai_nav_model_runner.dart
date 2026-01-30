@@ -13,9 +13,7 @@ abstract class AiNavRunner {
 }
 
 class AiNavModelRunner implements AiNavRunner {
-  AiNavModelRunner({
-    required this.assetPath,
-  });
+  AiNavModelRunner({required this.assetPath});
 
   final String assetPath;
 
@@ -56,7 +54,9 @@ class AiNavModelRunner implements AiNavRunner {
 
     final interpreter = _interpreter;
     if (interpreter == null) {
-      throw StateError('Model not loaded. Call ensureLoaded() first. Error=$_loadError');
+      throw StateError(
+        'Model not loaded. Call ensureLoaded() first. Error=$_loadError',
+      );
     }
 
     // Batch size = 1.

@@ -27,19 +27,28 @@ class _FailingAuthRepository implements AuthRepository {
 
   @override
   Future<void> updateDisplayName(String displayName) async {
-    throw const AuthException(message: 'API key not valid', code: 'invalid-api-key');
+    throw const AuthException(
+      message: 'API key not valid',
+      code: 'invalid-api-key',
+    );
   }
 
   @override
   Future<void> sendEmailVerification() async {
-    throw const AuthException(message: 'API key not valid', code: 'invalid-api-key');
+    throw const AuthException(
+      message: 'API key not valid',
+      code: 'invalid-api-key',
+    );
   }
 
   @override
   Future<PhoneVerificationSession> startPhoneVerification({
     required String phoneNumber,
   }) async {
-    throw const AuthException(message: 'API key not valid', code: 'invalid-api-key');
+    throw const AuthException(
+      message: 'API key not valid',
+      code: 'invalid-api-key',
+    );
   }
 
   @override
@@ -47,7 +56,10 @@ class _FailingAuthRepository implements AuthRepository {
     required String verificationId,
     required String smsCode,
   }) async {
-    throw const AuthException(message: 'API key not valid', code: 'invalid-api-key');
+    throw const AuthException(
+      message: 'API key not valid',
+      code: 'invalid-api-key',
+    );
   }
 
   @override
@@ -113,8 +125,9 @@ void main() {
     expect(repo.takeFallbackNotice(), isNotNull);
   });
 
-  testWidgets('Sign-in screen shows fallback notice and continues',
-      (tester) async {
+  testWidgets('Sign-in screen shows fallback notice and continues', (
+    tester,
+  ) async {
     final fallback = FakeAuthRepository();
     final repo = FallbackAuthRepository(
       primary: _FailingAuthRepository(),
@@ -128,10 +141,7 @@ void main() {
           path: '/',
           builder: (_, __) => const Scaffold(body: SizedBox.shrink()),
         ),
-        GoRoute(
-          path: '/sign-in',
-          builder: (_, __) => const SignInScreen(),
-        ),
+        GoRoute(path: '/sign-in', builder: (_, __) => const SignInScreen()),
       ],
     );
 

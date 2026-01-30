@@ -3,10 +3,7 @@ import 'package:flutter/material.dart';
 import 'shimmer.dart';
 
 class NovaSkeleton extends StatelessWidget {
-  const NovaSkeleton({
-    super.key,
-    required this.child,
-  });
+  const NovaSkeleton({super.key, required this.child});
 
   final Widget child;
 
@@ -17,11 +14,7 @@ class NovaSkeleton extends StatelessWidget {
 }
 
 class NovaSkeletonBox extends StatelessWidget {
-  const NovaSkeletonBox({
-    super.key,
-    required this.height,
-    this.radius,
-  });
+  const NovaSkeletonBox({super.key, required this.height, this.radius});
 
   final double height;
   final double? radius;

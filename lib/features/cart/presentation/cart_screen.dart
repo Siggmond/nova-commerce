@@ -37,9 +37,9 @@ class CartScreen extends ConsumerWidget {
         .fold<double>(0, (sum, item) => sum + item.total);
     final hasSelection = selectedIds.isNotEmpty;
     final allSelected = items.isNotEmpty && selectedIds.length == items.length;
-    final titleStyle = Theme.of(context).textTheme.titleMedium?.copyWith(
-          fontWeight: FontWeight.w800,
-        );
+    final titleStyle = Theme.of(
+      context,
+    ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800);
 
     return Scaffold(
       appBar: AppBar(
@@ -53,15 +53,16 @@ class CartScreen extends ConsumerWidget {
                     if (allSelected) {
                       selectionVm.selectAll(const <String>[]);
                     } else {
-                      selectionVm
-                          .selectAll(items.map((item) => item.product.id));
+                      selectionVm.selectAll(
+                        items.map((item) => item.product.id),
+                      );
                     }
                   },
             child: Text(
               allSelected ? 'Deselect all' : 'Select all',
-              style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.labelMedium?.copyWith(fontWeight: FontWeight.w700),
             ),
           ),
         ],
@@ -115,19 +116,18 @@ class CartScreen extends ConsumerWidget {
               SizedBox(height: 12.h),
               Text(
                 'You might like',
-                style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.w900,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w900),
               ),
               SizedBox(height: 4.h),
               Text(
                 'Optional add-ons. Tap to view details.',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context)
-                          .colorScheme
-                          .onSurface
-                          .withValues(alpha: 0.72),
-                    ),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.onSurface.withValues(alpha: 0.72),
+                ),
               ),
               SizedBox(height: 8.h),
               Wrap(
@@ -149,8 +149,8 @@ class CartScreen extends ConsumerWidget {
                   ),
                   _FilterChip(
                     label: 'Frequent Favorites',
-                    selected: selectedFilter ==
-                        RecommendedFilter.frequentFavorites,
+                    selected:
+                        selectedFilter == RecommendedFilter.frequentFavorites,
                     onTap: () =>
                         ref.read(recommendedFilterProvider.notifier).state =
                             RecommendedFilter.frequentFavorites,
@@ -229,10 +229,10 @@ class _InfoBanner extends StatelessWidget {
             child: Text(
               message,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: cs.onSurface.withValues(alpha: 0.82),
-                    fontWeight: FontWeight.w600,
-                    height: 1.25,
-                  ),
+                color: cs.onSurface.withValues(alpha: 0.82),
+                fontWeight: FontWeight.w600,
+                height: 1.25,
+              ),
             ),
           ),
         ],
@@ -256,8 +256,8 @@ class _SelectionInfoBanner extends StatelessWidget {
     final message = allSelected
         ? 'All items are selected for checkout. Uncheck items to keep them in your bag.'
         : hasSelection
-            ? 'Checkout will include selected items only. Unselected items stay in your bag.'
-            : 'Select items to continue to checkout.';
+        ? 'Checkout will include selected items only. Unselected items stay in your bag.'
+        : 'Select items to continue to checkout.';
 
     return Container(
       margin: EdgeInsets.only(bottom: 12.h),
@@ -279,9 +279,9 @@ class _SelectionInfoBanner extends StatelessWidget {
             child: Text(
               message,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    height: 1.25,
-                  ),
+                fontWeight: FontWeight.w600,
+                height: 1.25,
+              ),
             ),
           ),
         ],
@@ -369,9 +369,9 @@ class _CartItemRow extends StatelessWidget {
                   item.product.title,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w800,
-                      ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w800),
                 ),
                 SizedBox(height: 2.h),
                 Text(
@@ -379,8 +379,8 @@ class _CartItemRow extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: cs.onSurface.withValues(alpha: 0.7),
-                      ),
+                    color: cs.onSurface.withValues(alpha: 0.7),
+                  ),
                 ),
                 SizedBox(height: 6.h),
                 Row(
@@ -399,8 +399,8 @@ class _CartItemRow extends StatelessWidget {
                     Text(
                       item.quantity.toString(),
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.w800,
-                          ),
+                        fontWeight: FontWeight.w800,
+                      ),
                     ),
                     SizedBox(width: 2.w),
                     IconButton(
@@ -475,9 +475,9 @@ class _FilterChip extends StatelessWidget {
         child: Text(
           label,
           style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                color: selected ? Colors.white : cs.onSurface,
-                fontWeight: FontWeight.w700,
-              ),
+            color: selected ? Colors.white : cs.onSurface,
+            fontWeight: FontWeight.w700,
+          ),
         ),
       ),
     );
@@ -529,9 +529,9 @@ class _RecommendedCard extends StatelessWidget {
                   item.title,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w800,
-                      ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800),
                 ),
                 SizedBox(height: 6.h),
                 Row(
@@ -541,9 +541,7 @@ class _RecommendedCard extends StatelessWidget {
                         children: [
                           TextSpan(
                             text: '\$$dollars',
-                            style: Theme.of(context)
-                                .textTheme
-                                .labelLarge
+                            style: Theme.of(context).textTheme.labelLarge
                                 ?.copyWith(
                                   color: cs.onSurface,
                                   fontWeight: FontWeight.w900,
@@ -551,9 +549,7 @@ class _RecommendedCard extends StatelessWidget {
                           ),
                           TextSpan(
                             text: cents,
-                            style: Theme.of(context)
-                                .textTheme
-                                .labelSmall
+                            style: Theme.of(context).textTheme.labelSmall
                                 ?.copyWith(
                                   color: cs.onSurface.withValues(alpha: 0.8),
                                   fontWeight: FontWeight.w800,
@@ -626,39 +622,37 @@ class _CheckoutBar extends StatelessWidget {
               Text(
                 allSelected ? 'Subtotal' : 'Selected subtotal',
                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: Theme.of(
-                        context,
-                      ).colorScheme.onSurface.withValues(alpha: 0.7),
-                    ),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.onSurface.withValues(alpha: 0.7),
+                ),
               ),
               SizedBox(height: 2.h),
               Text(
                 '${currency.toUpperCase()} ${subtotal.toStringAsFixed(0)}',
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.w900,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w900),
               ),
               Text(
                 'Taxes and shipping are calculated at checkout.',
                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: Theme.of(context)
-                          .colorScheme
-                          .onSurface
-                          .withValues(alpha: 0.6),
-                    ),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.onSurface.withValues(alpha: 0.6),
+                ),
               ),
               if (!hasSelection) ...[
                 SizedBox(height: 4.h),
                 Text(
                   'Select items to continue',
                   style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        color: Theme.of(context)
-                            .colorScheme
-                            .onSurface
-                            .withValues(alpha: 0.6),
-                      ),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withValues(alpha: 0.6),
+                  ),
                 ),
               ],
             ],
@@ -726,11 +720,10 @@ class _EmptyCart extends StatelessWidget {
             Text(
               'Add items from any product page, then come back here to review and checkout.',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context)
-                        .colorScheme
-                        .onSurface
-                        .withValues(alpha: 0.75),
-                  ),
+                color: Theme.of(
+                  context,
+                ).colorScheme.onSurface.withValues(alpha: 0.75),
+              ),
               textAlign: TextAlign.center,
             ),
             SizedBox(height: 16.h),

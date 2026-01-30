@@ -9,7 +9,7 @@ abstract class SecureStore {
 
 class FlutterSecureStore implements SecureStore {
   FlutterSecureStore({FlutterSecureStorage? storage})
-      : _storage = storage ?? const FlutterSecureStorage();
+    : _storage = storage ?? const FlutterSecureStorage();
 
   final FlutterSecureStorage _storage;
 

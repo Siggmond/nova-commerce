@@ -22,16 +22,14 @@ class FirestoreOrdersRepository implements OrdersRepository {
     final orders = _db.collection('orders');
     final q = orders.where('uid', isEqualTo: uid.trim());
 
-    return q
-        .orderBy('createdAt', descending: true)
-        .limit(50)
-        .snapshots()
-        .map((snap) {
-          return snap.docs
-              .map(OrderDto.fromDoc)
-              .map(OrderMapper.toDomain)
-              .toList(growable: false);
-        });
+    return q.orderBy('createdAt', descending: true).limit(50).snapshots().map((
+      snap,
+    ) {
+      return snap.docs
+          .map(OrderDto.fromDoc)
+          .map(OrderMapper.toDomain)
+          .toList(growable: false);
+    });
   }
 
   @override

@@ -33,13 +33,11 @@ class TestHomeViewModel extends HomeViewModel {
   Future<void> refresh({bool showLoading = false}) async {}
 }
 
- void main() {
+void main() {
   test('Section retry triggers controller update', () {
     final container = ProviderContainer(
       overrides: [
-        homeViewModelProvider.overrideWith(
-          (ref) => TestHomeViewModel(ref),
-        ),
+        homeViewModelProvider.overrideWith((ref) => TestHomeViewModel(ref)),
       ],
     );
     addTearDown(container.dispose);

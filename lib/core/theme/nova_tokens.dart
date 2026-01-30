@@ -16,28 +16,27 @@ class NovaRadii {
 
 class NovaShadows {
   static List<BoxShadow> low(ColorScheme cs) => [
-        BoxShadow(
-          blurRadius: 18,
-          offset: const Offset(0, 10),
-          color: Colors.black.withValues(alpha: 0.10),
-        ),
-      ];
+    BoxShadow(
+      blurRadius: 18,
+      offset: const Offset(0, 10),
+      color: Colors.black.withValues(alpha: 0.10),
+    ),
+  ];
 }
 
 class NovaText {
-  static TextStyle? title(BuildContext context) =>
-      Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700);
+  static TextStyle? title(BuildContext context) => Theme.of(
+    context,
+  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700);
 
-  static TextStyle? sectionTitle(BuildContext context) => Theme.of(context)
-      .textTheme
-      .titleMedium
-      ?.copyWith(fontWeight: FontWeight.w800);
+  static TextStyle? sectionTitle(BuildContext context) => Theme.of(
+    context,
+  ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800);
 
   static TextStyle? bodyMuted(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    return Theme.of(context)
-        .textTheme
-        .bodyMedium
-        ?.copyWith(color: cs.onSurface.withValues(alpha: 0.70));
+    return Theme.of(context).textTheme.bodyMedium?.copyWith(
+      color: cs.onSurface.withValues(alpha: 0.70),
+    );
   }
 }

@@ -14,9 +14,7 @@ class AiPrivacyNote extends StatelessWidget {
         decoration: BoxDecoration(
           color: cs.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(AppRadii.md),
-          border: Border.all(
-            color: cs.outlineVariant.withValues(alpha: 0.5),
-          ),
+          border: Border.all(color: cs.outlineVariant.withValues(alpha: 0.5)),
         ),
         child: Padding(
           padding: AppInsets.cardTight,
@@ -32,9 +30,9 @@ class AiPrivacyNote extends StatelessWidget {
                 child: Text(
                   'Nova AI replies are generated and may be inaccurate. This demo does not provide citations. Your conversations are saved locally on this device and can be cleared anytime.',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: cs.onSurface.withValues(alpha: 0.75),
-                        height: 1.25,
-                      ),
+                    color: cs.onSurface.withValues(alpha: 0.75),
+                    height: 1.25,
+                  ),
                 ),
               ),
             ],

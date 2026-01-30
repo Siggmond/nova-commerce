@@ -57,16 +57,18 @@ class OrdersController extends StateNotifier<AsyncValue<List<Order>>> {
     }
 
     final repo = _ref.read(ordersRepositoryProvider);
-    _sub = repo.watchOrders(uid: uid, deviceId: deviceId).listen(
-      (orders) {
-        if (requestId != _requestId) return;
-        state = AsyncValue.data(orders);
-      },
-      onError: (Object e, StackTrace st) {
-        if (requestId != _requestId) return;
-        state = AsyncValue.error(e, st);
-      },
-    );
+    _sub = repo
+        .watchOrders(uid: uid, deviceId: deviceId)
+        .listen(
+          (orders) {
+            if (requestId != _requestId) return;
+            state = AsyncValue.data(orders);
+          },
+          onError: (Object e, StackTrace st) {
+            if (requestId != _requestId) return;
+            state = AsyncValue.error(e, st);
+          },
+        );
   }
 
   void refresh({bool showLoading = false}) {
@@ -86,17 +88,18 @@ class OrdersController extends StateNotifier<AsyncValue<List<Order>>> {
   }
 }
 
-final orderDetailsControllerProvider = StateNotifierProvider.family<
-  OrderDetailsController,
-  AsyncValue<Order>,
-  String
->((ref, id) {
-  return OrderDetailsController(ref, id);
-});
+final orderDetailsControllerProvider =
+    StateNotifierProvider.family<
+      OrderDetailsController,
+      AsyncValue<Order>,
+      String
+    >((ref, id) {
+      return OrderDetailsController(ref, id);
+    });
 
 class OrderDetailsController extends StateNotifier<AsyncValue<Order>> {
   OrderDetailsController(this._ref, this._orderId)
-      : super(const AsyncValue.loading()) {
+    : super(const AsyncValue.loading()) {
     load(showLoading: true);
   }
 

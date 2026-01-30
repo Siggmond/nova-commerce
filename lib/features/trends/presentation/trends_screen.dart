@@ -32,9 +32,7 @@ class TrendsScreen extends ConsumerWidget {
     }
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Trends'),
-      ),
+      appBar: AppBar(title: const Text('Trends')),
       body: productsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => AppErrorState(
@@ -54,9 +52,10 @@ class TrendsScreen extends ConsumerWidget {
 
           final hero = products.first;
           final favorites = products.skip(1).take(8).toList(growable: false);
-          final worthALook = products.skip(1 + favorites.length).take(6).toList(
-                growable: false,
-              );
+          final worthALook = products
+              .skip(1 + favorites.length)
+              .take(6)
+              .toList(growable: false);
           final morePicks = products
               .skip(1 + favorites.length + worthALook.length)
               .take(8)
@@ -111,8 +110,9 @@ class TrendsScreen extends ConsumerWidget {
                           width: 160,
                           child: NovaProductTile(
                             product: product,
-                            onTap: () => context
-                                .push('${AppRoutes.product}?id=${product.id}'),
+                            onTap: () => context.push(
+                              '${AppRoutes.product}?id=${product.id}',
+                            ),
                             isSaved: ids.contains(product.id),
                             onToggleSaved: () => toggleSaved(product.id),
                           ),
@@ -141,19 +141,17 @@ class TrendsScreen extends ConsumerWidget {
                       crossAxisSpacing: AppSpace.md,
                       childAspectRatio: 1.9,
                     ),
-                    delegate: SliverChildBuilderDelegate(
-                      (context, index) {
-                        final product = worthALook[index];
-                        return ProductCard(
-                          product: product,
-                          onTap: () => context
-                              .push('${AppRoutes.product}?id=${product.id}'),
-                          isSaved: ids.contains(product.id),
-                          onToggleSaved: () => toggleSaved(product.id),
-                        );
-                      },
-                      childCount: worthALook.length,
-                    ),
+                    delegate: SliverChildBuilderDelegate((context, index) {
+                      final product = worthALook[index];
+                      return ProductCard(
+                        product: product,
+                        onTap: () => context.push(
+                          '${AppRoutes.product}?id=${product.id}',
+                        ),
+                        isSaved: ids.contains(product.id),
+                        onToggleSaved: () => toggleSaved(product.id),
+                      );
+                    }, childCount: worthALook.length),
                   ),
                 ),
               if (morePicks.isNotEmpty)
@@ -181,8 +179,9 @@ class TrendsScreen extends ConsumerWidget {
                           width: 160,
                           child: NovaProductTile(
                             product: product,
-                            onTap: () => context
-                                .push('${AppRoutes.product}?id=${product.id}'),
+                            onTap: () => context.push(
+                              '${AppRoutes.product}?id=${product.id}',
+                            ),
                             isSaved: ids.contains(product.id),
                             onToggleSaved: () => toggleSaved(product.id),
                           ),
@@ -207,10 +206,7 @@ int _gridCrossAxisCount(BuildContext context) {
 }
 
 class _SectionHeader extends StatelessWidget {
-  const _SectionHeader({
-    required this.title,
-    required this.subtitle,
-  });
+  const _SectionHeader({required this.title, required this.subtitle});
 
   final String title;
   final String subtitle;
@@ -223,18 +219,17 @@ class _SectionHeader extends StatelessWidget {
       children: [
         Text(
           title,
-          style: Theme.of(context)
-              .textTheme
-              .titleMedium
-              ?.copyWith(fontWeight: FontWeight.w900),
+          style: Theme.of(
+            context,
+          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900),
         ),
         SizedBox(height: AppSpace.xxs),
         Text(
           subtitle,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: cs.onSurface.withValues(alpha: 0.72),
-                height: 1.25,
-              ),
+            color: cs.onSurface.withValues(alpha: 0.72),
+            height: 1.25,
+          ),
         ),
       ],
     );
@@ -242,10 +237,7 @@ class _SectionHeader extends StatelessWidget {
 }
 
 class _EditorialIntroCard extends StatelessWidget {
-  const _EditorialIntroCard({
-    required this.title,
-    required this.subtitle,
-  });
+  const _EditorialIntroCard({required this.title, required this.subtitle});
 
   final String title;
   final String subtitle;
@@ -266,18 +258,17 @@ class _EditorialIntroCard extends StatelessWidget {
           children: [
             Text(
               title,
-              style: Theme.of(context)
-                  .textTheme
-                  .labelLarge
-                  ?.copyWith(fontWeight: FontWeight.w900),
+              style: Theme.of(
+                context,
+              ).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w900),
             ),
             SizedBox(height: AppSpace.xs),
             Text(
               subtitle,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    height: 1.28,
-                    color: cs.onSurface.withValues(alpha: 0.82),
-                  ),
+                height: 1.28,
+                color: cs.onSurface.withValues(alpha: 0.82),
+              ),
             ),
           ],
         ),
@@ -351,7 +342,10 @@ class _EditorialHero extends StatelessWidget {
                       ),
                     ),
                     child: const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 6,
+                      ),
                       child: Text(
                         'Editor’s pick',
                         style: TextStyle(fontWeight: FontWeight.w900),
@@ -380,8 +374,9 @@ class _EditorialHero extends StatelessWidget {
                       onPressed: onToggleSaved,
                       icon: Icon(
                         isSaved ? Icons.favorite : Icons.favorite_border,
-                        color:
-                            isSaved ? cs.primary : cs.onSurface.withValues(alpha: 0.78),
+                        color: isSaved
+                            ? cs.primary
+                            : cs.onSurface.withValues(alpha: 0.78),
                         size: 20,
                       ),
                     ),
@@ -397,9 +392,9 @@ class _EditorialHero extends StatelessWidget {
                       Text(
                         'This week’s hero pick',
                         style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                              color: Colors.white.withValues(alpha: 0.92),
-                              fontWeight: FontWeight.w900,
-                            ),
+                          color: Colors.white.withValues(alpha: 0.92),
+                          fontWeight: FontWeight.w900,
+                        ),
                       ),
                       SizedBox(height: AppSpace.xs),
                       Text(
@@ -407,15 +402,16 @@ class _EditorialHero extends StatelessWidget {
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w900,
-                              height: 1.08,
-                            ),
+                          color: Colors.white,
+                          fontWeight: FontWeight.w900,
+                          height: 1.08,
+                        ),
                       ),
                       SizedBox(height: AppSpace.xs),
                       Text(
                         '${product.currency} ${product.price.toStringAsFixed(0)}',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(
                               color: Colors.white.withValues(alpha: 0.92),
                               fontWeight: FontWeight.w900,
                             ),

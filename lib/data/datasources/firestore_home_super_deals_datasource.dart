@@ -15,7 +15,11 @@ class FirestoreHomeSuperDealsDataSource {
     final data = doc.data();
     final raw = data == null ? null : data['productIds'];
     if (raw is! List) return <String>[];
-    final ids = raw.whereType<String>().map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
+    final ids = raw
+        .whereType<String>()
+        .map((e) => e.trim())
+        .where((e) => e.isNotEmpty)
+        .toList();
     if (ids.length <= limit) return ids;
     return ids.take(limit).toList(growable: false);
   }

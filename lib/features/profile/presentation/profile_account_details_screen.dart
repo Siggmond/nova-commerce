@@ -62,17 +62,16 @@ class _SignInRequiredCard extends StatelessWidget {
               children: [
                 Text(
                   'Sign in required',
-                  style: Theme.of(context)
-                      .textTheme
-                      .titleMedium
-                      ?.copyWith(fontWeight: FontWeight.w900),
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w900,
+                  ),
                 ),
                 SizedBox(height: AppSpace.xxs),
                 Text(
                   'Sign in to view and update your account details.',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: cs.onSurface.withValues(alpha: 0.70),
-                      ),
+                    color: cs.onSurface.withValues(alpha: 0.70),
+                  ),
                 ),
               ],
             ),
@@ -80,10 +79,7 @@ class _SignInRequiredCard extends StatelessWidget {
           SizedBox(width: AppSpace.sm),
           SizedBox(
             height: 36,
-            child: NovaButton.primary(
-              label: 'Sign in',
-              onPressed: onSignIn,
-            ),
+            child: NovaButton.primary(label: 'Sign in', onPressed: onSignIn),
           ),
         ],
       ),
@@ -99,9 +95,11 @@ class _ProfileAccountDetailsScreenState
     WidgetsBinding.instance.addObserver(_lifecycle);
   }
 
-  late final _lifecycle = _ProfileAccountDetailsLifecycle(onResume: () {
-    ref.read(profileDetailsViewModelProvider.notifier).reload();
-  });
+  late final _lifecycle = _ProfileAccountDetailsLifecycle(
+    onResume: () {
+      ref.read(profileDetailsViewModelProvider.notifier).reload();
+    },
+  );
 
   final _nameController = TextEditingController();
   bool _editingName = false;
@@ -150,7 +148,10 @@ class _ProfileAccountDetailsScreenState
     final state = ref.watch(profileDetailsViewModelProvider);
     final vm = ref.read(profileDetailsViewModelProvider.notifier);
 
-    ref.listen<ProfileDetailsState>(profileDetailsViewModelProvider, (prev, next) {
+    ref.listen<ProfileDetailsState>(profileDetailsViewModelProvider, (
+      prev,
+      next,
+    ) {
       if (prev?.eventId == next.eventId) return;
       final msg = next.event;
       if (msg == null || msg.trim().isEmpty) return;
@@ -181,7 +182,9 @@ class _ProfileAccountDetailsScreenState
               padding: AppInsets.screen,
               children: [
                 if (details == null)
-                  _SignInRequiredCard(onSignIn: () => context.push(AppRoutes.signIn))
+                  _SignInRequiredCard(
+                    onSignIn: () => context.push(AppRoutes.signIn),
+                  )
                 else ...[
                   _heroCard(context, details, cs),
                   SizedBox(height: AppSpace.lg),
@@ -215,7 +218,8 @@ class _ProfileAccountDetailsScreenState
                   SizedBox(height: AppSpace.md),
                   NovaSectionHeader(
                     title: 'Phone',
-                    subtitle: 'Verify for account recovery and delivery updates.',
+                    subtitle:
+                        'Verify for account recovery and delivery updates.',
                   ),
                   _phoneCard(details: details, state: state, vm: vm),
                   if (details.isAnonymous)
@@ -232,11 +236,7 @@ class _ProfileAccountDetailsScreenState
     );
   }
 
-  Widget _heroCard(
-    BuildContext context,
-    dynamic details,
-    ColorScheme cs,
-  ) {
+  Widget _heroCard(BuildContext context, dynamic details, ColorScheme cs) {
     final avatar = Container(
       width: 56,
       height: 56,
@@ -258,22 +258,20 @@ class _ProfileAccountDetailsScreenState
       details.displayName.trim().isNotEmpty
           ? details.displayName
           : (details.isAnonymous ? 'Guest session' : 'Your account'),
-      style: Theme.of(context)
-          .textTheme
-          .titleLarge
-          ?.copyWith(fontWeight: FontWeight.w900),
+      style: Theme.of(
+        context,
+      ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w900),
     );
 
     final subtitle = Text(
       details.isAnonymous
           ? 'Sign in to sync across devices.'
           : (details.email?.trim().isNotEmpty == true
-              ? details.email!
-              : 'Signed in'),
-      style: Theme.of(context)
-          .textTheme
-          .bodyMedium
-          ?.copyWith(color: cs.onSurface.withValues(alpha: 0.70)),
+                ? details.email!
+                : 'Signed in'),
+      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+        color: cs.onSurface.withValues(alpha: 0.70),
+      ),
     );
 
     return NovaSurface(
@@ -304,7 +302,8 @@ class _ProfileAccountDetailsScreenState
                         ),
                         child: Text(
                           'DEMO',
-                          style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                          style: Theme.of(context).textTheme.labelMedium
+                              ?.copyWith(
                                 fontWeight: FontWeight.w800,
                                 color: cs.primary,
                               ),
@@ -384,7 +383,9 @@ class _ProfileAccountDetailsScreenState
     required ProfileDetailsViewModel vm,
   }) {
     final cs = Theme.of(context).colorScheme;
-    final emailText = details.email?.isNotEmpty == true ? details.email! : 'No email';
+    final emailText = details.email?.isNotEmpty == true
+        ? details.email!
+        : 'No email';
     final statusText = details.isEmailVerified ? 'Verified ✅' : 'Not verified';
 
     final cooldownSeconds = _cooldownRemainingSeconds(_emailCooldownUntil);
@@ -398,10 +399,9 @@ class _ProfileAccountDetailsScreenState
         children: [
           Text(
             emailText,
-            style: Theme.of(context)
-                .textTheme
-                .titleMedium
-                ?.copyWith(fontWeight: FontWeight.w800),
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
           ),
           SizedBox(height: AppSpace.xxs),
           Row(
@@ -416,10 +416,9 @@ class _ProfileAccountDetailsScreenState
               SizedBox(width: AppSpace.xxs),
               Text(
                 statusText,
-                style: Theme.of(context)
-                    .textTheme
-                    .bodyMedium
-                    ?.copyWith(color: cs.onSurface.withValues(alpha: 0.75)),
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: cs.onSurface.withValues(alpha: 0.75),
+                ),
               ),
             ],
           ),
@@ -434,8 +433,9 @@ class _ProfileAccountDetailsScreenState
                   ? () async {
                       await vm.sendEmailVerification();
                       await vm.reload();
-                      _emailCooldownUntil =
-                          DateTime.now().add(const Duration(seconds: 30));
+                      _emailCooldownUntil = DateTime.now().add(
+                        const Duration(seconds: 30),
+                      );
                       _startCooldownTicking();
                       if (mounted) setState(() {});
                     }
@@ -469,10 +469,9 @@ class _ProfileAccountDetailsScreenState
             details.phoneNumber?.isNotEmpty == true
                 ? details.phoneNumber!
                 : 'No phone linked',
-            style: Theme.of(context)
-                .textTheme
-                .titleMedium
-                ?.copyWith(fontWeight: FontWeight.w800),
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
           ),
           SizedBox(height: AppSpace.xxs),
           Row(
@@ -487,10 +486,9 @@ class _ProfileAccountDetailsScreenState
               SizedBox(width: AppSpace.xxs),
               Text(
                 details.isPhoneVerified ? 'Verified ✅' : 'Not verified',
-                style: Theme.of(context)
-                    .textTheme
-                    .bodyMedium
-                    ?.copyWith(color: cs.onSurface.withValues(alpha: 0.75)),
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: cs.onSurface.withValues(alpha: 0.75),
+                ),
               ),
             ],
           ),
@@ -500,7 +498,8 @@ class _ProfileAccountDetailsScreenState
               controller: _phoneController,
               labelText: 'Phone number',
               hintText: '+12025550123',
-              enabled: !details.isAnonymous &&
+              enabled:
+                  !details.isAnonymous &&
                   !state.isSendingPhoneCode &&
                   !state.isLinkingPhone,
               keyboardType: TextInputType.phone,
@@ -514,8 +513,9 @@ class _ProfileAccountDetailsScreenState
               onPressed: canSend
                   ? () async {
                       await vm.startPhoneVerification(_phoneController.text);
-                      _phoneCooldownUntil =
-                          DateTime.now().add(const Duration(seconds: 30));
+                      _phoneCooldownUntil = DateTime.now().add(
+                        const Duration(seconds: 30),
+                      );
                       _startCooldownTicking();
                       if (mounted) setState(() {});
                     }

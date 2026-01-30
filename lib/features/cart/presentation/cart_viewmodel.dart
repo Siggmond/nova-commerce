@@ -34,11 +34,12 @@ final cartClearProvider = Provider<void Function()>((ref) {
 
 final selectedCartItemIdsProvider =
     StateNotifierProvider<CartSelectionViewModel, Set<String>>((ref) {
-  return CartSelectionViewModel(ref);
-});
+      return CartSelectionViewModel(ref);
+    });
 
-final recommendedFilterProvider =
-    StateProvider<RecommendedFilter>((ref) => RecommendedFilter.all);
+final recommendedFilterProvider = StateProvider<RecommendedFilter>(
+  (ref) => RecommendedFilter.all,
+);
 
 final recommendedItemsProvider = Provider<List<RecommendedItem>>((ref) {
   const items = [
@@ -231,9 +232,9 @@ class CartViewModel extends StateNotifier<AsyncValue<List<CartItem>>> {
     if (ids.isEmpty) return;
     final currentState = state.valueOrNull ?? const <CartItem>[];
     state = AsyncValue.data(
-      currentState.where((item) => !ids.contains(item.product.id)).toList(
-            growable: false,
-          ),
+      currentState
+          .where((item) => !ids.contains(item.product.id))
+          .toList(growable: false),
     );
     _persist();
   }
@@ -253,8 +254,10 @@ class CartViewModel extends StateNotifier<AsyncValue<List<CartItem>>> {
     _persist();
   }
 
-  double get subtotal =>
-      (state.valueOrNull ?? const <CartItem>[]).fold(0, (sum, item) => sum + item.total);
+  double get subtotal => (state.valueOrNull ?? const <CartItem>[]).fold(
+    0,
+    (sum, item) => sum + item.total,
+  );
 }
 
 class CartSelectionViewModel extends StateNotifier<Set<String>> {
@@ -296,10 +299,7 @@ class CartSelectionViewModel extends StateNotifier<Set<String>> {
       return;
     }
     final added = ids.difference(_knownIds);
-    state = {
-      ...state.intersection(ids),
-      ...added,
-    };
+    state = {...state.intersection(ids), ...added};
     _knownIds = ids;
   }
 }

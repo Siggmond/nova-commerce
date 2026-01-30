@@ -11,7 +11,8 @@ class ProfileDetailsScreen extends ConsumerStatefulWidget {
   const ProfileDetailsScreen({super.key});
 
   @override
-  ConsumerState<ProfileDetailsScreen> createState() => _ProfileDetailsScreenState();
+  ConsumerState<ProfileDetailsScreen> createState() =>
+      _ProfileDetailsScreenState();
 }
 
 class _ProfileDetailsLifecycle extends WidgetsBindingObserver {
@@ -34,9 +35,11 @@ class _ProfileDetailsScreenState extends ConsumerState<ProfileDetailsScreen> {
     WidgetsBinding.instance.addObserver(_lifecycle);
   }
 
-  late final _lifecycle = _ProfileDetailsLifecycle(onResume: () {
-    ref.read(profileDetailsViewModelProvider.notifier).reload();
-  });
+  late final _lifecycle = _ProfileDetailsLifecycle(
+    onResume: () {
+      ref.read(profileDetailsViewModelProvider.notifier).reload();
+    },
+  );
 
   final _nameController = TextEditingController();
   bool _editingName = false;
@@ -58,13 +61,14 @@ class _ProfileDetailsScreenState extends ConsumerState<ProfileDetailsScreen> {
     final state = ref.watch(profileDetailsViewModelProvider);
     final vm = ref.read(profileDetailsViewModelProvider.notifier);
 
-    ref.listen<ProfileDetailsState>(profileDetailsViewModelProvider, (prev, next) {
+    ref.listen<ProfileDetailsState>(profileDetailsViewModelProvider, (
+      prev,
+      next,
+    ) {
       if (prev?.eventId == next.eventId) return;
       final msg = next.event;
       if (msg == null || msg.trim().isEmpty) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(msg)),
-      );
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
     });
 
     final details = state.details;
@@ -124,7 +128,9 @@ class _ProfileDetailsScreenState extends ConsumerState<ProfileDetailsScreen> {
                               onPressed: state.isSavingName
                                   ? null
                                   : () async {
-                                      await vm.saveDisplayName(_nameController.text);
+                                      await vm.saveDisplayName(
+                                        _nameController.text,
+                                      );
                                       if (mounted) {
                                         setState(() => _editingName = false);
                                       }
@@ -149,9 +155,11 @@ class _ProfileDetailsScreenState extends ConsumerState<ProfileDetailsScreen> {
                   _sectionTitle(context, 'Email'),
                   Card(
                     child: ListTile(
-                      title: Text(details.email?.isNotEmpty == true
-                          ? details.email!
-                          : 'No email'),
+                      title: Text(
+                        details.email?.isNotEmpty == true
+                            ? details.email!
+                            : 'No email',
+                      ),
                       subtitle: Text(
                         details.isEmailVerified ? 'Verified' : 'Not verified',
                       ),
@@ -165,8 +173,8 @@ class _ProfileDetailsScreenState extends ConsumerState<ProfileDetailsScreen> {
                                 onPressed: state.isSendingEmail
                                     ? null
                                     : details.isAnonymous
-                                        ? null
-                                        : () => vm.sendEmailVerification(),
+                                    ? null
+                                    : () => vm.sendEmailVerification(),
                               ),
                             ),
                     ),
@@ -195,14 +203,17 @@ class _ProfileDetailsScreenState extends ConsumerState<ProfileDetailsScreen> {
                           ),
                           const SizedBox(height: 6),
                           Text(
-                            details.isPhoneVerified ? 'Verified' : 'Not verified',
+                            details.isPhoneVerified
+                                ? 'Verified'
+                                : 'Not verified',
                             style: Theme.of(context).textTheme.bodyMedium,
                           ),
                           const SizedBox(height: 12),
                           if (!details.isPhoneVerified) ...[
                             TextField(
                               controller: _phoneController,
-                              enabled: !details.isAnonymous &&
+                              enabled:
+                                  !details.isAnonymous &&
                                   !state.isSendingPhoneCode &&
                                   !state.isLinkingPhone,
                               decoration: const InputDecoration(
@@ -216,10 +227,13 @@ class _ProfileDetailsScreenState extends ConsumerState<ProfileDetailsScreen> {
                             AppButton.primary(
                               label: 'Send code',
                               isLoading: state.isSendingPhoneCode,
-                              onPressed: state.isSendingPhoneCode ||
+                              onPressed:
+                                  state.isSendingPhoneCode ||
                                       details.isAnonymous
                                   ? null
-                                  : () => vm.startPhoneVerification(_phoneController.text),
+                                  : () => vm.startPhoneVerification(
+                                      _phoneController.text,
+                                    ),
                             ),
                             const SizedBox(height: 10),
                             if (state.phoneVerificationId != null) ...[
@@ -236,10 +250,12 @@ class _ProfileDetailsScreenState extends ConsumerState<ProfileDetailsScreen> {
                               AppButton.primary(
                                 label: 'Verify phone',
                                 isLoading: state.isLinkingPhone,
-                                onPressed: state.isLinkingPhone ||
-                                        details.isAnonymous
+                                onPressed:
+                                    state.isLinkingPhone || details.isAnonymous
                                     ? null
-                                    : () => vm.confirmPhoneCode(_smsController.text),
+                                    : () => vm.confirmPhoneCode(
+                                        _smsController.text,
+                                      ),
                               ),
                             ],
                           ],
@@ -266,10 +282,9 @@ class _ProfileDetailsScreenState extends ConsumerState<ProfileDetailsScreen> {
       padding: const EdgeInsets.only(bottom: 8),
       child: Text(
         title,
-        style: Theme.of(context)
-            .textTheme
-            .titleMedium
-            ?.copyWith(fontWeight: FontWeight.w800),
+        style: Theme.of(
+          context,
+        ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
       ),
     );
   }
@@ -304,17 +319,16 @@ class _LegacySignInRequiredCard extends StatelessWidget {
                 children: [
                   Text(
                     'Sign in required',
-                    style: Theme.of(context)
-                        .textTheme
-                        .titleMedium
-                        ?.copyWith(fontWeight: FontWeight.w900),
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w900,
+                    ),
                   ),
                   const SizedBox(height: 2),
                   Text(
                     'Sign in to view and update your account details.',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: cs.onSurface.withValues(alpha: 0.70),
-                        ),
+                      color: cs.onSurface.withValues(alpha: 0.70),
+                    ),
                   ),
                 ],
               ),

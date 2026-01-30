@@ -22,7 +22,8 @@ sealed class HomeState {
       bool isRefreshing,
       bool isLoadingMore,
       bool hasMore,
-    ) data,
+    )
+    data,
     required T Function(Object error) error,
   }) {
     final s = this;

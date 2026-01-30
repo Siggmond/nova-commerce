@@ -51,16 +51,17 @@ class AppTheme {
   }
 
   static ThemeData get light {
-    final scheme = ColorScheme.fromSeed(
-      seedColor: _brandPrimary,
-      brightness: Brightness.light,
-    ).copyWith(
-      primary: _brandPrimary,
-      surface: _lightSurface,
-      surfaceContainerLow: _lightSurfaceLow,
-      surfaceContainerHigh: _lightSurfaceHigh,
-      surfaceContainerHighest: _lightSurfaceHighest,
-    );
+    final scheme =
+        ColorScheme.fromSeed(
+          seedColor: _brandPrimary,
+          brightness: Brightness.light,
+        ).copyWith(
+          primary: _brandPrimary,
+          surface: _lightSurface,
+          surfaceContainerLow: _lightSurfaceLow,
+          surfaceContainerHigh: _lightSurfaceHigh,
+          surfaceContainerHighest: _lightSurfaceHighest,
+        );
 
     final base = ThemeData(
       useMaterial3: true,
@@ -187,16 +188,17 @@ class AppTheme {
   }
 
   static ThemeData get dark {
-    final scheme = ColorScheme.fromSeed(
-      seedColor: _brandPrimary,
-      brightness: Brightness.dark,
-    ).copyWith(
-      primary: _brandPrimary.withValues(alpha: 0.92),
-      surface: _darkSurface,
-      surfaceContainerLow: _darkSurfaceLow,
-      surfaceContainerHigh: _darkSurfaceHigh,
-      surfaceContainerHighest: _darkSurfaceHighest,
-    );
+    final scheme =
+        ColorScheme.fromSeed(
+          seedColor: _brandPrimary,
+          brightness: Brightness.dark,
+        ).copyWith(
+          primary: _brandPrimary.withValues(alpha: 0.92),
+          surface: _darkSurface,
+          surfaceContainerLow: _darkSurfaceLow,
+          surfaceContainerHigh: _darkSurfaceHigh,
+          surfaceContainerHighest: _darkSurfaceHighest,
+        );
 
     final base = ThemeData(
       useMaterial3: true,

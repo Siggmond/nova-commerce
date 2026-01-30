@@ -162,8 +162,10 @@ class _HomeFeedState extends ConsumerState<_HomeFeed> {
         _hintShown = true;
         final start = widget.scrollController.offset;
         await widget.scrollController.animateTo(
-          (start + 36)
-              .clamp(0, widget.scrollController.position.maxScrollExtent),
+          (start + 36).clamp(
+            0,
+            widget.scrollController.position.maxScrollExtent,
+          ),
           duration: const Duration(milliseconds: 420),
           curve: Curves.easeOutCubic,
         );
@@ -451,8 +453,8 @@ class _HomeFeedState extends ConsumerState<_HomeFeed> {
                       child: CircularProgressIndicator(strokeWidth: 2.5),
                     )
                   : (widget.hasMore
-                      ? const SizedBox.shrink()
-                      : const SizedBox.shrink()),
+                        ? const SizedBox.shrink()
+                        : const SizedBox.shrink()),
             ),
           ),
         ),
@@ -655,13 +657,7 @@ class _ProductSliverGrid extends StatelessWidget {
     final width = MediaQuery.sizeOf(context).width;
     final crossAxisCount =
         crossAxisCountBuilder?.call(width) ??
-        (width < 400
-            ? 3
-            : (width < 520
-                ? 4
-                : (width < 720
-                    ? 5
-                    : 6)));
+        (width < 400 ? 3 : (width < 520 ? 4 : (width < 720 ? 5 : 6)));
 
     final horizontalPadding = 24.0;
     final crossSpacing = 8.0;
@@ -671,8 +667,8 @@ class _ProductSliverGrid extends StatelessWidget {
         ? items.length
         : (items.length < maxItems! ? items.length : maxItems!);
 
-    final tileWidth = (width - horizontalPadding -
-            (crossAxisCount - 1) * crossSpacing) /
+    final tileWidth =
+        (width - horizontalPadding - (crossAxisCount - 1) * crossSpacing) /
         crossAxisCount;
 
     assert(() {
@@ -689,35 +685,30 @@ class _ProductSliverGrid extends StatelessWidget {
         mainAxisSpacing: mainSpacing,
         childAspectRatio: 0.6,
       ),
-      delegate: SliverChildBuilderDelegate(
-        (context, index) {
-          final p = items[index];
-          return LayoutBuilder(
-            builder: (context, constraints) {
-              assert(() {
-                if (index == 0) {
-                  debugPrint(
-                    'Home tile${debugLabel == null ? '' : '[$debugLabel]'}: ${constraints.maxWidth} x ${constraints.maxHeight}',
-                  );
-                }
-                return true;
-              }());
+      delegate: SliverChildBuilderDelegate((context, index) {
+        final p = items[index];
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            assert(() {
+              if (index == 0) {
+                debugPrint(
+                  'Home tile${debugLabel == null ? '' : '[$debugLabel]'}: ${constraints.maxWidth} x ${constraints.maxHeight}',
+                );
+              }
+              return true;
+            }());
 
-              return _FeedProductTile(
-                key: ValueKey(
-                  keyPrefix == null ? p.id : '$keyPrefix-${p.id}',
-                ),
-                product: p,
-                imageWidth: tileWidth,
-                fillHeight: true,
-                forceShowTitle: true,
-                disableCompact: disableCompact,
-              );
-            },
-          );
-        },
-        childCount: count,
-      ),
+            return _FeedProductTile(
+              key: ValueKey(keyPrefix == null ? p.id : '$keyPrefix-${p.id}'),
+              product: p,
+              imageWidth: tileWidth,
+              fillHeight: true,
+              forceShowTitle: true,
+              disableCompact: disableCompact,
+            );
+          },
+        );
+      }, childCount: count),
     );
   }
 }

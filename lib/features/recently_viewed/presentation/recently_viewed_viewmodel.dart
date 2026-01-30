@@ -7,10 +7,12 @@ const int _recentlyViewedLimit = 12;
 
 final recentlyViewedViewModelProvider =
     StateNotifierProvider<RecentlyViewedViewModel, List<String>>((ref) {
-  return RecentlyViewedViewModel(ref);
-});
+      return RecentlyViewedViewModel(ref);
+    });
 
-final recentlyViewedProductsProvider = FutureProvider<List<Product>>((ref) async {
+final recentlyViewedProductsProvider = FutureProvider<List<Product>>((
+  ref,
+) async {
   final ids = ref.watch(recentlyViewedViewModelProvider);
   if (ids.isEmpty) return const [];
 

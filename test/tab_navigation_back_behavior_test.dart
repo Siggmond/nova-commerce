@@ -49,10 +49,9 @@ void main() {
     await tester.scrollUntilVisible(ordersText, 220);
     await tester.pump();
 
-    final ordersTileHitTestable =
-        find
-            .ancestor(of: ordersText, matching: find.byType(ListTile))
-            .hitTestable();
+    final ordersTileHitTestable = find
+        .ancestor(of: ordersText, matching: find.byType(ListTile))
+        .hitTestable();
     expect(ordersTileHitTestable, findsOneWidget);
 
     // Push Orders within Profile tab.

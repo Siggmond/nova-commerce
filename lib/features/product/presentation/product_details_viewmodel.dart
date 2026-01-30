@@ -187,9 +187,7 @@ class ProductDetailsViewModel extends StateNotifier<ProductDetailsState> {
         selectedColor: auto?.color,
         selectedSize: auto?.size,
       );
-      await _ref
-          .read(recentlyViewedViewModelProvider.notifier)
-          .add(product.id);
+      await _ref.read(recentlyViewedViewModelProvider.notifier).add(product.id);
     } catch (e) {
       state = ProductDetailsState.error(e);
     }

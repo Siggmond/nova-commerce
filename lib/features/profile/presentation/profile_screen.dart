@@ -110,10 +110,7 @@ class ProfileScreen extends ConsumerWidget {
                         ),
                       )),
                 SizedBox(height: useNovaUi ? AppSpace.sm : 12.h),
-                _SectionTitle(
-                  title: 'Account',
-                  useNovaUi: useNovaUi,
-                ),
+                _SectionTitle(title: 'Account', useNovaUi: useNovaUi),
                 SizedBox(height: useNovaUi ? AppSpace.xs : 8.h),
                 (useNovaUi
                     ? NovaSurface(
@@ -123,7 +120,8 @@ class ProfileScreen extends ConsumerWidget {
                           subtitle: const Text('Profile info and verification'),
                           trailing: const Icon(Icons.chevron_right),
                           onTap: () {
-                            final enableRedesign = AppEnv.enableNovaUi &&
+                            final enableRedesign =
+                                AppEnv.enableNovaUi &&
                                 AppEnv.enableNovaUiProfileDetails;
                             context.push(
                               enableRedesign
@@ -140,7 +138,8 @@ class ProfileScreen extends ConsumerWidget {
                           subtitle: const Text('Profile info and verification'),
                           trailing: const Icon(Icons.chevron_right),
                           onTap: () {
-                            final enableRedesign = AppEnv.enableNovaUi &&
+                            final enableRedesign =
+                                AppEnv.enableNovaUi &&
                                 AppEnv.enableNovaUiProfileDetails;
                             context.push(
                               enableRedesign
@@ -151,10 +150,7 @@ class ProfileScreen extends ConsumerWidget {
                         ),
                       )),
                 SizedBox(height: useNovaUi ? AppSpace.sm : 12.h),
-                _SectionTitle(
-                  title: 'About this build',
-                  useNovaUi: useNovaUi,
-                ),
+                _SectionTitle(title: 'About this build', useNovaUi: useNovaUi),
                 SizedBox(height: useNovaUi ? AppSpace.xs : 8.h),
                 (useNovaUi
                     ? NovaSurface(
@@ -196,18 +192,12 @@ class ProfileScreen extends ConsumerWidget {
                         ),
                       )),
               ],
-              _SectionTitle(
-                title: 'Orders & saved',
-                useNovaUi: useNovaUi,
-              ),
+              _SectionTitle(title: 'Orders & saved', useNovaUi: useNovaUi),
               SizedBox(height: useNovaUi ? AppSpace.xs : 8.h),
               _SecondaryLinksBlock(useNovaUi: useNovaUi),
               SizedBox(height: useNovaUi ? AppSpace.sm : 12.h),
 
-              _SectionTitle(
-                title: 'Preferences',
-                useNovaUi: useNovaUi,
-              ),
+              _SectionTitle(title: 'Preferences', useNovaUi: useNovaUi),
               SizedBox(height: useNovaUi ? AppSpace.xs : 8.h),
               (useNovaUi
                   ? NovaSurface(
@@ -382,17 +372,16 @@ class _SignedOutCard extends StatelessWidget {
               children: [
                 Text(
                   'Sign in',
-                  style: Theme.of(context)
-                      .textTheme
-                      .titleMedium
-                      ?.copyWith(fontWeight: FontWeight.w900),
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w900,
+                  ),
                 ),
                 SizedBox(height: 4.h),
                 Text(
                   'Sync orders and keep your account across devices.',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: cs.onSurface.withValues(alpha: 0.70),
-                      ),
+                    color: cs.onSurface.withValues(alpha: 0.70),
+                  ),
                 ),
               ],
             ),
@@ -447,14 +436,8 @@ class _SignedInCard extends StatelessWidget {
       title: Text(title),
       subtitle: Text(subtitle),
       trailing: useNovaUi
-          ? NovaButton.text(
-              label: 'Sign out',
-              onPressed: onSignOut,
-            )
-          : TextButton(
-              onPressed: onSignOut,
-              child: const Text('Sign out'),
-            ),
+          ? NovaButton.text(label: 'Sign out', onPressed: onSignOut)
+          : TextButton(onPressed: onSignOut, child: const Text('Sign out')),
     );
 
     return useNovaUi ? NovaSurface(child: tile) : Card(child: tile);
@@ -473,10 +456,9 @@ class _SectionTitle extends StatelessWidget {
       padding: useNovaUi ? EdgeInsets.zero : EdgeInsets.only(left: 2.w),
       child: Text(
         title,
-        style: Theme.of(context)
-            .textTheme
-            .titleSmall
-            ?.copyWith(fontWeight: FontWeight.w900),
+        style: Theme.of(
+          context,
+        ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w900),
       ),
     );
   }
@@ -538,17 +520,16 @@ class _BuildStatusRow extends StatelessWidget {
             children: [
               Text(
                 title,
-                style: Theme.of(context)
-                    .textTheme
-                    .bodyMedium
-                    ?.copyWith(fontWeight: FontWeight.w700),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700),
               ),
               SizedBox(height: 4.h),
               Text(
                 subtitle,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: cs.onSurface.withValues(alpha: 0.65),
-                    ),
+                  color: cs.onSurface.withValues(alpha: 0.65),
+                ),
               ),
             ],
           ),
@@ -562,9 +543,9 @@ class _BuildStatusRow extends StatelessWidget {
           ),
           child: Text(
             valueLabel,
-            style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                  fontWeight: FontWeight.w800,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.labelMedium?.copyWith(fontWeight: FontWeight.w800),
           ),
         ),
       ],
@@ -605,17 +586,16 @@ class _AccountHubHeader extends StatelessWidget {
             children: [
               Text(
                 'Account hub',
-                style: Theme.of(context)
-                    .textTheme
-                    .titleMedium
-                    ?.copyWith(fontWeight: FontWeight.w900),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900),
               ),
               SizedBox(height: 4.h),
               Text(
                 'Orders, saved items, and account details.',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: cs.onSurface.withValues(alpha: 0.7),
-                    ),
+                  color: cs.onSurface.withValues(alpha: 0.7),
+                ),
               ),
             ],
           ),

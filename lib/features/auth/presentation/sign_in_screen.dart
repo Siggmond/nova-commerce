@@ -47,8 +47,9 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
       context.pop();
     } on AuthException catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(e.message)));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(e.message)));
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -74,8 +75,9 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
       context.pop();
     } on AuthException catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(e.message)));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(e.message)));
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -92,8 +94,9 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
       context.pop();
     } on AuthException catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(e.message)));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(e.message)));
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -109,8 +112,9 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
       context.pop();
     } on AuthException catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(e.message)));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(e.message)));
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -119,8 +123,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
   void _maybeShowFallbackNotice(AuthRepository auth) {
     final notice = auth.takeFallbackNotice();
     if (notice == null || !mounted) return;
-    ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text(notice)));
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(notice)));
   }
 
   @override

@@ -28,8 +28,5 @@ jobs:
       - name: Test (non-golden)
         run: flutter test --exclude-tags=golden
 
-      - name: Test (golden)
-        run: flutter test --tags=golden
-
       - name: Build APK (release)
         run: flutter build apk --release

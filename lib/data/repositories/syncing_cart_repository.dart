@@ -17,17 +17,53 @@ class SyncingCartRepository implements CartRepository {
 
     try {
       final remoteLines = await _remote.loadCartLines();
-      if (remoteLines.isNotEmpty) {
+      if (remoteLines.isEmpty && localLines.isNotEmpty) {
+        await _remote.saveCartLines(localLines);
+        return localLines;
+      }
+
+      if (remoteLines.isNotEmpty && localLines.isEmpty) {
         await _local.saveCartLines(remoteLines);
         return remoteLines;
       }
 
-      if (localLines.isNotEmpty) {
-        await _remote.saveCartLines(localLines);
+      if (remoteLines.isNotEmpty && localLines.isNotEmpty) {
+        final merged = _merge(localLines: localLines, remoteLines: remoteLines);
+        await _remote.saveCartLines(merged);
+        await _local.saveCartLines(merged);
+        return merged;
       }
     } catch (_) {}
 
     return localLines;
+  }
+
+  List<CartLine> _merge({
+    required List<CartLine> localLines,
+    required List<CartLine> remoteLines,
+  }) {
+    final byKey = <String, CartLine>{};
+
+    void add(CartLine l) {
+      final key = '${l.productId}::${l.selectedColor}::${l.selectedSize}';
+      final existing = byKey[key];
+      if (existing == null) {
+        byKey[key] = l;
+        return;
+      }
+      byKey[key] = existing.copyWith(quantity: existing.quantity + l.quantity);
+    }
+
+    for (final l in remoteLines) {
+      if (l.productId.isEmpty || l.quantity <= 0) continue;
+      add(l);
+    }
+    for (final l in localLines) {
+      if (l.productId.isEmpty || l.quantity <= 0) continue;
+      add(l);
+    }
+
+    return byKey.values.where((l) => l.quantity > 0).toList(growable: false);
   }
 
   @override

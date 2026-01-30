@@ -110,6 +110,19 @@ flutter analyze
 flutter test
 ```
 
+> **Note:** Golden tests are skipped on Windows due to Flutter tool temp cleanup flakiness.
+> They run in CI and on non-Windows environments.
+
+### Testing (tagged)
+
+```bash
+# Non-golden tests (all platforms)
+flutter test --exclude-tags=golden
+
+# Golden tests (CI / non-Windows)
+flutter test --tags=golden
+```
+
 ### 3) Run the app
 
 ```bash

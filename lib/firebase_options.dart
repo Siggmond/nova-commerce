@@ -25,10 +25,10 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyDqIqQcmWNC7LpSSQZENJcqvPLR5WN77b0',
-    appId: '1:8104788928:android:12563da73c3bb46313be25',
-    messagingSenderId: '8104788928',
-    projectId: 'nova-commerce-420ba',
-    storageBucket: 'nova-commerce-420ba.firebasestorage.app',
+    apiKey: 'YOUR_API_KEY',
+    appId: 'YOUR_APP_ID',
+    messagingSenderId: 'YOUR_MESSAGING_SENDER_ID',
+    projectId: 'YOUR_PROJECT_ID',
+    storageBucket: 'YOUR_STORAGE_BUCKET',
   );
 }

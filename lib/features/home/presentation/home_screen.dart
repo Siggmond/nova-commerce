@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -24,6 +26,7 @@ class HomeScreen extends ConsumerStatefulWidget {
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   late final ScrollController _scrollController = ScrollController();
+  bool _cartNavInFlight = false;
 
   void _onScroll() {
     if (!_scrollController.hasClients) return;
@@ -55,7 +58,37 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         title: const Text('Nova'),
         actions: [
           IconButton(
-            onPressed: () => context.go(AppRoutes.cart),
+            key: const Key('home_messages_button'),
+            onPressed: () => context.go(AppRoutes.messages),
+            icon: const Icon(Icons.chat_bubble_outline),
+          ),
+          IconButton(
+            key: const Key('home_sign_in_button'),
+            onPressed: () => context.go(AppRoutes.signIn),
+            icon: const Icon(Icons.login_outlined),
+          ),
+          IconButton(
+            key: const Key('home_wishlist_button'),
+            onPressed: () => context.go(AppRoutes.wishlist),
+            icon: const Icon(Icons.favorite_border),
+          ),
+          IconButton(
+            onPressed: () {
+              if (_cartNavInFlight) return;
+              _cartNavInFlight = true;
+              if (!context.mounted) {
+                _cartNavInFlight = false;
+                return;
+              }
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (!context.mounted) {
+                  _cartNavInFlight = false;
+                  return;
+                }
+                context.go(AppRoutes.cart);
+                _cartNavInFlight = false;
+              });
+            },
             icon: const Icon(Icons.shopping_bag_outlined),
           ),
         ],
@@ -71,8 +104,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             onAction: () => ref.read(homeViewModelProvider.notifier).refresh(),
           );
         },
-        data: (items, isLoadingMore, hasMore) => RefreshIndicator(
-          onRefresh: () => ref.read(homeViewModelProvider.notifier).refresh(),
+        data: (items, isRefreshing, isLoadingMore, hasMore) => RefreshIndicator(
+          onRefresh: () => ref
+              .read(homeViewModelProvider.notifier)
+              .refresh(showLoading: false),
           child: _HomeFeed(
             scrollController: _scrollController,
             items: items,
@@ -109,6 +144,7 @@ class _HomeFeedState extends ConsumerState<_HomeFeed> {
 
   bool _hintShown = false;
   bool _didPrecache = false;
+  Timer? _hintTimer;
 
   @override
   void initState() {
@@ -116,27 +152,35 @@ class _HomeFeedState extends ConsumerState<_HomeFeed> {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (!mounted) return;
       _maybePrecacheFirstImages();
-      await Future<void>.delayed(const Duration(milliseconds: 420));
-      if (!mounted) return;
-      if (_hintShown) return;
-      _hintShown = true;
-      if (!widget.scrollController.hasClients) return;
-      final start = widget.scrollController.offset;
-      await widget.scrollController.animateTo(
-        (start + 36).clamp(0, widget.scrollController.position.maxScrollExtent),
-        duration: const Duration(milliseconds: 420),
-        curve: Curves.easeOutCubic,
-      );
-      await widget.scrollController.animateTo(
-        start,
-        duration: const Duration(milliseconds: 520),
-        curve: Curves.easeOutCubic,
-      );
+
+      _hintTimer?.cancel();
+      _hintTimer = Timer(const Duration(milliseconds: 420), () async {
+        if (!mounted) return;
+        if (_hintShown) return;
+        if (!widget.scrollController.hasClients) return;
+
+        _hintShown = true;
+        final start = widget.scrollController.offset;
+        await widget.scrollController.animateTo(
+          (start + 36)
+              .clamp(0, widget.scrollController.position.maxScrollExtent),
+          duration: const Duration(milliseconds: 420),
+          curve: Curves.easeOutCubic,
+        );
+        if (!mounted) return;
+        if (!widget.scrollController.hasClients) return;
+        await widget.scrollController.animateTo(
+          start,
+          duration: const Duration(milliseconds: 520),
+          curve: Curves.easeOutCubic,
+        );
+      });
     });
   }
 
   @override
   void dispose() {
+    _hintTimer?.cancel();
     super.dispose();
   }
 
@@ -168,7 +212,6 @@ class _HomeFeedState extends ConsumerState<_HomeFeed> {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final listImageWidth = 1.sw - 32.w;
 
     final meta = ref.watch(homeCatalogMetaProvider);
     final filtered = ref.watch(homeFilteredProductsProvider);
@@ -185,7 +228,7 @@ class _HomeFeedState extends ConsumerState<_HomeFeed> {
       controller: widget.scrollController,
       slivers: [
         SliverPadding(
-          padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 0),
+          padding: EdgeInsets.fromLTRB(12.w, 12.h, 12.w, 0),
           sliver: SliverToBoxAdapter(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -267,31 +310,33 @@ class _HomeFeedState extends ConsumerState<_HomeFeed> {
         ),
         if (filtered.isNotEmpty)
           SliverPadding(
-            padding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 0),
-            sliver: SliverList(
-              delegate: SliverChildBuilderDelegate((context, index) {
-                final p = filtered[index];
-                return Padding(
-                  padding: EdgeInsets.only(bottom: 12.h),
-                  child: _FeedProductTile(
-                    key: ValueKey(p.id),
-                    product: p,
-                    imageWidth: listImageWidth,
-                  ),
-                );
-              }, childCount: filtered.length < 12 ? filtered.length : 12),
+            padding: EdgeInsets.fromLTRB(12.w, 0, 12.w, 0),
+            sliver: _ProductSliverGrid(
+              items: filtered,
+              maxItems: 12,
+              keyPrefix: 'browse',
+              debugLabel: 'Browse',
+              disableCompact: true,
+              crossAxisCountBuilder: (width) {
+                if (width < 520) return 3;
+                if (width < 720) return 4;
+                return 5;
+              },
             ),
           ),
         SliverPadding(
-          padding: EdgeInsets.fromLTRB(16.w, 6.h, 16.w, 0),
+          padding: EdgeInsets.fromLTRB(12.w, 6.h, 12.w, 0),
           sliver: SliverToBoxAdapter(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _SectionHeader(
-                  key: _trendingKey,
-                  title: 'Trending now',
-                  subtitle: 'The feed everyone is tapping today',
+                KeyedSubtree(
+                  key: const Key('home_quick_squares_section'),
+                  child: _SectionHeader(
+                    key: _trendingKey,
+                    title: 'Trending now',
+                    subtitle: 'The feed everyone is tapping today',
+                  ),
                 ),
                 SizedBox(height: 12.h),
                 SizedBox(height: 0.h),
@@ -300,19 +345,32 @@ class _HomeFeedState extends ConsumerState<_HomeFeed> {
           ),
         ),
         SliverPadding(
-          padding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 0),
-          sliver: SliverToBoxAdapter(child: _HorizontalCards(items: trending)),
+          padding: EdgeInsets.fromLTRB(12.w, 0, 12.w, 0),
+          sliver: _ProductSliverGrid(
+            items: trending,
+            keyPrefix: 'trending',
+            debugLabel: 'Trending',
+            disableCompact: true,
+            crossAxisCountBuilder: (width) {
+              if (width < 520) return 3;
+              if (width < 720) return 4;
+              return 5;
+            },
+          ),
         ),
         SliverPadding(
-          padding: EdgeInsets.fromLTRB(16.w, 18.h, 16.w, 0),
+          padding: EdgeInsets.fromLTRB(12.w, 18.h, 12.w, 0),
           sliver: SliverToBoxAdapter(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _SectionHeader(
-                  key: _pickedKey,
-                  title: 'Picked for you',
-                  subtitle: 'Based on what you saved & viewed (demo)',
+                KeyedSubtree(
+                  key: const Key('home_catalog_section'),
+                  child: _SectionHeader(
+                    key: _pickedKey,
+                    title: 'Picked for you',
+                    subtitle: 'Based on what you saved & viewed (demo)',
+                  ),
                 ),
                 SizedBox(height: 12.h),
               ],
@@ -320,36 +378,37 @@ class _HomeFeedState extends ConsumerState<_HomeFeed> {
           ),
         ),
         SliverPadding(
-          padding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 0),
-          sliver: SliverList(
-            delegate: SliverChildBuilderDelegate((context, index) {
-              final p = picked[index];
-              return Padding(
-                padding: EdgeInsets.only(bottom: 12.h),
-                child: AnimatedSlide(
-                  duration: const Duration(milliseconds: 360),
-                  curve: Curves.easeOutCubic,
-                  offset: Offset.zero,
-                  child: _FeedProductTile(
-                    key: ValueKey('picked-${p.id}'),
-                    product: p,
-                    imageWidth: listImageWidth,
-                  ),
-                ),
-              );
-            }, childCount: picked.length),
+          padding: EdgeInsets.fromLTRB(12.w, 0, 12.w, 0),
+          sliver: _ProductSliverGrid(
+            items: picked,
+            keyPrefix: 'picked',
+            debugLabel: 'Picked',
+            disableCompact: true,
+            crossAxisCountBuilder: (width) {
+              if (width < 520) return 3;
+              if (width < 720) return 4;
+              return 5;
+            },
           ),
         ),
         SliverPadding(
-          padding: EdgeInsets.fromLTRB(16.w, 6.h, 16.w, 0),
+          padding: EdgeInsets.fromLTRB(12.w, 6.h, 12.w, 0),
           sliver: SliverToBoxAdapter(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _SectionHeader(
-                  key: _underKey,
-                  title: 'Under \$50 today',
-                  subtitle: 'Budget heat — fast wins',
+                KeyedSubtree(
+                  key: const Key('home_styles_section'),
+                  child: _SectionHeader(
+                    key: _underKey,
+                    title: 'Under \$50 today',
+                    subtitle: 'Budget heat — fast wins',
+                  ),
+                ),
+                const SizedBox(
+                  key: Key('home_super_deals_header'),
+                  height: 0,
+                  width: double.infinity,
                 ),
                 SizedBox(height: 12.h),
                 if (under.isEmpty)
@@ -368,8 +427,18 @@ class _HomeFeedState extends ConsumerState<_HomeFeed> {
         ),
         if (under.isNotEmpty)
           SliverPadding(
-            padding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 0),
-            sliver: SliverToBoxAdapter(child: _HorizontalCards(items: under)),
+            padding: EdgeInsets.fromLTRB(12.w, 0, 12.w, 0),
+            sliver: _ProductSliverGrid(
+              items: under,
+              keyPrefix: 'under',
+              debugLabel: 'Under',
+              disableCompact: true,
+              crossAxisCountBuilder: (width) {
+                if (width < 520) return 3;
+                if (width < 720) return 4;
+                return 5;
+              },
+            ),
           ),
         SliverToBoxAdapter(
           child: Padding(
@@ -382,8 +451,8 @@ class _HomeFeedState extends ConsumerState<_HomeFeed> {
                       child: CircularProgressIndicator(strokeWidth: 2.5),
                     )
                   : (widget.hasMore
-                        ? const SizedBox.shrink()
-                        : const SizedBox.shrink()),
+                      ? const SizedBox.shrink()
+                      : const SizedBox.shrink()),
             ),
           ),
         ),
@@ -532,10 +601,16 @@ class _FeedProductTile extends ConsumerWidget {
     super.key,
     required this.product,
     required this.imageWidth,
+    this.fillHeight = false,
+    this.forceShowTitle = false,
+    this.disableCompact = false,
   });
 
   final Product product;
   final double imageWidth;
+  final bool fillHeight;
+  final bool forceShowTitle;
+  final bool disableCompact;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -550,6 +625,99 @@ class _FeedProductTile extends ConsumerWidget {
       onToggleSaved: () =>
           ref.read(wishlistViewModelProvider.notifier).toggle(product.id),
       onTap: () => context.push('${AppRoutes.product}?id=${product.id}'),
+      fillHeight: fillHeight,
+      forceShowTitle: forceShowTitle,
+      disableCompact: disableCompact,
+      tightTitlePrice: true,
+    );
+  }
+}
+
+class _ProductSliverGrid extends StatelessWidget {
+  const _ProductSliverGrid({
+    required this.items,
+    this.maxItems,
+    this.keyPrefix,
+    this.debugLabel,
+    this.crossAxisCountBuilder,
+    this.disableCompact = false,
+  });
+
+  final List<Product> items;
+  final int? maxItems;
+  final String? keyPrefix;
+  final String? debugLabel;
+  final int Function(double width)? crossAxisCountBuilder;
+  final bool disableCompact;
+
+  @override
+  Widget build(BuildContext context) {
+    final width = MediaQuery.sizeOf(context).width;
+    final crossAxisCount =
+        crossAxisCountBuilder?.call(width) ??
+        (width < 400
+            ? 3
+            : (width < 520
+                ? 4
+                : (width < 720
+                    ? 5
+                    : 6)));
+
+    final horizontalPadding = 24.0;
+    final crossSpacing = 8.0;
+    final mainSpacing = 8.0;
+
+    final count = maxItems == null
+        ? items.length
+        : (items.length < maxItems! ? items.length : maxItems!);
+
+    final tileWidth = (width - horizontalPadding -
+            (crossAxisCount - 1) * crossSpacing) /
+        crossAxisCount;
+
+    assert(() {
+      debugPrint(
+        'Home grid${debugLabel == null ? '' : '[$debugLabel]'}: width=$width crossAxisCount=$crossAxisCount tileWidth=$tileWidth',
+      );
+      return true;
+    }());
+
+    return SliverGrid(
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: crossAxisCount,
+        crossAxisSpacing: crossSpacing,
+        mainAxisSpacing: mainSpacing,
+        childAspectRatio: 0.6,
+      ),
+      delegate: SliverChildBuilderDelegate(
+        (context, index) {
+          final p = items[index];
+          return LayoutBuilder(
+            builder: (context, constraints) {
+              assert(() {
+                if (index == 0) {
+                  debugPrint(
+                    'Home tile${debugLabel == null ? '' : '[$debugLabel]'}: ${constraints.maxWidth} x ${constraints.maxHeight}',
+                  );
+                }
+                return true;
+              }());
+
+              return _FeedProductTile(
+                key: ValueKey(
+                  keyPrefix == null ? p.id : '$keyPrefix-${p.id}',
+                ),
+                product: p,
+                imageWidth: tileWidth,
+                fillHeight: true,
+                forceShowTitle: true,
+                disableCompact: disableCompact,
+              );
+            },
+          );
+        },
+        childCount: count,
+      ),
     );
   }
 }
@@ -763,42 +931,6 @@ class _SectionHeader extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-}
-
-class _HorizontalCards extends ConsumerWidget {
-  const _HorizontalCards({required this.items});
-
-  final List<Product> items;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final imageWidth = 260.w;
-    return SizedBox(
-      height: 280.h,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        itemCount: items.length,
-        separatorBuilder: (_, __) => SizedBox(width: 12.w),
-        itemBuilder: (context, index) {
-          final p = items[index];
-          return SizedBox(
-            width: 260.w,
-            child: ProductCard(
-              key: ValueKey(p.id),
-              product: p,
-              isSaved: ref.watch(
-                wishlistIdsProvider.select((ids) => ids.contains(p.id)),
-              ),
-              imageWidth: imageWidth,
-              onToggleSaved: () =>
-                  ref.read(wishlistViewModelProvider.notifier).toggle(p.id),
-              onTap: () => context.push('${AppRoutes.product}?id=${p.id}'),
-            ),
-          );
-        },
-      ),
     );
   }
 }

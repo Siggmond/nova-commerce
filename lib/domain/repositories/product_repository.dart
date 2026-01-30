@@ -5,10 +5,6 @@ class FeaturedProductsPage {
 
   final List<Product> items;
 
-  /// Repository-specific pagination cursor.
-  ///
-  /// - Firestore implementation: `DocumentSnapshot<Map<String, dynamic>>`
-  /// - Fake implementation: last product id (`String`)
   final Object? cursor;
 }
 

@@ -1,11 +1,11 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/config/auth_providers.dart';
+import '../../../core/theme/app_tokens.dart';
+import '../../../core/widgets/app_button.dart';
+import '../../../domain/repositories/auth_repository.dart';
 
 class SignInScreen extends ConsumerStatefulWidget {
   const SignInScreen({super.key});
@@ -28,7 +28,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
   }
 
   Future<void> _signInEmail() async {
-    final auth = ref.read(firebaseAuthProvider);
+    final auth = ref.read(authRepositoryProvider);
     final email = _email.text.trim();
     final password = _password.text;
 
@@ -41,41 +41,21 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
 
     setState(() => _busy = true);
     try {
-      final current = auth.currentUser;
-      if (current != null && current.isAnonymous) {
-        try {
-          final credential = EmailAuthProvider.credential(
-            email: email,
-            password: password,
-          );
-          await current.linkWithCredential(credential);
-        } on FirebaseAuthException catch (e) {
-          if (e.code == 'credential-already-in-use') {
-            await auth.signInWithEmailAndPassword(
-              email: email,
-              password: password,
-            );
-          } else {
-            rethrow;
-          }
-        }
-      } else {
-        await auth.signInWithEmailAndPassword(email: email, password: password);
-      }
+      await auth.signInEmail(email: email, password: password);
+      _maybeShowFallbackNotice(auth);
       if (!mounted) return;
       context.pop();
-    } on FirebaseAuthException catch (e) {
+    } on AuthException catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(e.message ?? e.code)));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(e.message)));
     } finally {
       if (mounted) setState(() => _busy = false);
     }
   }
 
   Future<void> _signUpEmail() async {
-    final auth = ref.read(firebaseAuthProvider);
+    final auth = ref.read(authRepositoryProvider);
     final email = _email.text.trim();
     final password = _password.text;
 
@@ -88,93 +68,59 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
 
     setState(() => _busy = true);
     try {
-      final current = auth.currentUser;
-      if (current != null && current.isAnonymous) {
-        final credential = EmailAuthProvider.credential(
-          email: email,
-          password: password,
-        );
-        await current.linkWithCredential(credential);
-      } else {
-        await auth.createUserWithEmailAndPassword(
-          email: email,
-          password: password,
-        );
-      }
+      await auth.createAccount(email: email, password: password);
+      _maybeShowFallbackNotice(auth);
       if (!mounted) return;
       context.pop();
-    } on FirebaseAuthException catch (e) {
+    } on AuthException catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(e.message ?? e.code)));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(e.message)));
     } finally {
       if (mounted) setState(() => _busy = false);
     }
   }
 
   Future<void> _signInGoogle() async {
-    final auth = ref.read(firebaseAuthProvider);
+    final auth = ref.read(authRepositoryProvider);
 
     setState(() => _busy = true);
     try {
-      final googleUser = await GoogleSignIn().signIn();
-      if (googleUser == null) {
-        return;
-      }
-
-      final googleAuth = await googleUser.authentication;
-      final credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
-      );
-
-      final current = auth.currentUser;
-      if (current != null && current.isAnonymous) {
-        try {
-          await current.linkWithCredential(credential);
-        } on FirebaseAuthException catch (e) {
-          if (e.code == 'credential-already-in-use') {
-            await auth.signInWithCredential(credential);
-          } else {
-            rethrow;
-          }
-        }
-      } else {
-        await auth.signInWithCredential(credential);
-      }
+      await auth.signInWithGoogle();
+      _maybeShowFallbackNotice(auth);
       if (!mounted) return;
       context.pop();
-    } on FirebaseAuthException catch (e) {
+    } on AuthException catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(e.message ?? e.code)));
-    } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(e.toString())));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(e.message)));
     } finally {
       if (mounted) setState(() => _busy = false);
     }
   }
 
   Future<void> _continueAsGuest() async {
-    final auth = ref.read(firebaseAuthProvider);
+    final auth = ref.read(authRepositoryProvider);
     setState(() => _busy = true);
     try {
       await auth.signInAnonymously();
+      _maybeShowFallbackNotice(auth);
       if (!mounted) return;
       context.pop();
-    } on FirebaseAuthException catch (e) {
+    } on AuthException catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(e.message ?? e.code)));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(e.message)));
     } finally {
       if (mounted) setState(() => _busy = false);
     }
+  }
+
+  void _maybeShowFallbackNotice(AuthRepository auth) {
+    final notice = auth.takeFallbackNotice();
+    if (notice == null || !mounted) return;
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(notice)));
   }
 
   @override
@@ -184,7 +130,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
       body: AbsorbPointer(
         absorbing: _busy,
         child: ListView(
-          padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 20.h),
+          padding: AppInsets.screen,
           children: [
             TextField(
               controller: _email,
@@ -194,7 +140,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                 border: OutlineInputBorder(),
               ),
             ),
-            SizedBox(height: 12.h),
+            SizedBox(height: AppSpace.sm),
             TextField(
               controller: _password,
               obscureText: true,
@@ -203,42 +149,40 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                 border: OutlineInputBorder(),
               ),
             ),
-            SizedBox(height: 14.h),
+            SizedBox(height: AppSpace.md),
             SizedBox(
               width: double.infinity,
-              child: FilledButton(
+              child: AppButton.primary(
+                label: 'Sign in',
                 onPressed: _signInEmail,
-                child: _busy
-                    ? const SizedBox(
-                        width: 18,
-                        height: 18,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : const Text('Sign in'),
+                isLoading: _busy,
               ),
             ),
-            SizedBox(height: 10.h),
+            SizedBox(height: AppSpace.sm),
             SizedBox(
               width: double.infinity,
-              child: OutlinedButton(
+              child: AppButton.outlined(
+                label: 'Create account',
                 onPressed: _signUpEmail,
-                child: const Text('Create account'),
+                isLoading: _busy,
               ),
             ),
-            SizedBox(height: 10.h),
+            SizedBox(height: AppSpace.sm),
             SizedBox(
               width: double.infinity,
-              child: OutlinedButton(
+              child: AppButton.outlined(
+                label: 'Continue with Google',
                 onPressed: _signInGoogle,
-                child: const Text('Continue with Google'),
+                isLoading: _busy,
               ),
             ),
-            SizedBox(height: 18.h),
+            SizedBox(height: AppSpace.lg),
             SizedBox(
               width: double.infinity,
-              child: TextButton(
+              child: AppButton.text(
+                label: 'Continue as guest',
                 onPressed: _continueAsGuest,
-                child: const Text('Continue as guest'),
+                isLoading: _busy,
               ),
             ),
           ],

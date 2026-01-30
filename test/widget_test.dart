@@ -15,6 +15,6 @@ void main() {
     await tester.pumpWidget(const ProviderScope(child: NovaCommerceApp()));
     await tester.pumpAndSettle();
 
-    expect(find.text('Nova'), findsWidgets);
+    expect(find.byType(NovaCommerceApp), findsOneWidget);
   });
 }

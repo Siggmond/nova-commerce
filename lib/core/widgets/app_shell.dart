@@ -1,128 +1,79 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
-import '../config/app_routes.dart';
+import '../ai_nav/ai_nav_features.dart';
+import '../ai_nav/ai_nav_intent.dart';
+import '../ai_nav/ai_nav_providers.dart';
+import '../../core/config/auth_providers.dart';
 import '../../features/cart/presentation/cart_viewmodel.dart';
+import '../../features/wishlist/presentation/wishlist_viewmodel.dart';
+import 'ai_animated_navbar.dart';
 
 class AppShell extends ConsumerWidget {
-  const AppShell({super.key, required this.child});
+  const AppShell({super.key, required this.navigationShell});
 
-  final Widget child;
-
-  static int _locationToIndex(String location) {
-    if (location.startsWith(AppRoutes.ai)) return 1;
-    if (location.startsWith(AppRoutes.cart)) return 2;
-    if (location.startsWith(AppRoutes.profile)) return 3;
-    return 0;
-  }
-
-  static String _indexToLocation(int index) {
-    switch (index) {
-      case 1:
-        return AppRoutes.ai;
-      case 2:
-        return AppRoutes.cart;
-      case 3:
-        return AppRoutes.profile;
-      case 0:
-      default:
-        return AppRoutes.home;
-    }
-  }
+  final StatefulNavigationShell navigationShell;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final state = GoRouterState.of(context);
-    final currentIndex = _locationToIndex(state.uri.toString());
+    final currentIndex = navigationShell.currentIndex;
     final cartCount = ref
-        .watch(cartViewModelProvider)
+        .watch(cartItemsProvider)
         .fold<int>(0, (sum, item) => sum + item.quantity);
 
+    final location = _safeLocation(context);
+    final suppress = _shouldSuppressSuggestions(location);
+    ref.read(aiNavControllerProvider.notifier).setSuppressed(suppress);
+
+    final wishlistCount = ref.watch(wishlistIdsProvider).length;
+    final isSignedIn = ref.watch(currentUidProvider) != null;
+
+    final features = AiNavFeatures.fromAppSignals(
+      currentTabIndex: currentIndex,
+      tabCount: 5,
+      cartCount: cartCount,
+      wishlistCount: wishlistCount,
+      isSignedIn: isSignedIn,
+      hourOfDay: DateTime.now().hour,
+    );
+    ref.read(aiNavControllerProvider.notifier).updateFeatures(features.toVector());
+
+    final suggestion = ref.watch(aiNavControllerProvider);
+    final suggestedIndex = switch (suggestion?.intent) {
+      AiNavIntent.home => 0,
+      AiNavIntent.ai => 1,
+      AiNavIntent.trends => 2,
+      AiNavIntent.cart => 3,
+      AiNavIntent.profile => 4,
+      _ => null,
+    };
+
     return Scaffold(
-      body: child,
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: currentIndex,
-        onDestinationSelected: (index) {
-          final location = _indexToLocation(index);
-          if (location == state.uri.toString()) return;
-          context.go(location);
+      body: navigationShell,
+      bottomNavigationBar: AiAnimatedNavBar(
+        currentIndex: currentIndex,
+        cartCount: cartCount,
+        suggestedIndex: suggestedIndex,
+        suggestedConfidence: suggestion?.confidence,
+        onSelect: (index) {
+          ref.read(aiNavControllerProvider.notifier).consumeSuggestionAndCooldown();
+          if (index == currentIndex) return;
+          navigationShell.goBranch(index);
         },
-        destinations: [
-          const NavigationDestination(
-            icon: Icon(Icons.storefront_outlined),
-            selectedIcon: Icon(Icons.storefront),
-            label: 'Shop',
-          ),
-          const NavigationDestination(
-            icon: Icon(Icons.auto_awesome_outlined),
-            selectedIcon: Icon(Icons.auto_awesome),
-            label: 'AI',
-          ),
-          NavigationDestination(
-            icon: _CartIcon(count: cartCount, selected: false),
-            selectedIcon: _CartIcon(count: cartCount, selected: true),
-            label: 'Cart',
-          ),
-          const NavigationDestination(
-            icon: Icon(Icons.person_outline),
-            selectedIcon: Icon(Icons.person),
-            label: 'Profile',
-          ),
-        ],
       ),
     );
   }
-}
 
-class _CartIcon extends StatelessWidget {
-  const _CartIcon({required this.count, required this.selected});
+  static String _safeLocation(BuildContext context) {
+    try {
+      return GoRouterState.of(context).uri.toString();
+    } catch (_) {
+      return '';
+    }
+  }
 
-  final int count;
-  final bool selected;
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final base = Icon(
-      selected ? Icons.shopping_cart : Icons.shopping_cart_outlined,
-    );
-    if (count <= 0) return base;
-
-    return Stack(
-      clipBehavior: Clip.none,
-      children: [
-        base,
-        Positioned(
-          top: (-4).h,
-          right: (-6).w,
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 220),
-            curve: Curves.easeOutCubic,
-            padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
-            decoration: BoxDecoration(
-              color: cs.primary,
-              borderRadius: BorderRadius.circular(999.r),
-              border: Border.all(color: cs.surface, width: 1.5),
-              boxShadow: [
-                BoxShadow(
-                  blurRadius: 14.r,
-                  offset: Offset(0, 8.h),
-                  color: Colors.black.withValues(alpha: 0.22),
-                ),
-              ],
-            ),
-            child: Text(
-              count > 99 ? '99+' : '$count',
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                color: cs.onPrimary,
-                fontWeight: FontWeight.w900,
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
+  static bool _shouldSuppressSuggestions(String location) {
+    return location.startsWith('/checkout') || location.startsWith('/order-success');
   }
 }

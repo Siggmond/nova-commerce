@@ -21,7 +21,23 @@ class Product {
   final String description;
   final List<Variant> variants;
 
-  String get imageUrl => imageUrls.isNotEmpty ? imageUrls.first : '';
+  String get imageUrl {
+    for (final url in imageUrls) {
+      final normalized = _normalizeImageUrl(url);
+      if (normalized.isNotEmpty) return normalized;
+    }
+    return '';
+  }
+
+  String _normalizeImageUrl(String url) {
+    final trimmed = url.trim();
+    if (trimmed.isEmpty) return '';
+    if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+      return trimmed;
+    }
+    if (trimmed.startsWith('//')) return 'https:$trimmed';
+    return trimmed;
+  }
 
   List<String> get availableColors {
     final colors = <String>{};

@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'dart:developer' as developer;
 
 import '../../domain/entities/product.dart';
 import '../../domain/entities/variant.dart';
@@ -79,15 +80,26 @@ class FirestoreProductRepository implements ProductRepository {
 
     final imageUrlsRaw = data['imageUrls'];
     final imageUrls = imageUrlsRaw is List
-        ? imageUrlsRaw.whereType<String>().toList(growable: false)
+        ? imageUrlsRaw
+            .whereType<String>()
+            .map(_normalizeImageUrl)
+            .whereType<String>()
+            .toList(growable: false)
         : const <String>[];
 
     final variantsRaw = data['variants'];
     final variants = <Variant>[];
     if (variantsRaw is List) {
       for (final v in variantsRaw) {
-        if (v is Map) {
-          variants.add(Variant.fromJson(v.cast<String, dynamic>()));
+        final parsed = Variant.tryFromJson(v);
+        if (parsed != null) {
+          variants.add(parsed);
+        } else {
+          developer.log(
+            'Skipping invalid variant payload',
+            name: 'FirestoreProductRepository',
+            error: {'productId': id, 'variant': v},
+          );
         }
       }
     }
@@ -104,5 +116,15 @@ class FirestoreProductRepository implements ProductRepository {
           : description,
       variants: variants,
     );
+  }
+
+  String? _normalizeImageUrl(String url) {
+    final trimmed = url.trim();
+    if (trimmed.isEmpty) return null;
+    if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+      return trimmed;
+    }
+    if (trimmed.startsWith('//')) return 'https:$trimmed';
+    return trimmed;
   }
 }

@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/config/app_routes.dart';
+import '../../../core/theme/app_tokens.dart';
 import '../../../core/widgets/empty_state.dart';
 import '../../../core/widgets/error_state.dart';
 import '../../../core/widgets/product_card.dart';
@@ -39,9 +40,9 @@ class WishlistScreen extends ConsumerWidget {
           }
 
           return ListView.separated(
-            padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 20.h),
+            padding: AppInsets.screen,
             itemCount: products.length,
-            separatorBuilder: (_, __) => SizedBox(height: 12.h),
+            separatorBuilder: (_, __) => SizedBox(height: AppSpace.xxs),
             itemBuilder: (context, index) {
               final p = products[index];
               return ProductCard(
@@ -67,11 +68,11 @@ class _WishlistSkeleton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView(
-      padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 20.h),
+      padding: AppInsets.screen,
       children: List.generate(4, (index) {
         return Padding(
-          padding: EdgeInsets.only(bottom: 12.h),
-          child: const Shimmer(child: SkeletonBox(height: 220, radius: 16)),
+          padding: EdgeInsets.only(bottom: AppSpace.sm),
+          child: Shimmer(child: SkeletonBox(height: 184, radius: AppRadii.md)),
         );
       }),
     );

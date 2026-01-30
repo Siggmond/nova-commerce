@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../theme/app_tokens.dart';
+
 class Shimmer extends StatefulWidget {
   const Shimmer({super.key, required this.child});
 
@@ -55,10 +57,14 @@ class _ShimmerState extends State<Shimmer> with SingleTickerProviderStateMixin {
 }
 
 class SkeletonBox extends StatelessWidget {
-  const SkeletonBox({super.key, required this.height, this.radius = 12});
+  const SkeletonBox({
+    super.key,
+    required this.height,
+    this.radius,
+  });
 
   final double height;
-  final double radius;
+  final double? radius;
 
   @override
   Widget build(BuildContext context) {
@@ -66,7 +72,7 @@ class SkeletonBox extends StatelessWidget {
       height: height,
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(radius),
+        borderRadius: BorderRadius.circular(radius ?? AppRadii.sm),
       ),
     );
   }

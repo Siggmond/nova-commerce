@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import 'app_cached_network_image.dart';
@@ -14,6 +15,9 @@ class ProductCard extends StatelessWidget {
     this.onToggleSaved,
     this.fillHeight = false,
     this.imageWidth,
+    this.forceShowTitle = false,
+    this.disableCompact = false,
+    this.tightTitlePrice = false,
   });
 
   final Product product;
@@ -23,175 +27,271 @@ class ProductCard extends StatelessWidget {
   final VoidCallback? onToggleSaved;
   final bool fillHeight;
   final double? imageWidth;
+  final bool forceShowTitle;
+  final bool disableCompact;
+  final bool tightTitlePrice;
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final radius = BorderRadius.circular(22.r);
-    final dpr = ScreenUtil().pixelRatio ?? 1.0;
-    final w = imageWidth;
-    final memCacheWidth = w == null ? null : (w * dpr).round();
-    final memCacheHeight = w == null ? null : ((w * (10 / 16)) * dpr).round();
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final cs = Theme.of(context).colorScheme;
+        final radius = BorderRadius.circular(16.r);
+        final dpr = ScreenUtil().pixelRatio ?? 1.0;
 
-    final defaultCardHeight = 272.h;
-    final imageHeight = 156.h;
+        final defaultCardHeight = 184.h;
+        final effectiveCardHeight = fillHeight
+            ? (constraints.hasBoundedHeight
+                ? constraints.maxHeight
+                : defaultCardHeight)
+            : defaultCardHeight;
 
-    Widget imageStack() {
-      return Stack(
-        children: [
-          Positioned.fill(
-            child: AppCachedNetworkImage(
-              url: product.imageUrl,
-              fit: BoxFit.cover,
-              memCacheWidth: memCacheWidth,
-              memCacheHeight: memCacheHeight,
-              backgroundColor: cs.surfaceContainerHigh,
-            ),
-          ),
-          Positioned.fill(
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Colors.transparent,
-                    Colors.black.withValues(alpha: 0.06),
-                    Colors.black.withValues(alpha: 0.16),
-                  ],
-                  stops: const [0.0, 0.6, 1.0],
-                ),
-              ),
-            ),
-          ),
-          if (trailing != null)
-            Positioned(
-              top: 12.h,
-              right: 12.w,
-              child: _PillOverlay(child: trailing!),
-            )
-          else if (isSaved != null && onToggleSaved != null)
-            Positioned(
-              top: 12.h,
-              right: 12.w,
-              child: _WishlistHeart(
-                isSaved: isSaved!,
-                onPressed: onToggleSaved!,
-              ),
-            ),
-        ],
-      );
-    }
+        final effectiveImageHeight = fillHeight
+            ? (effectiveCardHeight * 0.55)
+            : (effectiveCardHeight * 0.54);
 
-    Widget detailsBody() {
-      return Padding(
-        padding: EdgeInsets.fromLTRB(14.w, 14.h, 14.w, 16.h),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              product.brand.toUpperCase(),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              softWrap: false,
-              style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                letterSpacing: 0.8,
-                fontWeight: FontWeight.w800,
-                color: cs.onSurface.withValues(alpha: 0.6),
-              ),
-            ),
-            SizedBox(height: 6.h),
-            Expanded(
-              child: Align(
-                alignment: Alignment.topLeft,
-                child: Text(
-                  product.title,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  softWrap: false,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w900,
+        final effectiveImageWidth = imageWidth ?? constraints.maxWidth;
+
+        final memCacheWidth = effectiveImageWidth.isFinite
+            ? (effectiveImageWidth * dpr).round()
+            : null;
+
+        final memCacheHeight = (effectiveImageHeight.isFinite &&
+                effectiveImageHeight > 0)
+            ? (effectiveImageHeight * dpr).round()
+            : null;
+
+        Widget imageStack() {
+          return Stack(
+            children: [
+              Positioned.fill(
+                child: Hero(
+                  tag: 'product-${product.id}',
+                  child: ClipRRect(
+                    borderRadius:
+                        BorderRadius.vertical(top: radius.topLeft),
+                    child: AppCachedNetworkImage(
+                      url: product.imageUrl,
+                      fit: BoxFit.cover,
+                      memCacheWidth: memCacheWidth,
+                      memCacheHeight: memCacheHeight,
+                      backgroundColor: cs.surfaceContainerHigh,
+                    ),
                   ),
                 ),
               ),
-            ),
-            Row(
-              children: [
-                Expanded(
+              Positioned.fill(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.transparent,
+                        Colors.black.withValues(alpha: 0.08),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              if (trailing != null)
+                Positioned(
+                  top: 6.h,
+                  right: 6.w,
+                  child: _PillOverlay(child: trailing!),
+                )
+              else if (isSaved != null && onToggleSaved != null)
+                Positioned(
+                  top: 6.h,
+                  right: 6.w,
+                  child: _WishlistHeart(
+                    isSaved: isSaved!,
+                    onPressed: onToggleSaved!,
+                  ),
+                ),
+            ],
+          );
+        }
+
+        Widget detailsBody() {
+          return LayoutBuilder(
+            builder: (context, constraints) {
+              final isCompact =
+                  !disableCompact && constraints.maxWidth < 180;
+
+              final isVeryTight = constraints.maxHeight < 52 || constraints.maxWidth < 80;
+
+              if (isVeryTight) {
+                final titleStyle = Theme.of(context).textTheme.bodySmall?.copyWith(
+                      fontWeight: FontWeight.w800,
+                      height: 1.05,
+                    );
+                final priceStyle = Theme.of(context).textTheme.bodySmall?.copyWith(
+                      fontWeight: FontWeight.w900,
+                      height: 1.05,
+                    );
+
+                return Padding(
+                  padding: EdgeInsets.all(2.r),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        product.title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: titleStyle,
+                      ),
+                      SizedBox(height: 1.h),
+                      Text(
+                        '${product.currency} ${product.price.toStringAsFixed(0)}',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: priceStyle,
+                      ),
+                    ],
+                  ),
+                );
+              }
+
+              final titleStyle = Theme.of(context)
+                  .textTheme
+                  .titleSmall
+                  ?.copyWith(
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.2,
+                  );
+
+              final brandStyle = Theme.of(context)
+                  .textTheme
+                  .labelSmall
+                  ?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.8,
+                    color: cs.onSurface.withValues(alpha: 0.55),
+                  );
+
+              final priceChip = Container(
+                padding: EdgeInsets.symmetric(
+                  horizontal: 8.w,
+                  vertical: 4.h,
+                ),
+                decoration: BoxDecoration(
+                  color: cs.surfaceContainerHighest,
+                  borderRadius: BorderRadius.circular(8.r),
+                ),
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerLeft,
                   child: Text(
                     '${product.currency} ${product.price.toStringAsFixed(0)}',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    softWrap: false,
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.w900,
-                    ),
+                    style: Theme.of(context)
+                        .textTheme
+                        .labelLarge
+                        ?.copyWith(fontWeight: FontWeight.w800),
                   ),
                 ),
-                SizedBox(width: 10.w),
-                DecoratedBox(
-                  decoration: BoxDecoration(
-                    color: cs.primary.withValues(alpha: 0.10),
-                    borderRadius: BorderRadius.circular(999.r),
-                    border: Border.all(
-                      color: cs.primary.withValues(alpha: 0.22),
-                    ),
-                  ),
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 10.w,
-                      vertical: 6.h,
-                    ),
-                    child: Text(
-                      'New drop',
+              );
+
+              return Padding(
+                padding: EdgeInsets.all(8.r),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      product.brand.toUpperCase(),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      softWrap: false,
-                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                        color: cs.primary,
-                        fontWeight: FontWeight.w800,
+                      style: brandStyle,
+                    ),
+                    SizedBox(height: 4.h),
+                    Expanded(
+                      child: Text(
+                        product.title,
+                        maxLines: isCompact ? 1 : 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: titleStyle,
                       ),
                     ),
-                  ),
+                    SizedBox(height: 6.h),
+                    Row(
+                      children: [
+                        Flexible(child: priceChip),
+                        if (!isCompact) ...[
+                          SizedBox(width: 6.w),
+                          Flexible(child: _NewDropBadge()),
+                        ],
+                      ],
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          ],
-        ),
-      );
-    }
+              );
+            },
+          );
+        }
 
-    final cardChild = Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.max,
-      children: fillHeight
-          ? [
-              Expanded(flex: 10, child: imageStack()),
-              Expanded(flex: 8, child: detailsBody()),
-            ]
-          : [
-              SizedBox(
-                height: imageHeight,
-                width: double.infinity,
-                child: imageStack(),
+        final cardChild = Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: fillHeight
+              ? [
+                  Expanded(flex: 11, child: imageStack()),
+                  Expanded(flex: 9, child: detailsBody()),
+                ]
+              : [
+                  SizedBox(
+                    height: effectiveImageHeight,
+                    width: double.infinity,
+                    child: imageStack(),
+                  ),
+                  Expanded(child: detailsBody()),
+                ],
+        );
+
+        return RepaintBoundary(
+          child: _ScaleOnTap(
+            child: InkWell(
+              borderRadius: radius,
+              onTap: onTap,
+              child: Card(
+                elevation: 1.5,
+                shadowColor: Colors.black.withValues(alpha: 0.08),
+                surfaceTintColor: cs.surface,
+                clipBehavior: Clip.antiAlias,
+                shape: RoundedRectangleBorder(borderRadius: radius),
+                child: fillHeight
+                    ? SizedBox.expand(child: cardChild)
+                    : SizedBox(
+                        height: defaultCardHeight,
+                        child: cardChild,
+                      ),
               ),
-              Expanded(child: detailsBody()),
-            ],
+            ),
+          ),
+        );
+      },
     );
+  }
+}
 
-    return RepaintBoundary(
-      child: InkWell(
-        borderRadius: radius,
-        onTap: onTap,
-        child: Card(
-          elevation: 3,
-          shadowColor: Colors.black.withValues(alpha: 0.14),
-          clipBehavior: Clip.antiAlias,
-          shape: RoundedRectangleBorder(borderRadius: radius),
-          child: fillHeight
-              ? SizedBox.expand(child: cardChild)
-              : SizedBox(height: defaultCardHeight, child: cardChild),
-        ),
+class _NewDropBadge extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 3.h),
+      decoration: BoxDecoration(
+        color: cs.primary.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Text(
+        'New',
+        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              fontWeight: FontWeight.w800,
+              color: cs.primary,
+            ),
       ),
     );
   }
@@ -207,14 +307,16 @@ class _PillOverlay extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: cs.surface.withValues(alpha: 0.86),
+        color: cs.surface.withValues(alpha: 0.88),
         borderRadius: BorderRadius.circular(999.r),
-        border: Border.all(color: cs.outlineVariant.withValues(alpha: 0.5)),
+        border: Border.all(
+          color: cs.outlineVariant.withValues(alpha: 0.4),
+        ),
         boxShadow: [
           BoxShadow(
-            blurRadius: 18.r,
-            offset: Offset(0, 10.h),
-            color: Colors.black.withValues(alpha: 0.18),
+            blurRadius: 12.r,
+            offset: Offset(0, 6.h),
+            color: Colors.black.withValues(alpha: 0.12),
           ),
         ],
       ),
@@ -223,70 +325,68 @@ class _PillOverlay extends StatelessWidget {
   }
 }
 
-class _WishlistHeart extends StatefulWidget {
-  const _WishlistHeart({required this.isSaved, required this.onPressed});
+class _WishlistHeart extends StatelessWidget {
+  const _WishlistHeart({
+    required this.isSaved,
+    required this.onPressed,
+  });
 
   final bool isSaved;
   final VoidCallback onPressed;
 
   @override
-  State<_WishlistHeart> createState() => _WishlistHeartState();
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
+    return _PillOverlay(
+      child: IconButton(
+        visualDensity: VisualDensity.compact,
+        padding: EdgeInsets.zero,
+        constraints: BoxConstraints.tightFor(
+          width: 40.r,
+          height: 40.r,
+        ),
+        onPressed: () {
+          HapticFeedback.selectionClick();
+          onPressed();
+        },
+        icon: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 200),
+          child: Icon(
+            key: ValueKey(isSaved),
+            isSaved ? Icons.favorite : Icons.favorite_border,
+            color:
+                isSaved ? cs.primary : cs.onSurface.withValues(alpha: 0.78),
+            size: 16.r,
+          ),
+        ),
+      ),
+    );
+  }
 }
 
-class _WishlistHeartState extends State<_WishlistHeart>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _controller = AnimationController(
-    vsync: this,
-    duration: const Duration(milliseconds: 260),
-  );
+class _ScaleOnTap extends StatefulWidget {
+  const _ScaleOnTap({required this.child});
+  final Widget child;
 
   @override
-  void didUpdateWidget(covariant _WishlistHeart oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (!oldWidget.isSaved && widget.isSaved) {
-      _controller.forward(from: 0);
-    }
-  }
+  State<_ScaleOnTap> createState() => _ScaleOnTapState();
+}
 
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
+class _ScaleOnTapState extends State<_ScaleOnTap> {
+  bool pressed = false;
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final scale = Tween<double>(
-      begin: 1,
-      end: 1.18,
-    ).animate(CurvedAnimation(parent: _controller, curve: Curves.elasticOut));
-
-    return _PillOverlay(
-      child: AnimatedBuilder(
-        animation: _controller,
-        builder: (context, child) {
-          return Transform.scale(scale: scale.value, child: child);
-        },
-        child: IconButton(
-          onPressed: widget.onPressed,
-          icon: AnimatedSwitcher(
-            duration: const Duration(milliseconds: 180),
-            switchInCurve: Curves.easeOutCubic,
-            switchOutCurve: Curves.easeInCubic,
-            transitionBuilder: (child, anim) => ScaleTransition(
-              scale: Tween<double>(begin: 0.85, end: 1).animate(anim),
-              child: FadeTransition(opacity: anim, child: child),
-            ),
-            child: Icon(
-              widget.isSaved ? Icons.favorite : Icons.favorite_border,
-              key: ValueKey<bool>(widget.isSaved),
-              color: widget.isSaved
-                  ? cs.primary
-                  : cs.onSurface.withValues(alpha: 0.78),
-            ),
-          ),
-        ),
+    return AnimatedScale(
+      scale: pressed ? 0.97 : 1.0,
+      duration: const Duration(milliseconds: 120),
+      curve: Curves.easeOut,
+      child: Listener(
+        onPointerDown: (_) => setState(() => pressed = true),
+        onPointerUp: (_) => setState(() => pressed = false),
+        onPointerCancel: (_) => setState(() => pressed = false),
+        child: widget.child,
       ),
     );
   }

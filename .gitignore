@@ -24,6 +24,7 @@ migrate_working_dir/
 ####################################
 # Flutter / Dart
 ####################################
+flutter/
 .dart_tool/
 .flutter-plugins
 .flutter-plugins-dependencies

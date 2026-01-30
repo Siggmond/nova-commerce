@@ -503,7 +503,7 @@ class _HomeFeedState extends ConsumerState<_HomeFeed> {
                   ),
                   SizedBox(height: 14.h),
                   DropdownButtonFormField<String?>(
-                    value: brand,
+                    initialValue: brand,
                     decoration: const InputDecoration(
                       labelText: 'Brand',
                       border: OutlineInputBorder(),
@@ -537,7 +537,7 @@ class _HomeFeedState extends ConsumerState<_HomeFeed> {
                   ),
                   SizedBox(height: 14.h),
                   DropdownButtonFormField<HomeSort>(
-                    value: sort,
+                    initialValue: sort,
                     decoration: const InputDecoration(
                       labelText: 'Sort',
                       border: OutlineInputBorder(),

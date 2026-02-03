@@ -15,7 +15,9 @@ class _ImmediateAiRepo implements AiRepository {
     required List<ChatMessage> history,
     required String userText,
   }) async {
-    final userCreatedAt = history.isEmpty ? DateTime.now() : history.last.createdAt;
+    final userCreatedAt = history.isEmpty
+        ? DateTime.now()
+        : history.last.createdAt;
     return ChatMessage(
       id: 'a1',
       role: ChatRole.assistant,
@@ -56,26 +58,28 @@ void main() {
     expect(messages.first.role, ChatRole.assistant);
   });
 
-  test('AiChatViewModel keeps user message before assistant reply when timestamps match',
-      () async {
-    final container = ProviderContainer(
-      overrides: [aiRepositoryProvider.overrideWithValue(_ImmediateAiRepo())],
-    );
-    addTearDown(container.dispose);
+  test(
+    'AiChatViewModel keeps user message before assistant reply when timestamps match',
+    () async {
+      final container = ProviderContainer(
+        overrides: [aiRepositoryProvider.overrideWithValue(_ImmediateAiRepo())],
+      );
+      addTearDown(container.dispose);
 
-    final vm = container.read(aiChatViewModelProvider.notifier);
+      final vm = container.read(aiChatViewModelProvider.notifier);
 
-    // Force same timestamp by seeding a user message at epoch 0, then reply is epoch 0.
-    await vm.send('hello');
+      // Force same timestamp by seeding a user message at epoch 0, then reply is epoch 0.
+      await vm.send('hello');
 
-    final state = container.read(aiChatViewModelProvider);
-    final messages = state.activeSession.messages;
-    expect(messages.length, 3);
+      final state = container.read(aiChatViewModelProvider);
+      final messages = state.activeSession.messages;
+      expect(messages.length, 3);
 
-    // seed assistant
-    expect(messages[0].role, ChatRole.assistant);
-    // then user, then assistant
-    expect(messages[1].role, ChatRole.user);
-    expect(messages[2].role, ChatRole.assistant);
-  });
+      // seed assistant
+      expect(messages[0].role, ChatRole.assistant);
+      // then user, then assistant
+      expect(messages[1].role, ChatRole.user);
+      expect(messages[2].role, ChatRole.assistant);
+    },
+  );
 }

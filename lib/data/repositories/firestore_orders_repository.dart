@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 
 import '../../domain/entities/order.dart' as domain;
 import '../../domain/repositories/orders_repository.dart';
@@ -19,18 +20,40 @@ class FirestoreOrdersRepository implements OrdersRepository {
       return const Stream<List<domain.Order>>.empty();
     }
 
+    if (!kReleaseMode) {
+      debugPrint(
+        'FirestoreOrdersRepository.watchOrders uid=${uid.trim()} path=orders where uid==${uid.trim()}',
+      );
+    }
+
     final orders = _db.collection('orders');
     final q = orders.where('uid', isEqualTo: uid.trim());
 
     return q
-        .orderBy('createdAt', descending: true)
         .limit(50)
         .snapshots()
+        .handleError((Object e, StackTrace st) {
+          if (!kReleaseMode) {
+            final code = e is FirebaseException ? e.code : null;
+            debugPrint(
+              'FirestoreOrdersRepository.watchOrders error code=$code error=$e',
+            );
+          }
+          throw e;
+        })
         .map((snap) {
-          return snap.docs
+          final list = snap.docs
               .map(OrderDto.fromDoc)
               .map(OrderMapper.toDomain)
-              .toList(growable: false);
+              .toList(growable: true);
+
+          list.sort((a, b) {
+            final at = a.createdAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+            final bt = b.createdAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+            return bt.compareTo(at);
+          });
+
+          return list;
         });
   }
 

@@ -1,36 +1,32 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:phone_number/phone_number.dart';
 import 'package:http/http.dart' as http;
-import 'package:meta/meta.dart';
 
 import '../../../core/config/app_env.dart';
 import '../../../core/config/auth_providers.dart';
 import '../../../core/config/providers.dart';
 import '../../../core/errors/checkout_exceptions.dart';
 import '../../../data/datasources/shared_prefs_checkout_address_datasource.dart';
+import '../../loyalty/gold_controller.dart';
 import '../../../domain/entities/cart_item.dart';
 import '../../../domain/entities/cart_line.dart';
 import '../domain/checkout_cart_summary.dart';
 import '../../cart/presentation/cart_viewmodel.dart';
 
 class PlaceSuggestion {
-  const PlaceSuggestion({
-    required this.placeId,
-    required this.description,
-  });
+  const PlaceSuggestion({required this.placeId, required this.description});
 
   final String placeId;
   final String description;
 }
 
 abstract class PhoneNormalizer {
-  Future<String?> toE164({
-    required String input,
-    required String regionCode,
-  });
+  Future<String?> toE164({required String input, required String regionCode});
 }
 
 class PhoneNumberNormalizer implements PhoneNormalizer {
@@ -100,7 +96,7 @@ class ParsedAddress {
 final checkoutCartSummaryProvider = Provider<CheckoutCartSummary>((ref) {
   final items = ref.watch(selectedCartItemsProvider);
   final currency = items.isNotEmpty ? items.first.product.currency : 'USD';
-  final subtotal = items.fold<double>(0, (sum, i) => sum + i.total);
+  final subtotal = items.fold<double>(0, (acc, i) => acc + i.total);
   const shippingFee = 0.0;
   final total = subtotal + shippingFee;
 
@@ -255,8 +251,9 @@ class CheckoutState {
       addressError: clearErrors ? null : (addressError ?? this.addressError),
       cityError: clearErrors ? null : (cityError ?? this.cityError),
       stateError: clearErrors ? null : (stateError ?? this.stateError),
-      postalCodeError:
-          clearErrors ? null : (postalCodeError ?? this.postalCodeError),
+      postalCodeError: clearErrors
+          ? null
+          : (postalCodeError ?? this.postalCodeError),
       countryError: clearErrors ? null : (countryError ?? this.countryError),
       isSubmitting: isSubmitting ?? this.isSubmitting,
       hasSelectedItems: hasSelectedItems ?? this.hasSelectedItems,
@@ -277,21 +274,34 @@ class CheckoutViewModel extends StateNotifier<CheckoutState> {
     this._ref, {
     PhoneNormalizer? phoneNormalizer,
     http.Client? httpClient,
-  })  : _phoneNormalizer = phoneNormalizer ?? PhoneNumberNormalizer(),
-        _httpClient = httpClient ?? http.Client(),
-        _addressStore = SharedPrefsCheckoutAddressDataSource(),
-        super(
-          CheckoutState(
-            placesAvailable: AppEnv.enablePlacesAutocomplete &&
-                AppEnv.googlePlacesApiKey.isNotEmpty,
-            placesConfigured: AppEnv.enablePlacesAutocomplete,
-          ),
-        ) {
+  }) : _phoneNormalizer = phoneNormalizer ?? PhoneNumberNormalizer(),
+       _httpClient = httpClient ?? http.Client(),
+       _addressStore = SharedPrefsCheckoutAddressDataSource(),
+       super(
+         CheckoutState(
+           placesAvailable:
+               AppEnv.enablePlacesAutocomplete &&
+               AppEnv.googlePlacesApiKey.isNotEmpty,
+           placesConfigured: AppEnv.enablePlacesAutocomplete,
+         ),
+       ) {
+    final initialCart = _ref.read(selectedCartItemsProvider);
+    final initialAuth = _ref.read(authUserProvider);
+    final initialUser = initialAuth.maybeWhen(
+      data: (u) => u,
+      orElse: () => null,
+    );
+    state = state.copyWith(
+      hasSelectedItems: initialCart.isNotEmpty,
+      isSignedIn: initialUser != null && !initialUser.isAnonymous,
+    );
+
     _ref.listen<List<CartItem>>(selectedCartItemsProvider, (_, next) {
       state = state.copyWith(hasSelectedItems: next.isNotEmpty);
     });
-    _ref.listen<String?>(currentUidProvider, (_, next) {
-      state = state.copyWith(isSignedIn: next != null && next.trim().isNotEmpty);
+    _ref.listen(authUserProvider, (_, next) {
+      final user = next.maybeWhen(data: (u) => u, orElse: () => null);
+      state = state.copyWith(isSignedIn: user != null && !user.isAnonymous);
     });
   }
 
@@ -345,10 +355,13 @@ class CheckoutViewModel extends StateNotifier<CheckoutState> {
     _autocompleteDebounce?.cancel();
     _placesSessionToken = null;
     state = CheckoutState(
-      placesAvailable: AppEnv.enablePlacesAutocomplete &&
+      placesAvailable:
+          AppEnv.enablePlacesAutocomplete &&
           AppEnv.googlePlacesApiKey.isNotEmpty,
       placesConfigured: AppEnv.enablePlacesAutocomplete,
       placesUnavailable: false,
+      hasSelectedItems: state.hasSelectedItems,
+      isSignedIn: state.isSignedIn,
     );
   }
 
@@ -412,10 +425,7 @@ class CheckoutViewModel extends StateNotifier<CheckoutState> {
     required String input,
     required String regionCode,
   }) async {
-    return _phoneNormalizer.toE164(
-      input: input,
-      regionCode: regionCode,
-    );
+    return _phoneNormalizer.toE164(input: input, regionCode: regionCode);
   }
 
   void _scheduleAutocomplete(String query) {
@@ -514,21 +524,18 @@ class CheckoutViewModel extends StateNotifier<CheckoutState> {
   Future<void> selectSuggestion(PlaceSuggestion suggestion) async {
     if (!state.placesAvailable || suggestion.placeId.trim().isEmpty) return;
     final requestId = ++_autocompleteRequestId;
-    final token = _placesSessionToken ??
-        DateTime.now().millisecondsSinceEpoch.toString();
+    final token =
+        _placesSessionToken ?? DateTime.now().millisecondsSinceEpoch.toString();
 
     state = state.copyWith(isFetchingSuggestions: true);
     try {
-      final uri = Uri.https(
-        'maps.googleapis.com',
-        '/maps/api/place/details/json',
-        {
-          'place_id': suggestion.placeId,
-          'key': AppEnv.googlePlacesApiKey,
-          'sessiontoken': token,
-          'fields': 'address_component,formatted_address',
-        },
-      );
+      final uri =
+          Uri.https('maps.googleapis.com', '/maps/api/place/details/json', {
+            'place_id': suggestion.placeId,
+            'key': AppEnv.googlePlacesApiKey,
+            'sessiontoken': token,
+            'fields': 'address_component,formatted_address',
+          });
 
       final response = await _httpClient.get(uri);
       if (response.statusCode != 200) {
@@ -602,10 +609,10 @@ class CheckoutViewModel extends StateNotifier<CheckoutState> {
       }
     }
 
-    final streetLine = [streetNumber, route]
-        .where((e) => e.trim().isNotEmpty)
-        .join(' ')
-        .trim();
+    final streetLine = [
+      streetNumber,
+      route,
+    ].where((e) => e.trim().isNotEmpty).join(' ').trim();
     if (streetLine.isEmpty && locality.isEmpty && country.isEmpty) {
       return null;
     }
@@ -640,8 +647,25 @@ class CheckoutViewModel extends StateNotifier<CheckoutState> {
       return;
     }
 
-    final uid = _ref.read(currentUidProvider);
+    final user = _ref
+        .read(authUserProvider)
+        .maybeWhen(data: (u) => u, orElse: () => null);
+    final uidFromProvider = _ref.read(currentUidProvider);
+    final uid = uidFromProvider ?? user?.uid;
+
+    if (!kReleaseMode) {
+      debugPrint(
+        'Checkout.submit auth uid=${uid ?? ''} isAnonymous=${user?.isAnonymous ?? true} email=${user?.email ?? ''}',
+      );
+    }
+
+    final needsNonAnonymous = uidFromProvider == null;
     if (uid == null || uid.trim().isEmpty) {
+      _emit(const CheckoutEvent.showSnack('Please sign in to continue.'));
+      _emit(const CheckoutEvent.goToSignIn());
+      return;
+    }
+    if (needsNonAnonymous && (user == null || user.isAnonymous)) {
       _emit(const CheckoutEvent.showSnack('Please sign in to continue.'));
       _emit(const CheckoutEvent.goToSignIn());
       return;
@@ -691,11 +715,15 @@ class CheckoutViewModel extends StateNotifier<CheckoutState> {
     state = state.copyWith(isSubmitting: true);
     try {
       final summary = _ref.read(checkoutCartSummaryProvider);
-      final deviceId = await _ref.read(deviceIdDataSourceProvider).getOrCreate();
+      final deviceId = await _ref
+          .read(deviceIdDataSourceProvider)
+          .getOrCreate();
 
       // Keep the server cart in sync before checkout (Cloud Function reads cart server-side).
       final allItems = _ref.read(cartItemsProvider);
-      await _ref.read(cartRepositoryProvider).saveCartLines(
+      await _ref
+          .read(cartRepositoryProvider)
+          .saveCartLines(
             allItems
                 .map(
                   (i) => CartLine(
@@ -709,6 +737,21 @@ class CheckoutViewModel extends StateNotifier<CheckoutState> {
           );
 
       final repo = _ref.read(orderRepositoryProvider);
+
+      if (!kReleaseMode) {
+        dynamic firebaseUser;
+        firebaseUser = null;
+        try {
+          // In tests Firebase may be uninitialized; keep logging best-effort.
+          firebaseUser = _ref.read(firebaseAuthProvider).currentUser;
+        } catch (e) {
+          debugPrint('PLACE_ORDER firebaseAuthProvider read failed: $e');
+        }
+        debugPrint(
+          'PLACE_ORDER uid_provider=${uidFromProvider ?? ''} uid_authUser=${user?.uid ?? ''} uid_firebase=${firebaseUser?.uid ?? ''} anon=${firebaseUser?.isAnonymous ?? true} env_fakeRepos=${AppEnv.useFakeRepos} repo=${repo.runtimeType}',
+        );
+      }
+
       final orderId = await repo.placeOrder(
         uid: uid,
         deviceId: deviceId,
@@ -730,10 +773,17 @@ class CheckoutViewModel extends StateNotifier<CheckoutState> {
 
       if (requestId != _requestId) return;
 
+      try {
+        await _ref
+            .read(goldControllerProvider.notifier)
+            .awardForOrder(orderId: orderId, orderTotal: summary.total);
+      } catch (_) {}
+
       final selectedIds = _ref.read(selectedCartItemIdsProvider);
       final cartItems = _ref.read(cartItemsProvider);
       final allIds = cartItems.map((i) => i.product.id).toSet();
-      if (selectedIds.isEmpty || (allIds.isNotEmpty && selectedIds.length == allIds.length)) {
+      if (selectedIds.isEmpty ||
+          (allIds.isNotEmpty && selectedIds.length == allIds.length)) {
         _ref.read(cartClearProvider).call();
       } else {
         _ref
@@ -752,11 +802,34 @@ class CheckoutViewModel extends StateNotifier<CheckoutState> {
       if (requestId != _requestId) return;
       _emit(const CheckoutEvent.showSnack('Please sign in to continue.'));
       _emit(const CheckoutEvent.goToSignIn());
+    } on FirebaseException catch (e) {
+      if (requestId != _requestId) return;
+
+      if (!kReleaseMode) {
+        debugPrint(
+          'PLACE_ORDER failed: FirebaseException(code=${e.code}, message=${e.message})',
+        );
+      }
+
+      _emit(
+        CheckoutEvent.showSnack(
+          kReleaseMode
+              ? 'Something went wrong. Please try again.'
+              : 'Checkout failed: ${e.code}',
+        ),
+      );
     } catch (e) {
       if (requestId != _requestId) return;
-      _emit(const CheckoutEvent.showSnack(
-        'Something went wrong. Please try again.',
-      ));
+      if (!kReleaseMode) {
+        debugPrint('PLACE_ORDER failed: $e');
+      }
+      _emit(
+        CheckoutEvent.showSnack(
+          kReleaseMode
+              ? 'Something went wrong. Please try again.'
+              : 'Checkout failed: ${e.runtimeType}',
+        ),
+      );
     } finally {
       if (requestId == _requestId) {
         state = state.copyWith(isSubmitting: false);

@@ -49,68 +49,74 @@ class _NoopRecentlyViewedRepository implements RecentlyViewedRepository {
 }
 
 void main() {
-  test('ProductDetailsViewModel auto-selects when exactly one in-stock variant',
-      () async {
-    final repo = _SingleVariantProductRepo();
+  test(
+    'ProductDetailsViewModel auto-selects when exactly one in-stock variant',
+    () async {
+      final repo = _SingleVariantProductRepo();
 
-    final container = ProviderContainer(
-      overrides: [
-        productRepositoryProvider.overrideWithValue(repo),
-        recentlyViewedRepositoryProvider
-            .overrideWithValue(_NoopRecentlyViewedRepository()),
-      ],
-    );
-    addTearDown(container.dispose);
+      final container = ProviderContainer(
+        overrides: [
+          productRepositoryProvider.overrideWithValue(repo),
+          recentlyViewedRepositoryProvider.overrideWithValue(
+            _NoopRecentlyViewedRepository(),
+          ),
+        ],
+      );
+      addTearDown(container.dispose);
 
-    // Provider is lazy; read triggers creation
-    final state = container.read(productDetailsViewModelProvider('p_single'));
-    expect(state, isA<ProductDetailsLoading>());
+      // Provider is lazy; read triggers creation
+      final state = container.read(productDetailsViewModelProvider('p_single'));
+      expect(state, isA<ProductDetailsLoading>());
 
-    // wait for async load
-    await Future<void>.delayed(Duration.zero);
+      // wait for async load
+      await Future<void>.delayed(Duration.zero);
 
-    final after = container.read(productDetailsViewModelProvider('p_single'));
-    expect(after, isA<ProductDetailsData>());
-    final data = after as ProductDetailsData;
-    expect(data.selectedColor, 'Black');
-    expect(data.selectedSize, 'M');
-    expect(data.canAdd, isTrue);
-  });
+      final after = container.read(productDetailsViewModelProvider('p_single'));
+      expect(after, isA<ProductDetailsData>());
+      final data = after as ProductDetailsData;
+      expect(data.selectedColor, 'Black');
+      expect(data.selectedSize, 'M');
+      expect(data.canAdd, isTrue);
+    },
+  );
 
-  test('ProductDetailsData never hides options; disabled sets are relative to current selection', () {
-    const p = Product(
-      id: 'p',
-      title: 't',
-      brand: 'b',
-      price: 10,
-      currency: 'USD',
-      imageUrls: <String>[],
-      description: 'd',
-      variants: [
-        Variant(color: 'Black', size: 'S', stock: 1),
-        Variant(color: 'Black', size: 'M', stock: 1),
-        Variant(color: 'White', size: 'S', stock: 1),
-        // out of stock combination should not enable options
-        Variant(color: 'White', size: 'M', stock: 0),
-      ],
-    );
+  test(
+    'ProductDetailsData never hides options; disabled sets are relative to current selection',
+    () {
+      const p = Product(
+        id: 'p',
+        title: 't',
+        brand: 'b',
+        price: 10,
+        currency: 'USD',
+        imageUrls: <String>[],
+        description: 'd',
+        variants: [
+          Variant(color: 'Black', size: 'S', stock: 1),
+          Variant(color: 'Black', size: 'M', stock: 1),
+          Variant(color: 'White', size: 'S', stock: 1),
+          // out of stock combination should not enable options
+          Variant(color: 'White', size: 'M', stock: 0),
+        ],
+      );
 
-    // Selecting a color should NOT remove any sizes; it should disable invalid ones
-    final data = ProductDetailsData(
-      product: p,
-      selectedColor: 'White',
-      selectedSize: null,
-    );
-    expect(data.availableSizes, ['M', 'S']);
-    expect(data.disabledSizes, {'M'});
+      // Selecting a color should NOT remove any sizes; it should disable invalid ones
+      final data = ProductDetailsData(
+        product: p,
+        selectedColor: 'White',
+        selectedSize: null,
+      );
+      expect(data.availableSizes, ['M', 'S']);
+      expect(data.disabledSizes, {'M'});
 
-    // Selecting a size should NOT remove any colors; it should disable invalid ones
-    final data2 = ProductDetailsData(
-      product: p,
-      selectedColor: null,
-      selectedSize: 'M',
-    );
-    expect(data2.availableColors, ['Black', 'White']);
-    expect(data2.disabledColors, {'White'});
-  });
+      // Selecting a size should NOT remove any colors; it should disable invalid ones
+      final data2 = ProductDetailsData(
+        product: p,
+        selectedColor: null,
+        selectedSize: 'M',
+      );
+      expect(data2.availableColors, ['Black', 'White']);
+      expect(data2.disabledColors, {'White'});
+    },
+  );
 }

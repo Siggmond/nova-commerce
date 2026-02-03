@@ -1,17 +1,21 @@
 import 'dart:async';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/config/auth_providers.dart';
 import '../../../core/config/providers.dart';
-import '../../../domain/entities/order.dart';
+import '../../../domain/entities/order.dart' as domain;
 
 final ordersControllerProvider =
-    StateNotifierProvider<OrdersController, AsyncValue<List<Order>>>((ref) {
+    StateNotifierProvider<OrdersController, AsyncValue<List<domain.Order>>>((
+      ref,
+    ) {
       return OrdersController(ref);
     });
 
-class OrdersController extends StateNotifier<AsyncValue<List<Order>>> {
+class OrdersController extends StateNotifier<AsyncValue<List<domain.Order>>> {
   OrdersController(this._ref) : super(const AsyncValue.loading()) {
     _uid = _ref.read(currentUidProvider);
     _ref.listen<String?>(currentUidProvider, (previous, next) {
@@ -24,7 +28,7 @@ class OrdersController extends StateNotifier<AsyncValue<List<Order>>> {
 
   final Ref _ref;
 
-  StreamSubscription<List<Order>>? _sub;
+  StreamSubscription<List<domain.Order>>? _sub;
   String? _uid;
 
   int _requestId = 0;
@@ -33,11 +37,18 @@ class OrdersController extends StateNotifier<AsyncValue<List<Order>>> {
     final uid = _uid;
     if (uid == null || uid.trim().isEmpty) {
       _sub?.cancel();
+      if (!kReleaseMode) {
+        debugPrint('OrdersController: no uid yet (signed out?)');
+      }
       state = AsyncValue.error(
         StateError('Sign in required.'),
         StackTrace.current,
       );
       return;
+    }
+
+    if (!kReleaseMode) {
+      debugPrint('OrdersController: subscribing uid=${uid.trim()}');
     }
 
     _subscribe(uid: uid, deviceId: '', showLoading: state.hasError);
@@ -57,16 +68,22 @@ class OrdersController extends StateNotifier<AsyncValue<List<Order>>> {
     }
 
     final repo = _ref.read(ordersRepositoryProvider);
-    _sub = repo.watchOrders(uid: uid, deviceId: deviceId).listen(
-      (orders) {
-        if (requestId != _requestId) return;
-        state = AsyncValue.data(orders);
-      },
-      onError: (Object e, StackTrace st) {
-        if (requestId != _requestId) return;
-        state = AsyncValue.error(e, st);
-      },
-    );
+    _sub = repo
+        .watchOrders(uid: uid, deviceId: deviceId)
+        .listen(
+          (orders) {
+            if (requestId != _requestId) return;
+            state = AsyncValue.data(orders);
+          },
+          onError: (Object e, StackTrace st) {
+            if (requestId != _requestId) return;
+            if (!kReleaseMode) {
+              final code = e is FirebaseException ? e.code : null;
+              debugPrint('OrdersController: stream error code=$code error=$e');
+            }
+            state = AsyncValue.error(e, st);
+          },
+        );
   }
 
   void refresh({bool showLoading = false}) {
@@ -86,17 +103,18 @@ class OrdersController extends StateNotifier<AsyncValue<List<Order>>> {
   }
 }
 
-final orderDetailsControllerProvider = StateNotifierProvider.family<
-  OrderDetailsController,
-  AsyncValue<Order>,
-  String
->((ref, id) {
-  return OrderDetailsController(ref, id);
-});
+final orderDetailsControllerProvider =
+    StateNotifierProvider.family<
+      OrderDetailsController,
+      AsyncValue<domain.Order>,
+      String
+    >((ref, id) {
+      return OrderDetailsController(ref, id);
+    });
 
-class OrderDetailsController extends StateNotifier<AsyncValue<Order>> {
+class OrderDetailsController extends StateNotifier<AsyncValue<domain.Order>> {
   OrderDetailsController(this._ref, this._orderId)
-      : super(const AsyncValue.loading()) {
+    : super(const AsyncValue.loading()) {
     load(showLoading: true);
   }
 

@@ -57,11 +57,7 @@ class _ShimmerState extends State<Shimmer> with SingleTickerProviderStateMixin {
 }
 
 class SkeletonBox extends StatelessWidget {
-  const SkeletonBox({
-    super.key,
-    required this.height,
-    this.radius,
-  });
+  const SkeletonBox({super.key, required this.height, this.radius});
 
   final double height;
   final double? radius;

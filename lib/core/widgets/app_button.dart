@@ -51,20 +51,18 @@ class AppButton extends StatelessWidget {
             child: CircularProgressIndicator(strokeWidth: 2),
           )
         : (icon == null
-            ? Text(label)
-            : Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(icon),
-                  SizedBox(width: AppSpace.sm),
-                  Text(label),
-                ],
-              ));
+              ? Text(label)
+              : Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(icon),
+                    SizedBox(width: AppSpace.sm),
+                    Text(label),
+                  ],
+                ));
 
     final style = ButtonStyle(
-      minimumSize: const WidgetStatePropertyAll(
-        Size.fromHeight(AppHitTargets.min),
-      ),
+      minimumSize: const WidgetStatePropertyAll(Size(0, AppHitTargets.min)),
       padding: WidgetStatePropertyAll(AppInsets.button),
       shape: WidgetStatePropertyAll(
         RoundedRectangleBorder(

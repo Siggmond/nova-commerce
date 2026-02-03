@@ -8,8 +8,12 @@ class FirestoreHomeConfigRepository implements HomeConfigRepository {
 
   final FirestoreHomeConfigDataSource _dataSource;
 
-  factory FirestoreHomeConfigRepository.fromFirestore(FirebaseFirestore firestore) {
-    return FirestoreHomeConfigRepository(FirestoreHomeConfigDataSource(firestore));
+  factory FirestoreHomeConfigRepository.fromFirestore(
+    FirebaseFirestore firestore,
+  ) {
+    return FirestoreHomeConfigRepository(
+      FirestoreHomeConfigDataSource(firestore),
+    );
   }
 
   @override

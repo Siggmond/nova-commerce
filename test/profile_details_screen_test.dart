@@ -9,7 +9,9 @@ import 'package:nova_commerce/data/repositories/fake_auth_repository.dart';
 import 'package:nova_commerce/features/profile/presentation/profile_details_screen.dart';
 
 void main() {
-  testWidgets('Profile Details screen renders for signed-in user', (tester) async {
+  testWidgets('Profile Details screen renders for signed-in user', (
+    tester,
+  ) async {
     final repo = FakeAuthRepository();
     await repo.createAccount(email: 'a@b.com', password: 'pw');
 
@@ -120,10 +122,7 @@ void main() {
     }
     expect(phoneField, findsOneWidget);
 
-    await tester.enterText(
-      phoneField,
-      '+12025550123',
-    );
+    await tester.enterText(phoneField, '+12025550123');
 
     final sendCodeButton = find.byWidgetPredicate(
       (w) => w is AppButton && w.label == 'Send code',
@@ -145,10 +144,7 @@ void main() {
     }
     expect(smsField, findsOneWidget);
 
-    await tester.enterText(
-      smsField,
-      '123456',
-    );
+    await tester.enterText(smsField, '123456');
 
     final verifyPhoneButton = find.byWidgetPredicate(
       (w) => w is AppButton && w.label == 'Verify phone',

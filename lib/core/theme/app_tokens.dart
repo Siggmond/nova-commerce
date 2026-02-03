@@ -16,9 +16,9 @@ class AppInsets {
   static EdgeInsets get screenTight =>
       EdgeInsets.fromLTRB(12.w, 8.h, 12.w, 8.h);
 
-  static EdgeInsets get card => EdgeInsets.all(10.r);
+  static EdgeInsets get card => EdgeInsets.all(16.r);
 
-  static EdgeInsets get cardTight => EdgeInsets.all(8.r);
+  static EdgeInsets get cardTight => EdgeInsets.all(12.r);
 
   static EdgeInsets get button =>
       EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h);

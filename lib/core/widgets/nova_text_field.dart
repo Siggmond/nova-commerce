@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
-import '../theme/app_tokens.dart';
 import '../theme/nova_tokens.dart';
+
+enum NovaFieldDensity { compact, comfortable }
 
 class NovaTextField extends StatelessWidget {
   const NovaTextField({
@@ -18,6 +19,7 @@ class NovaTextField extends StatelessWidget {
     this.onSubmitted,
     this.errorText,
     this.prefix,
+    this.density = NovaFieldDensity.compact,
   });
 
   final TextEditingController controller;
@@ -32,51 +34,60 @@ class NovaTextField extends StatelessWidget {
   final VoidCallback? onSubmitted;
   final String? errorText;
   final Widget? prefix;
+  final NovaFieldDensity density;
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final t = Theme.of(context).textTheme;
 
-    return TextField(
-      controller: controller,
-      enabled: enabled,
-      obscureText: obscureText,
-      style: t.bodySmall,
-      keyboardType: keyboardType,
-      focusNode: focusNode,
-      textInputAction: textInputAction,
-      onChanged: onChanged,
-      onSubmitted: (_) => onSubmitted?.call(),
-      decoration: InputDecoration(
-        isDense: true,
-        labelText: labelText,
-        hintText: hintText,
-        errorText: errorText,
-        labelStyle: t.bodySmall,
-        hintStyle: t.bodySmall?.copyWith(
-          color: cs.onSurface.withValues(alpha: 0.6),
-        ),
-        prefixIcon: prefix,
-        filled: true,
-        fillColor: NovaColors.sheet(cs),
-        contentPadding: EdgeInsets.symmetric(
-          horizontal: AppSpace.md,
-          vertical: AppSpace.xxs,
-        ),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(NovaRadii.radius16),
-          borderSide: BorderSide(color: cs.outlineVariant),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(NovaRadii.radius16),
-          borderSide: BorderSide(
-            color: cs.outlineVariant.withValues(alpha: 0.7),
+    final isComfortable = density == NovaFieldDensity.comfortable;
+    final contentPadding = isComfortable
+        ? const EdgeInsets.symmetric(horizontal: 16, vertical: 16)
+        : const EdgeInsets.symmetric(horizontal: 14, vertical: 12);
+    final minHeight = isComfortable ? 52.0 : 44.0;
+
+    final textStyle = isComfortable ? t.bodyMedium : t.bodySmall;
+
+    return ConstrainedBox(
+      constraints: BoxConstraints(minHeight: minHeight),
+      child: TextField(
+        controller: controller,
+        enabled: enabled,
+        obscureText: obscureText,
+        style: textStyle,
+        keyboardType: keyboardType,
+        focusNode: focusNode,
+        textInputAction: textInputAction,
+        onChanged: onChanged,
+        onSubmitted: (_) => onSubmitted?.call(),
+        decoration: InputDecoration(
+          isDense: true,
+          labelText: labelText,
+          hintText: hintText,
+          errorText: errorText,
+          labelStyle: t.labelMedium,
+          hintStyle: textStyle?.copyWith(
+            color: cs.onSurface.withValues(alpha: 0.6),
           ),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(NovaRadii.radius16),
-          borderSide: BorderSide(color: cs.primary, width: 1.4),
+          prefixIcon: prefix,
+          filled: true,
+          fillColor: NovaColors.sheet(cs),
+          contentPadding: contentPadding,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(NovaRadii.radius16),
+            borderSide: BorderSide(color: cs.outlineVariant),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(NovaRadii.radius16),
+            borderSide: BorderSide(
+              color: cs.outlineVariant.withValues(alpha: 0.7),
+            ),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(NovaRadii.radius16),
+            borderSide: BorderSide(color: cs.primary, width: 1.4),
+          ),
         ),
       ),
     );

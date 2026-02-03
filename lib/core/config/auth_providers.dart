@@ -22,9 +22,7 @@ final authRepositoryProvider = Provider<AuthRepository>((ref) {
     throw StateError('Firebase is not configured.');
   }
 
-  return FirebaseAuthRepository(
-    ref.read(firebaseAuthProvider),
-  );
+  return FirebaseAuthRepository(ref.read(firebaseAuthProvider));
 });
 
 final authUserProvider = StreamProvider<AuthUser?>((ref) {
@@ -32,8 +30,7 @@ final authUserProvider = StreamProvider<AuthUser?>((ref) {
 });
 
 final currentUidProvider = Provider<String?>((ref) {
-  return ref.watch(authUserProvider).maybeWhen(
-        data: (user) => user?.uid,
-        orElse: () => null,
-      );
+  return ref
+      .watch(authUserProvider)
+      .maybeWhen(data: (user) => user?.uid, orElse: () => null);
 });

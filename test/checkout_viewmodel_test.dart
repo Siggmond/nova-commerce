@@ -202,26 +202,31 @@ void main() {
     expect(normalized, '+9613123456');
   });
 
-  test('Lebanon phone normalization supports local format without leading 0',
-      () async {
-    final normalizer = PhoneNumberNormalizer();
-    final normalized = await normalizer.toE164(
-      input: '3 123456',
-      regionCode: 'LB',
-    );
+  test(
+    'Lebanon phone normalization supports local format without leading 0',
+    () async {
+      final normalizer = PhoneNumberNormalizer();
+      final normalized = await normalizer.toE164(
+        input: '3 123456',
+        regionCode: 'LB',
+      );
 
-    expect(normalized, '+9613123456');
-  });
+      expect(normalized, '+9613123456');
+    },
+  );
 
-  test('Lebanon phone normalization supports international +961 input', () async {
-    final normalizer = PhoneNumberNormalizer();
-    final normalized = await normalizer.toE164(
-      input: '+961 3 123456',
-      regionCode: 'LB',
-    );
+  test(
+    'Lebanon phone normalization supports international +961 input',
+    () async {
+      final normalizer = PhoneNumberNormalizer();
+      final normalized = await normalizer.toE164(
+        input: '+961 3 123456',
+        regionCode: 'LB',
+      );
 
-    expect(normalized, '+9613123456');
-  });
+      expect(normalized, '+9613123456');
+    },
+  );
 
   test('Phone normalization handles leading zero local formats', () async {
     final container = ProviderContainer(
@@ -245,60 +250,64 @@ void main() {
     expect(normalized, '+442079460123');
   });
 
-  test('Fallback auth (invalid API key) still allows checkout without redirect',
-      () async {
-    final repo = _TestOrderRepository();
+  test(
+    'Fallback auth (invalid API key) still allows checkout without redirect',
+    () async {
+      final repo = _TestOrderRepository();
 
-    final fallback = FakeAuthRepository();
-    final authRepo = FallbackAuthRepository(
-      primary: _InvalidApiKeyAuthRepository(),
-      fallback: fallback,
-    );
+      final fallback = FakeAuthRepository();
+      final authRepo = FallbackAuthRepository(
+        primary: _InvalidApiKeyAuthRepository(),
+        fallback: fallback,
+      );
 
-    final clearCounter = _ClearCounter();
-    final container = ProviderContainer(
-      overrides: [
-        authRepositoryProvider.overrideWithValue(authRepo),
-        checkoutViewModelProvider.overrideWith(
-          (ref) => CheckoutViewModel(
-            ref,
-            phoneNormalizer: _FakePhoneNormalizer(next: '+12025550123'),
+      final clearCounter = _ClearCounter();
+      final container = ProviderContainer(
+        overrides: [
+          authRepositoryProvider.overrideWithValue(authRepo),
+          checkoutViewModelProvider.overrideWith(
+            (ref) => CheckoutViewModel(
+              ref,
+              phoneNormalizer: _FakePhoneNormalizer(next: '+12025550123'),
+            ),
           ),
-        ),
-        deviceIdDataSourceProvider.overrideWithValue(_TestDeviceIdDataSource()),
-        cartRepositoryProvider.overrideWithValue(_NoopCartRepository()),
-        orderRepositoryProvider.overrideWithValue(repo),
-        cartItemsProvider.overrideWithValue(<CartItem>[_item()]),
-        cartClearProvider.overrideWithValue(() => clearCounter.calls++),
-      ],
-    );
-    addTearDown(container.dispose);
+          deviceIdDataSourceProvider.overrideWithValue(
+            _TestDeviceIdDataSource(),
+          ),
+          cartRepositoryProvider.overrideWithValue(_NoopCartRepository()),
+          orderRepositoryProvider.overrideWithValue(repo),
+          cartItemsProvider.overrideWithValue(<CartItem>[_item()]),
+          cartClearProvider.overrideWithValue(() => clearCounter.calls++),
+        ],
+      );
+      addTearDown(container.dispose);
 
-    // This triggers fallback-to-demo. Historically, authUserProvider could stay null
-    // because the stream came from primary and never switched.
-    await authRepo.signInEmail(email: 'user@nova.dev', password: 'secret');
+      // This triggers fallback-to-demo. Historically, authUserProvider could stay null
+      // because the stream came from primary and never switched.
+      await authRepo.signInEmail(email: 'user@nova.dev', password: 'secret');
 
-    // Force provider evaluation and ensure uid is available before submitting.
-    final user = await container.read(authUserProvider.future);
-    expect(user, isNotNull);
-    expect(container.read(currentUidProvider), isNotNull);
+      // Force provider evaluation and ensure uid is available before submitting.
+      final user = await container.read(authUserProvider.future);
+      expect(user, isNotNull);
+      expect(container.read(currentUidProvider), isNotNull);
 
-    final vm = container.read(checkoutViewModelProvider.notifier);
-    vm.setFullName('Nova User');
-    vm.setPhone('2025550123');
-    vm.setAddress('123 Main St');
-    vm.setCity('Seattle');
-    vm.setStateRegion('WA');
-    vm.setPostalCode('98101');
-    vm.setCountry('United States');
+      final vm = container.read(checkoutViewModelProvider.notifier);
+      vm.setFullName('Nova User');
+      vm.setPhone('2025550123');
+      vm.setAddress('123 Main St');
+      vm.setCity('Seattle');
+      vm.setStateRegion('WA');
+      vm.setPostalCode('98101');
+      vm.setCountry('United States');
 
-    await vm.submit();
+      await vm.submit();
 
-    final state = container.read(checkoutViewModelProvider);
-    expect(state.event, isNot(isA<CheckoutGoToSignIn>()));
-    expect(repo.calls, 1);
-    expect(state.event, isA<CheckoutGoToSuccess>());
-  });
+      final state = container.read(checkoutViewModelProvider);
+      expect(state.event, isNot(isA<CheckoutGoToSignIn>()));
+      expect(repo.calls, 1);
+      expect(state.event, isA<CheckoutGoToSuccess>());
+    },
+  );
 
   test('Signed-in user can place order without sign-in redirect', () async {
     final repo = _TestOrderRepository();
@@ -349,44 +358,40 @@ void main() {
     final container = ProviderContainer(
       overrides: [
         checkoutViewModelProvider.overrideWith(
-          (ref) => CheckoutViewModel(
-            ref,
-            phoneNormalizer: _FakePhoneNormalizer(),
-          ),
+          (ref) =>
+              CheckoutViewModel(ref, phoneNormalizer: _FakePhoneNormalizer()),
         ),
       ],
     );
     addTearDown(container.dispose);
 
     final vm = container.read(checkoutViewModelProvider.notifier);
-    final parsed = vm.parseAddressComponentsForTest(
-      [
-        {
-          'long_name': '1600',
-          'types': ['street_number'],
-        },
-        {
-          'long_name': 'Amphitheatre Parkway',
-          'types': ['route'],
-        },
-        {
-          'long_name': 'Mountain View',
-          'types': ['locality'],
-        },
-        {
-          'long_name': 'CA',
-          'types': ['administrative_area_level_1'],
-        },
-        {
-          'long_name': '94043',
-          'types': ['postal_code'],
-        },
-        {
-          'long_name': 'United States',
-          'types': ['country'],
-        },
-      ],
-    );
+    final parsed = vm.parseAddressComponentsForTest([
+      {
+        'long_name': '1600',
+        'types': ['street_number'],
+      },
+      {
+        'long_name': 'Amphitheatre Parkway',
+        'types': ['route'],
+      },
+      {
+        'long_name': 'Mountain View',
+        'types': ['locality'],
+      },
+      {
+        'long_name': 'CA',
+        'types': ['administrative_area_level_1'],
+      },
+      {
+        'long_name': '94043',
+        'types': ['postal_code'],
+      },
+      {
+        'long_name': 'United States',
+        'types': ['country'],
+      },
+    ]);
 
     expect(parsed, isNotNull);
     expect(parsed!.addressLine, '1600 Amphitheatre Parkway');
@@ -400,10 +405,8 @@ void main() {
     final container = ProviderContainer(
       overrides: [
         checkoutViewModelProvider.overrideWith(
-          (ref) => CheckoutViewModel(
-            ref,
-            phoneNormalizer: _FakePhoneNormalizer(),
-          ),
+          (ref) =>
+              CheckoutViewModel(ref, phoneNormalizer: _FakePhoneNormalizer()),
         ),
       ],
     );

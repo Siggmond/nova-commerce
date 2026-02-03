@@ -1,11 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
-
 import '../../features/ai_assistant/presentation/ai_chat_screen.dart';
 import '../../features/cart/presentation/cart_screen.dart';
 import '../../features/checkout/presentation/checkout_screen.dart';
-import '../../features/home/presentation/home_screen.dart';
+import '../../features/home/presentation/home_v2_screen.dart';
 import '../../features/auth/presentation/sign_in_screen.dart';
 import '../../features/orders/presentation/order_details_screen.dart';
 import '../../features/orders/presentation/order_success_screen.dart';
@@ -17,16 +16,22 @@ import '../../features/profile/presentation/profile_details_screen.dart';
 import '../../features/profile/presentation/profile_account_details_screen.dart';
 import '../../features/profile/presentation/profile_screen.dart';
 import '../../features/messages/presentation/messages_screen.dart';
+import '../../features/search/presentation/collection_results_screen.dart';
 import '../../features/search/presentation/search_screen.dart';
 import '../../features/wishlist/presentation/wishlist_screen.dart';
+import '../../features/home/presentation/trending_now_screen.dart';
+import '../../features/home/presentation/picked_for_you_screen.dart';
+import '../../features/loyalty/presentation/gold_screen.dart';
+import '../../features/offers/presentation/offers_screen.dart';
+import '../../features/offers/presentation/offer_details_screen.dart';
 import '../widgets/app_shell.dart';
-import 'app_env.dart';
 import 'app_routes.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _homeNavigatorKey = GlobalKey<NavigatorState>();
+final _searchNavigatorKey = GlobalKey<NavigatorState>();
 final _aiNavigatorKey = GlobalKey<NavigatorState>();
-final _trendsNavigatorKey = GlobalKey<NavigatorState>();
+final _offersNavigatorKey = GlobalKey<NavigatorState>();
 final _cartNavigatorKey = GlobalKey<NavigatorState>();
 final _profileNavigatorKey = GlobalKey<NavigatorState>();
 
@@ -69,7 +74,28 @@ GoRouter createAppRouter({String initialLocation = AppRoutes.home}) {
             routes: [
               GoRoute(
                 path: AppRoutes.home,
-                builder: (context, state) => const HomeScreen(),
+                builder: (context, state) => const HomeV2Screen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            navigatorKey: _searchNavigatorKey,
+            routes: [
+              GoRoute(
+                path: AppRoutes.search,
+                builder: (context, state) {
+                  final initialQuery = state.uri.queryParameters['q'] ?? '';
+                  return SearchScreen(initialQuery: initialQuery);
+                },
+                routes: [
+                  GoRoute(
+                    path: 'collection/:id',
+                    builder: (context, state) {
+                      final id = state.pathParameters['id'] ?? '';
+                      return CollectionResultsScreen(collectionId: id);
+                    },
+                  ),
+                ],
               ),
             ],
           ),
@@ -83,11 +109,20 @@ GoRouter createAppRouter({String initialLocation = AppRoutes.home}) {
             ],
           ),
           StatefulShellBranch(
-            navigatorKey: _trendsNavigatorKey,
+            navigatorKey: _offersNavigatorKey,
             routes: [
               GoRoute(
-                path: AppRoutes.trends,
-                builder: (context, state) => const TrendsScreen(),
+                path: AppRoutes.offers,
+                builder: (context, state) => const OffersScreen(),
+                routes: [
+                  GoRoute(
+                    path: ':id',
+                    builder: (context, state) {
+                      final id = state.pathParameters['id'] ?? '';
+                      return OfferDetailsScreen(offerId: id);
+                    },
+                  ),
+                ],
               ),
             ],
           ),
@@ -119,13 +154,9 @@ GoRouter createAppRouter({String initialLocation = AppRoutes.home}) {
               GoRoute(
                 path: AppRoutes.profileAccountDetails,
                 pageBuilder: (context, state) {
-                  final enableRedesign =
-                      AppEnv.enableNovaUi && AppEnv.enableNovaUiProfileDetails;
                   return _fadeSlidePage(
                     state: state,
-                    child: enableRedesign
-                        ? const ProfileAccountDetailsScreen()
-                        : const ProfileDetailsScreen(),
+                    child: const ProfileAccountDetailsScreen(),
                   );
                 },
               ),
@@ -141,7 +172,10 @@ GoRouter createAppRouter({String initialLocation = AppRoutes.home}) {
               GoRoute(
                 path: AppRoutes.orders,
                 pageBuilder: (context, state) {
-                  return _fadeSlidePage(state: state, child: const OrdersScreen());
+                  return _fadeSlidePage(
+                    state: state,
+                    child: const OrdersScreen(),
+                  );
                 },
                 routes: [
                   GoRoute(
@@ -167,13 +201,26 @@ GoRouter createAppRouter({String initialLocation = AppRoutes.home}) {
         ],
       ),
       GoRoute(
-        path: AppRoutes.search,
+        path: AppRoutes.trends,
         parentNavigatorKey: _rootNavigatorKey,
         pageBuilder: (context, state) {
-          final initialQuery = state.uri.queryParameters['q'] ?? '';
+          return _fadeSlidePage(state: state, child: const TrendsScreen());
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.trendingNow,
+        parentNavigatorKey: _rootNavigatorKey,
+        pageBuilder: (context, state) {
+          return _fadeSlidePage(state: state, child: const TrendingNowScreen());
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.pickedForYou,
+        parentNavigatorKey: _rootNavigatorKey,
+        pageBuilder: (context, state) {
           return _fadeSlidePage(
             state: state,
-            child: SearchScreen(initialQuery: initialQuery),
+            child: const PickedForYouScreen(),
           );
         },
       ),
@@ -210,6 +257,13 @@ GoRouter createAppRouter({String initialLocation = AppRoutes.home}) {
         },
       ),
       GoRoute(
+        path: AppRoutes.gold,
+        parentNavigatorKey: _rootNavigatorKey,
+        pageBuilder: (context, state) {
+          return _fadeSlidePage(state: state, child: const GoldScreen());
+        },
+      ),
+      GoRoute(
         path: '${AppRoutes.orderSuccess}/:id',
         parentNavigatorKey: _rootNavigatorKey,
         pageBuilder: (context, state) {
@@ -230,9 +284,7 @@ GoRouter createAppRouter({String initialLocation = AppRoutes.home}) {
         pageBuilder: (context, state) {
           return _fadeSlidePage(
             state: state,
-            child: const Scaffold(
-              body: Center(child: Text('Coming soon')),
-            ),
+            child: const Scaffold(body: Center(child: Text('Coming soon'))),
           );
         },
       ),
@@ -242,9 +294,7 @@ GoRouter createAppRouter({String initialLocation = AppRoutes.home}) {
         pageBuilder: (context, state) {
           return _fadeSlidePage(
             state: state,
-            child: const Scaffold(
-              body: Center(child: Text('Coming soon')),
-            ),
+            child: const Scaffold(body: Center(child: Text('Coming soon'))),
           );
         },
       ),
@@ -254,9 +304,7 @@ GoRouter createAppRouter({String initialLocation = AppRoutes.home}) {
         pageBuilder: (context, state) {
           return _fadeSlidePage(
             state: state,
-            child: const Scaffold(
-              body: Center(child: Text('Coming soon')),
-            ),
+            child: const Scaffold(body: Center(child: Text('Coming soon'))),
           );
         },
       ),
@@ -266,9 +314,7 @@ GoRouter createAppRouter({String initialLocation = AppRoutes.home}) {
         pageBuilder: (context, state) {
           return _fadeSlidePage(
             state: state,
-            child: const Scaffold(
-              body: Center(child: Text('Coming soon')),
-            ),
+            child: const Scaffold(body: Center(child: Text('Coming soon'))),
           );
         },
       ),
@@ -278,9 +324,7 @@ GoRouter createAppRouter({String initialLocation = AppRoutes.home}) {
         pageBuilder: (context, state) {
           return _fadeSlidePage(
             state: state,
-            child: const Scaffold(
-              body: Center(child: Text('Coming soon')),
-            ),
+            child: const Scaffold(body: Center(child: Text('Coming soon'))),
           );
         },
       ),
@@ -290,9 +334,7 @@ GoRouter createAppRouter({String initialLocation = AppRoutes.home}) {
         pageBuilder: (context, state) {
           return _fadeSlidePage(
             state: state,
-            child: const Scaffold(
-              body: Center(child: Text('Coming soon')),
-            ),
+            child: const Scaffold(body: Center(child: Text('Coming soon'))),
           );
         },
       ),
@@ -302,9 +344,7 @@ GoRouter createAppRouter({String initialLocation = AppRoutes.home}) {
         pageBuilder: (context, state) {
           return _fadeSlidePage(
             state: state,
-            child: const Scaffold(
-              body: Center(child: Text('Coming soon')),
-            ),
+            child: const Scaffold(body: Center(child: Text('Coming soon'))),
           );
         },
       ),
@@ -314,9 +354,7 @@ GoRouter createAppRouter({String initialLocation = AppRoutes.home}) {
         pageBuilder: (context, state) {
           return _fadeSlidePage(
             state: state,
-            child: const Scaffold(
-              body: Center(child: Text('Coming soon')),
-            ),
+            child: const Scaffold(body: Center(child: Text('Coming soon'))),
           );
         },
       ),
@@ -326,9 +364,7 @@ GoRouter createAppRouter({String initialLocation = AppRoutes.home}) {
         pageBuilder: (context, state) {
           return _fadeSlidePage(
             state: state,
-            child: const Scaffold(
-              body: Center(child: Text('Coming soon')),
-            ),
+            child: const Scaffold(body: Center(child: Text('Coming soon'))),
           );
         },
       ),
@@ -338,9 +374,7 @@ GoRouter createAppRouter({String initialLocation = AppRoutes.home}) {
         pageBuilder: (context, state) {
           return _fadeSlidePage(
             state: state,
-            child: const Scaffold(
-              body: Center(child: Text('Coming soon')),
-            ),
+            child: const Scaffold(body: Center(child: Text('Coming soon'))),
           );
         },
       ),

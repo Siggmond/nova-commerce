@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/config/app_routes.dart';
@@ -17,7 +16,6 @@ class WishlistScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(wishlistViewModelProvider);
-    final listImageWidth = 1.sw - 32.w;
 
     return Scaffold(
       appBar: AppBar(title: const Text('Wishlist')),
@@ -39,20 +37,36 @@ class WishlistScreen extends ConsumerWidget {
             );
           }
 
-          return ListView.separated(
-            padding: AppInsets.screen,
-            itemCount: products.length,
-            separatorBuilder: (_, __) => SizedBox(height: AppSpace.xxs),
-            itemBuilder: (context, index) {
-              final p = products[index];
-              return ProductCard(
-                key: ValueKey(p.id),
-                product: p,
-                isSaved: true,
-                imageWidth: listImageWidth,
-                onToggleSaved: () =>
-                    ref.read(wishlistViewModelProvider.notifier).toggle(p.id),
-                onTap: () => context.push('${AppRoutes.product}?id=${p.id}'),
+          return LayoutBuilder(
+            builder: (context, constraints) {
+              final width = constraints.maxWidth;
+              final crossAxisCount = width < 420
+                  ? 2
+                  : (width < 620 ? 3 : (width < 900 ? 4 : 5));
+
+              return GridView.builder(
+                padding: AppInsets.screen,
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: crossAxisCount,
+                  mainAxisSpacing: AppSpace.sm,
+                  crossAxisSpacing: AppSpace.sm,
+                  childAspectRatio: 0.62,
+                ),
+                itemCount: products.length,
+                itemBuilder: (context, index) {
+                  final p = products[index];
+                  return ProductCard(
+                    key: ValueKey(p.id),
+                    product: p,
+                    isSaved: true,
+                    fillHeight: true,
+                    onToggleSaved: () => ref
+                        .read(wishlistViewModelProvider.notifier)
+                        .toggle(p.id),
+                    onTap: () =>
+                        context.push('${AppRoutes.product}?id=${p.id}'),
+                  );
+                },
               );
             },
           );
@@ -67,14 +81,18 @@ class _WishlistSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListView(
+    return GridView.builder(
       padding: AppInsets.screen,
-      children: List.generate(4, (index) {
-        return Padding(
-          padding: EdgeInsets.only(bottom: AppSpace.sm),
-          child: Shimmer(child: SkeletonBox(height: 184, radius: AppRadii.md)),
-        );
-      }),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        mainAxisSpacing: 8,
+        crossAxisSpacing: 8,
+        childAspectRatio: 0.62,
+      ),
+      itemCount: 6,
+      itemBuilder: (context, index) {
+        return Shimmer(child: SkeletonBox(height: 184, radius: AppRadii.md));
+      },
     );
   }
 }

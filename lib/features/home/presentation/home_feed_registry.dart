@@ -1,11 +1,13 @@
 enum HomeSectionId {
+  heroCarousel,
+  categoriesGrid,
+  editorialBanner,
+  trendsEditorial,
   browseResults,
   trendingHeader,
   trendingFeed,
   pickedHeader,
   pickedFeed,
-  underHeader,
-  underFeed,
 }
 
 class HomeSectionDefinition {
@@ -15,11 +17,13 @@ class HomeSectionDefinition {
 }
 
 const homeSectionRegistry = <HomeSectionDefinition>[
+  HomeSectionDefinition(HomeSectionId.heroCarousel),
+  HomeSectionDefinition(HomeSectionId.categoriesGrid),
+  HomeSectionDefinition(HomeSectionId.editorialBanner),
+  HomeSectionDefinition(HomeSectionId.trendsEditorial),
   HomeSectionDefinition(HomeSectionId.trendingHeader),
   HomeSectionDefinition(HomeSectionId.trendingFeed),
   HomeSectionDefinition(HomeSectionId.pickedHeader),
   HomeSectionDefinition(HomeSectionId.pickedFeed),
-  HomeSectionDefinition(HomeSectionId.underHeader),
-  HomeSectionDefinition(HomeSectionId.underFeed),
   HomeSectionDefinition(HomeSectionId.browseResults),
 ];

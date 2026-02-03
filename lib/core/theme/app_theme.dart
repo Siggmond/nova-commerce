@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import 'app_shadows.dart';
+import 'app_tokens.dart';
+
 class AppTheme {
   static const Color _brandPrimary = Color(0xFF6D5EF6);
 
@@ -51,16 +54,17 @@ class AppTheme {
   }
 
   static ThemeData get light {
-    final scheme = ColorScheme.fromSeed(
-      seedColor: _brandPrimary,
-      brightness: Brightness.light,
-    ).copyWith(
-      primary: _brandPrimary,
-      surface: _lightSurface,
-      surfaceContainerLow: _lightSurfaceLow,
-      surfaceContainerHigh: _lightSurfaceHigh,
-      surfaceContainerHighest: _lightSurfaceHighest,
-    );
+    final scheme =
+        ColorScheme.fromSeed(
+          seedColor: _brandPrimary,
+          brightness: Brightness.light,
+        ).copyWith(
+          primary: _brandPrimary,
+          surface: _lightSurface,
+          surfaceContainerLow: _lightSurfaceLow,
+          surfaceContainerHigh: _lightSurfaceHigh,
+          surfaceContainerHighest: _lightSurfaceHighest,
+        );
 
     final base = ThemeData(
       useMaterial3: true,
@@ -109,8 +113,8 @@ class AppTheme {
         ),
       ),
       cardTheme: CardThemeData(
-        elevation: 1.5,
-        shadowColor: Colors.black.withValues(alpha: 0.12),
+        elevation: AppElevation.card,
+        shadowColor: AppShadows.shadowColor.withValues(alpha: 0.10),
         color: base.colorScheme.surfaceContainerHigh,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16.r),
@@ -187,16 +191,17 @@ class AppTheme {
   }
 
   static ThemeData get dark {
-    final scheme = ColorScheme.fromSeed(
-      seedColor: _brandPrimary,
-      brightness: Brightness.dark,
-    ).copyWith(
-      primary: _brandPrimary.withValues(alpha: 0.92),
-      surface: _darkSurface,
-      surfaceContainerLow: _darkSurfaceLow,
-      surfaceContainerHigh: _darkSurfaceHigh,
-      surfaceContainerHighest: _darkSurfaceHighest,
-    );
+    final scheme =
+        ColorScheme.fromSeed(
+          seedColor: _brandPrimary,
+          brightness: Brightness.dark,
+        ).copyWith(
+          primary: _brandPrimary.withValues(alpha: 0.92),
+          surface: _darkSurface,
+          surfaceContainerLow: _darkSurfaceLow,
+          surfaceContainerHigh: _darkSurfaceHigh,
+          surfaceContainerHighest: _darkSurfaceHighest,
+        );
 
     final base = ThemeData(
       useMaterial3: true,
@@ -245,8 +250,8 @@ class AppTheme {
         ),
       ),
       cardTheme: CardThemeData(
-        elevation: 1.5,
-        shadowColor: Colors.black.withValues(alpha: 0.28),
+        elevation: AppElevation.card,
+        shadowColor: AppShadows.shadowColor.withValues(alpha: 0.28),
         color: base.colorScheme.surfaceContainerHigh,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16.r),

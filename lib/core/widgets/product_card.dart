@@ -3,6 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import 'app_cached_network_image.dart';
+import '../theme/app_shadows.dart';
+import '../theme/app_tokens.dart';
 import '../../domain/entities/product.dart';
 
 class ProductCard extends StatelessWidget {
@@ -42,8 +44,8 @@ class ProductCard extends StatelessWidget {
         final defaultCardHeight = 184.h;
         final effectiveCardHeight = fillHeight
             ? (constraints.hasBoundedHeight
-                ? constraints.maxHeight
-                : defaultCardHeight)
+                  ? constraints.maxHeight
+                  : defaultCardHeight)
             : defaultCardHeight;
 
         final effectiveImageHeight = fillHeight
@@ -56,8 +58,8 @@ class ProductCard extends StatelessWidget {
             ? (effectiveImageWidth * dpr).round()
             : null;
 
-        final memCacheHeight = (effectiveImageHeight.isFinite &&
-                effectiveImageHeight > 0)
+        final memCacheHeight =
+            (effectiveImageHeight.isFinite && effectiveImageHeight > 0)
             ? (effectiveImageHeight * dpr).round()
             : null;
 
@@ -68,8 +70,7 @@ class ProductCard extends StatelessWidget {
                 child: Hero(
                   tag: 'product-${product.id}',
                   child: ClipRRect(
-                    borderRadius:
-                        BorderRadius.vertical(top: radius.topLeft),
+                    borderRadius: BorderRadius.vertical(top: radius.topLeft),
                     child: AppCachedNetworkImage(
                       url: product.imageUrl,
                       fit: BoxFit.cover,
@@ -116,20 +117,16 @@ class ProductCard extends StatelessWidget {
         Widget detailsBody() {
           return LayoutBuilder(
             builder: (context, constraints) {
-              final isCompact =
-                  !disableCompact && constraints.maxWidth < 180;
+              final isCompact = !disableCompact && constraints.maxWidth < 180;
 
-              final isVeryTight = constraints.maxHeight < 52 || constraints.maxWidth < 80;
+              final isVeryTight =
+                  constraints.maxHeight < 52 || constraints.maxWidth < 80;
 
               if (isVeryTight) {
-                final titleStyle = Theme.of(context).textTheme.bodySmall?.copyWith(
-                      fontWeight: FontWeight.w800,
-                      height: 1.05,
-                    );
-                final priceStyle = Theme.of(context).textTheme.bodySmall?.copyWith(
-                      fontWeight: FontWeight.w900,
-                      height: 1.05,
-                    );
+                final titleStyle = Theme.of(context).textTheme.bodySmall
+                    ?.copyWith(fontWeight: FontWeight.w800, height: 1.05);
+                final priceStyle = Theme.of(context).textTheme.bodySmall
+                    ?.copyWith(fontWeight: FontWeight.w900, height: 1.05);
 
                 return Padding(
                   padding: EdgeInsets.all(2.r),
@@ -155,17 +152,10 @@ class ProductCard extends StatelessWidget {
                 );
               }
 
-              final titleStyle = Theme.of(context)
-                  .textTheme
-                  .titleSmall
-                  ?.copyWith(
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: -0.2,
-                  );
+              final titleStyle = Theme.of(context).textTheme.titleSmall
+                  ?.copyWith(fontWeight: FontWeight.w800, letterSpacing: -0.2);
 
-              final brandStyle = Theme.of(context)
-                  .textTheme
-                  .labelSmall
+              final brandStyle = Theme.of(context).textTheme.labelSmall
                   ?.copyWith(
                     fontWeight: FontWeight.w700,
                     letterSpacing: 0.8,
@@ -173,10 +163,7 @@ class ProductCard extends StatelessWidget {
                   );
 
               final priceChip = Container(
-                padding: EdgeInsets.symmetric(
-                  horizontal: 8.w,
-                  vertical: 4.h,
-                ),
+                padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
                 decoration: BoxDecoration(
                   color: cs.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(8.r),
@@ -188,10 +175,9 @@ class ProductCard extends StatelessWidget {
                     '${product.currency} ${product.price.toStringAsFixed(0)}',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context)
-                        .textTheme
-                        .labelLarge
-                        ?.copyWith(fontWeight: FontWeight.w800),
+                    style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                      fontWeight: FontWeight.w800,
+                    ),
                   ),
                 ),
               );
@@ -256,17 +242,14 @@ class ProductCard extends StatelessWidget {
               borderRadius: radius,
               onTap: onTap,
               child: Card(
-                elevation: 1.5,
-                shadowColor: Colors.black.withValues(alpha: 0.08),
+                elevation: AppElevation.card,
+                shadowColor: AppShadows.shadowColor.withValues(alpha: 0.10),
                 surfaceTintColor: cs.surface,
                 clipBehavior: Clip.antiAlias,
                 shape: RoundedRectangleBorder(borderRadius: radius),
                 child: fillHeight
                     ? SizedBox.expand(child: cardChild)
-                    : SizedBox(
-                        height: defaultCardHeight,
-                        child: cardChild,
-                      ),
+                    : SizedBox(height: defaultCardHeight, child: cardChild),
               ),
             ),
           ),
@@ -289,9 +272,9 @@ class _NewDropBadge extends StatelessWidget {
       child: Text(
         'New',
         style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              fontWeight: FontWeight.w800,
-              color: cs.primary,
-            ),
+          fontWeight: FontWeight.w800,
+          color: cs.primary,
+        ),
       ),
     );
   }
@@ -309,16 +292,8 @@ class _PillOverlay extends StatelessWidget {
       decoration: BoxDecoration(
         color: cs.surface.withValues(alpha: 0.88),
         borderRadius: BorderRadius.circular(999.r),
-        border: Border.all(
-          color: cs.outlineVariant.withValues(alpha: 0.4),
-        ),
-        boxShadow: [
-          BoxShadow(
-            blurRadius: 12.r,
-            offset: Offset(0, 6.h),
-            color: Colors.black.withValues(alpha: 0.12),
-          ),
-        ],
+        border: Border.all(color: cs.outlineVariant.withValues(alpha: 0.4)),
+        boxShadow: AppShadows.sm(),
       ),
       child: child,
     );
@@ -326,10 +301,7 @@ class _PillOverlay extends StatelessWidget {
 }
 
 class _WishlistHeart extends StatelessWidget {
-  const _WishlistHeart({
-    required this.isSaved,
-    required this.onPressed,
-  });
+  const _WishlistHeart({required this.isSaved, required this.onPressed});
 
   final bool isSaved;
   final VoidCallback onPressed;
@@ -342,10 +314,7 @@ class _WishlistHeart extends StatelessWidget {
       child: IconButton(
         visualDensity: VisualDensity.compact,
         padding: EdgeInsets.zero,
-        constraints: BoxConstraints.tightFor(
-          width: 40.r,
-          height: 40.r,
-        ),
+        constraints: BoxConstraints.tightFor(width: 40.r, height: 40.r),
         onPressed: () {
           HapticFeedback.selectionClick();
           onPressed();
@@ -355,8 +324,7 @@ class _WishlistHeart extends StatelessWidget {
           child: Icon(
             key: ValueKey(isSaved),
             isSaved ? Icons.favorite : Icons.favorite_border,
-            color:
-                isSaved ? cs.primary : cs.onSurface.withValues(alpha: 0.78),
+            color: isSaved ? cs.primary : cs.onSurface.withValues(alpha: 0.78),
             size: 16.r,
           ),
         ),

@@ -26,9 +26,9 @@ class NovaChip extends StatelessWidget {
       selected: selected,
       onSelected: enabled ? onSelected : null,
       labelStyle: Theme.of(context).textTheme.labelLarge?.copyWith(
-            fontWeight: FontWeight.w700,
-            color: selected ? cs.primary : cs.onSurface.withValues(alpha: 0.85),
-          ),
+        fontWeight: FontWeight.w700,
+        color: selected ? cs.primary : cs.onSurface.withValues(alpha: 0.85),
+      ),
       selectedColor: cs.primary.withValues(alpha: 0.10),
       backgroundColor: NovaColors.sheetStrong(cs),
       side: BorderSide(
@@ -40,7 +40,10 @@ class NovaChip extends StatelessWidget {
         borderRadius: BorderRadius.circular(NovaRadii.radiusPill),
       ),
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-      padding: EdgeInsets.symmetric(horizontal: AppSpace.sm, vertical: AppSpace.xxs),
+      padding: EdgeInsets.symmetric(
+        horizontal: AppSpace.sm,
+        vertical: AppSpace.xxs,
+      ),
       visualDensity: VisualDensity.compact,
     );
   }

@@ -3,6 +3,9 @@ class AppRoutes {
   static const String product = '/product';
   static const String cart = '/cart';
   static const String trends = '/trends';
+  static const String offers = '/offers';
+  static const String trendingNow = '/trending-now';
+  static const String pickedForYou = '/picked-for-you';
   static const String checkout = '/checkout';
   static const String signIn = '/sign-in';
   static const String messages = '/messages';
@@ -10,8 +13,10 @@ class AppRoutes {
   static const String orderSuccess = '/order-success';
   static const String wishlist = '/wishlist';
   static const String search = '/search';
+  static const String searchCollection = '/search/collection';
   static const String ai = '/ai';
   static const String profile = '/profile';
   static const String profileDetails = '/profile/details';
   static const String profileAccountDetails = '/profile/account-details';
+  static const String gold = '/gold';
 }

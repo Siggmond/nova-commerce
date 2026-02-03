@@ -4,13 +4,10 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/config/app_routes.dart';
 import '../../checkout/domain/checkout_cart_summary.dart';
+import '../../loyalty/gold_controller.dart';
 
 class OrderSuccessScreen extends StatelessWidget {
-  const OrderSuccessScreen({
-    super.key,
-    required this.orderId,
-    this.summary,
-  });
+  const OrderSuccessScreen({super.key, required this.orderId, this.summary});
 
   final String orderId;
   final CheckoutCartSummary? summary;
@@ -61,9 +58,18 @@ class OrderSuccessScreen extends StatelessWidget {
                   '${summary!.items.length} items • '
                   '${summary!.currency.toUpperCase()} '
                   '${summary!.total.toStringAsFixed(0)} total',
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700),
+                  textAlign: TextAlign.center,
+                ),
+                SizedBox(height: 8.h),
+                Text(
+                  'You earned +${goldEarnedFromOrderTotal(summary!.total)} Gold',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w700,
-                      ),
+                    color: cs.onSurface.withValues(alpha: 0.75),
+                    fontWeight: FontWeight.w700,
+                  ),
                   textAlign: TextAlign.center,
                 ),
               ],

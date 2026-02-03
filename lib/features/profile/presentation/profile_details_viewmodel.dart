@@ -57,8 +57,8 @@ class ProfileDetailsState {
 
 final profileDetailsViewModelProvider =
     StateNotifierProvider<ProfileDetailsViewModel, ProfileDetailsState>((ref) {
-  return ProfileDetailsViewModel(ref.read(authRepositoryProvider));
-});
+      return ProfileDetailsViewModel(ref.read(authRepositoryProvider));
+    });
 
 class ProfileDetailsViewModel extends StateNotifier<ProfileDetailsState> {
   ProfileDetailsViewModel(this._auth) : super(const ProfileDetailsState()) {
@@ -122,7 +122,9 @@ class ProfileDetailsViewModel extends StateNotifier<ProfileDetailsState> {
   Future<void> sendEmailVerification() async {
     final details = state.details;
     if (details == null) return;
-    if (details.isAnonymous || details.email == null || details.email!.isEmpty) {
+    if (details.isAnonymous ||
+        details.email == null ||
+        details.email!.isEmpty) {
       _emit('No email attached to this account.');
       return;
     }

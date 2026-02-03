@@ -44,7 +44,8 @@ class OrderDetailsScreen extends ConsumerWidget {
                 Navigator.of(context).maybePop();
                 return;
               }
-              ref.read(orderDetailsControllerProvider(orderId).notifier)
+              ref
+                  .read(orderDetailsControllerProvider(orderId).notifier)
                   .refresh();
             },
           );
@@ -64,8 +65,9 @@ class OrderDetailsScreen extends ConsumerWidget {
                   children: [
                     Text(
                       'Summary',
-                      style: Theme.of(context).textTheme.titleMedium
-                          ?.copyWith(fontWeight: FontWeight.w900),
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w900,
+                      ),
                     ),
                     SizedBox(height: AppSpace.sm),
                     Row(
@@ -73,9 +75,7 @@ class OrderDetailsScreen extends ConsumerWidget {
                         Expanded(
                           child: Text(
                             'Order ID #$shortId',
-                            style: Theme.of(context)
-                                .textTheme
-                                .labelLarge
+                            style: Theme.of(context).textTheme.labelLarge
                                 ?.copyWith(fontWeight: FontWeight.w800),
                           ),
                         ),
@@ -98,11 +98,7 @@ class OrderDetailsScreen extends ConsumerWidget {
                       ],
                     ),
                     SizedBox(height: AppSpace.xs),
-                    _Row(
-                      left: 'Status',
-                      right: statusLabel,
-                      icon: statusIcon,
-                    ),
+                    _Row(left: 'Status', right: statusLabel, icon: statusIcon),
                     SizedBox(height: AppSpace.xs),
                     _Row(
                       left: 'Total',
@@ -126,8 +122,9 @@ class OrderDetailsScreen extends ConsumerWidget {
                   children: [
                     Text(
                       'Shipping',
-                      style: Theme.of(context).textTheme.titleMedium
-                          ?.copyWith(fontWeight: FontWeight.w900),
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w900,
+                      ),
                     ),
                     SizedBox(height: AppSpace.sm),
                     Text(
@@ -161,16 +158,20 @@ class OrderDetailsScreen extends ConsumerWidget {
                 child: useNovaUi
                     ? NovaButton.primary(
                         onPressed: () async {
-                          final productRepo =
-                              ref.read(productRepositoryProvider);
-                          final cartVm =
-                              ref.read(cartViewModelProvider.notifier);
-                          final ids =
-                              order.items.map((i) => i.productId).toSet();
+                          final productRepo = ref.read(
+                            productRepositoryProvider,
+                          );
+                          final cartVm = ref.read(
+                            cartViewModelProvider.notifier,
+                          );
+                          final ids = order.items
+                              .map((i) => i.productId)
+                              .toSet();
                           if (ids.isEmpty) return;
 
-                          final products =
-                              await productRepo.getProductsByIds(ids);
+                          final products = await productRepo.getProductsByIds(
+                            ids,
+                          );
                           final byId = {for (final p in products) p.id: p};
                           int added = 0;
                           for (final item in order.items) {
@@ -199,16 +200,20 @@ class OrderDetailsScreen extends ConsumerWidget {
                       )
                     : FilledButton(
                         onPressed: () async {
-                          final productRepo =
-                              ref.read(productRepositoryProvider);
-                          final cartVm =
-                              ref.read(cartViewModelProvider.notifier);
-                          final ids =
-                              order.items.map((i) => i.productId).toSet();
+                          final productRepo = ref.read(
+                            productRepositoryProvider,
+                          );
+                          final cartVm = ref.read(
+                            cartViewModelProvider.notifier,
+                          );
+                          final ids = order.items
+                              .map((i) => i.productId)
+                              .toSet();
                           if (ids.isEmpty) return;
 
-                          final products =
-                              await productRepo.getProductsByIds(ids);
+                          final products = await productRepo.getProductsByIds(
+                            ids,
+                          );
                           final byId = {for (final p in products) p.id: p};
                           int added = 0;
                           for (final item in order.items) {

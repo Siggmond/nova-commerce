@@ -1,8 +1,1 @@
-enum AiNavIntent {
-  home,
-  ai,
-  trends,
-  cart,
-  profile,
-  idle,
-}
+enum AiNavIntent { home, ai, trends, cart, profile, idle }

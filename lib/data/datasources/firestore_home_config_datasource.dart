@@ -6,9 +6,10 @@ class FirestoreHomeConfigDataSource {
   final FirebaseFirestore _firestore;
 
   Stream<Map<String, dynamic>> watchConfig() {
-    final primary = _firestore.doc('home_config/config').snapshots().map(
-          (doc) => (doc.data() ?? <String, dynamic>{}),
-        );
+    final primary = _firestore
+        .doc('home_config/config')
+        .snapshots()
+        .map((doc) => (doc.data() ?? <String, dynamic>{}));
 
     return primary.asyncMap((data) async {
       if (data.isNotEmpty) return data;

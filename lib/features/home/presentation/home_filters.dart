@@ -6,7 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../domain/entities/product.dart';
 import 'home_viewmodel.dart';
 
-enum HomeSort { newest, priceAsc, priceDesc }
+enum HomeSort { recommended, newest, priceAsc, priceDesc }
 
 class HomeBrowseFilters {
   const HomeBrowseFilters({
@@ -14,7 +14,7 @@ class HomeBrowseFilters {
     this.brand,
     this.inStockOnly = false,
     this.priceRange,
-    this.sort = HomeSort.newest,
+    this.sort = HomeSort.recommended,
   });
 
   final String query;
@@ -140,6 +140,10 @@ final homeCatalogMetaProvider = Provider<HomeCatalogMeta>((ref) {
   );
 });
 
+final homeActiveCategoryProvider = StateProvider<String>((ref) {
+  return 'All';
+});
+
 final homeFilteredProductsProvider = Provider<List<Product>>((ref) {
   final items = ref
       .watch(homeViewModelProvider)
@@ -150,6 +154,10 @@ final homeFilteredProductsProvider = Provider<List<Product>>((ref) {
       );
 
   final filters = ref.watch(homeBrowseFiltersProvider);
+  final activeCategory = ref
+      .watch(homeActiveCategoryProvider)
+      .trim()
+      .toLowerCase();
   final meta = ref.watch(homeCatalogMetaProvider);
 
   final safeMaxPrice = meta.maxPrice <= meta.minPrice
@@ -162,6 +170,10 @@ final homeFilteredProductsProvider = Provider<List<Product>>((ref) {
 
   final filtered = items
       .where((p) {
+        if (activeCategory.isNotEmpty && activeCategory != 'all') {
+          final hay = '${p.title} ${p.brand}'.toLowerCase();
+          if (!hay.contains(activeCategory)) return false;
+        }
         if (brand != null && brand.isNotEmpty) {
           if (p.brand.trim() != brand) return false;
         }
@@ -178,13 +190,15 @@ final homeFilteredProductsProvider = Provider<List<Product>>((ref) {
       .toList(growable: true);
 
   switch (filters.sort) {
+    case HomeSort.recommended:
+      break;
+    case HomeSort.newest:
+      break;
     case HomeSort.priceAsc:
       filtered.sort((a, b) => a.price.compareTo(b.price));
       break;
     case HomeSort.priceDesc:
       filtered.sort((a, b) => b.price.compareTo(a.price));
-      break;
-    case HomeSort.newest:
       break;
   }
 
@@ -193,9 +207,4 @@ final homeFilteredProductsProvider = Provider<List<Product>>((ref) {
 
 final homePersonalizationEnabledProvider = Provider<bool>((ref) {
   return false;
-});
-
-final homeUnder50ProductsProvider = Provider<List<Product>>((ref) {
-  final items = ref.watch(homeFilteredProductsProvider);
-  return items.where((p) => p.price <= 50).toList(growable: false);
 });

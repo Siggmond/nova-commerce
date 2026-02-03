@@ -25,7 +25,10 @@ class _StreamOrdersRepo implements OrdersRepository {
   final StreamController<List<Order>> controller;
 
   @override
-  Stream<List<Order>> watchOrders({required String? uid, required String deviceId}) {
+  Stream<List<Order>> watchOrders({
+    required String? uid,
+    required String deviceId,
+  }) {
     return controller.stream;
   }
 
@@ -55,7 +58,7 @@ Order _o(String id) {
         quantity: 1,
         selectedColor: 'Black',
         selectedSize: 'M',
-      )
+      ),
     ],
     createdAt: DateTime.utc(2025, 1, 1),
     updatedAt: DateTime.utc(2025, 1, 1),
@@ -91,7 +94,10 @@ void main() {
     controller.add([_o('o1')]);
     await Future<void>.delayed(const Duration(milliseconds: 1));
 
-    expect(states.any((s) => s.hasValue && (s.value?.length ?? 0) == 1), isTrue);
+    expect(
+      states.any((s) => s.hasValue && (s.value?.length ?? 0) == 1),
+      isTrue,
+    );
     final latest = states.last;
     expect(latest.hasValue, isTrue);
     expect(latest.value?.first.id, 'o1');
@@ -131,7 +137,10 @@ class _FakeFetchRepo implements OrdersRepository {
   }
 
   @override
-  Stream<List<Order>> watchOrders({required String? uid, required String deviceId}) {
+  Stream<List<Order>> watchOrders({
+    required String? uid,
+    required String deviceId,
+  }) {
     return const Stream<List<Order>>.empty();
   }
 }

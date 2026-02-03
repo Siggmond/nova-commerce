@@ -12,9 +12,9 @@ class AiClearChatAction extends ConsumerWidget {
       tooltip: 'Clear chat',
       onPressed: () {
         ref.read(aiChatViewModelProvider.notifier).clear();
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Chat cleared')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Chat cleared')));
       },
       icon: const Icon(Icons.delete_outline),
     );

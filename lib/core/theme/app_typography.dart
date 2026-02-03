@@ -8,9 +8,8 @@ extension AppTypographyX on BuildContext {
   TextStyle? get h3 => appText.titleMedium;
 
   TextStyle? get body => appText.bodyMedium;
-  TextStyle? get bodyStrong => appText.bodyMedium?.copyWith(
-        fontWeight: FontWeight.w700,
-      );
+  TextStyle? get bodyStrong =>
+      appText.bodyMedium?.copyWith(fontWeight: FontWeight.w700);
 
   TextStyle? get label => appText.labelLarge;
 }

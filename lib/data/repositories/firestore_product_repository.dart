@@ -81,10 +81,10 @@ class FirestoreProductRepository implements ProductRepository {
     final imageUrlsRaw = data['imageUrls'];
     final imageUrls = imageUrlsRaw is List
         ? imageUrlsRaw
-            .whereType<String>()
-            .map(_normalizeImageUrl)
-            .whereType<String>()
-            .toList(growable: false)
+              .whereType<String>()
+              .map(_normalizeImageUrl)
+              .whereType<String>()
+              .toList(growable: false)
         : const <String>[];
 
     final variantsRaw = data['variants'];

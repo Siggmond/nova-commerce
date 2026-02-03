@@ -1,12 +1,14 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import 'package:nova_commerce/app.dart';
+import 'package:nova_commerce/core/config/app_routes.dart';
 import 'package:nova_commerce/core/config/auth_providers.dart';
 import 'package:nova_commerce/data/repositories/fake_auth_repository.dart';
-import 'package:nova_commerce/features/orders/presentation/orders_screen.dart';
 import 'package:nova_commerce/features/profile/presentation/profile_screen.dart';
+import 'package:nova_commerce/features/wishlist/presentation/wishlist_screen.dart';
 
 Future<void> _pumpUntilFound(
   WidgetTester tester,
@@ -25,56 +27,49 @@ void main() {
   testWidgets('Bottom tabs preserve stack and back behavior is predictable', (
     WidgetTester tester,
   ) async {
+    final authRepo = FakeAuthRepository();
+
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [
-          authRepositoryProvider.overrideWithValue(FakeAuthRepository()),
-        ],
+        overrides: [authRepositoryProvider.overrideWithValue(authRepo)],
         child: const NovaCommerceApp(),
       ),
     );
     await tester.pumpAndSettle(const Duration(milliseconds: 800));
 
     // Start on Home.
+    await _pumpUntilFound(
+      tester,
+      find.byKey(const Key('home_messages_button')),
+    );
     expect(find.byKey(const Key('home_messages_button')), findsWidgets);
 
     // Go to Profile tab.
-    await tester.tap(find.text('Profile').hitTestable());
+    await tester.tap(find.text('Account').hitTestable());
     await _pumpUntilFound(tester, find.byType(ProfileScreen).hitTestable());
     expect(find.byType(ProfileScreen).hitTestable(), findsOneWidget);
 
-    // Wait for Profile actions to render.
-    final ordersText = find.text('Orders');
-    await _pumpUntilFound(tester, ordersText);
-    await tester.scrollUntilVisible(ordersText, 220);
+    // Push Wishlist within Profile tab.
+    final profileContext = tester.element(find.byType(ProfileScreen));
+    GoRouter.of(profileContext).push(AppRoutes.wishlist);
     await tester.pump();
-
-    final ordersTileHitTestable =
-        find
-            .ancestor(of: ordersText, matching: find.byType(ListTile))
-            .hitTestable();
-    expect(ordersTileHitTestable, findsOneWidget);
-
-    // Push Orders within Profile tab.
-    await tester.tap(ordersTileHitTestable);
-    // Orders may show a skeleton with ongoing shimmer animation, so avoid
-    // pumpAndSettle which would time out.
-    await _pumpUntilFound(tester, find.byType(OrdersScreen));
-    expect(find.byType(OrdersScreen), findsOneWidget);
+    await _pumpUntilFound(tester, find.byType(WishlistScreen));
+    expect(find.byType(WishlistScreen), findsOneWidget);
 
     // Switch to Home tab, then back to Profile.
-    await tester.tap(find.text('Shop'));
-    await tester.pump(const Duration(milliseconds: 500));
+    await tester.tap(find.text('Shop').hitTestable());
+    await tester.pumpAndSettle(const Duration(milliseconds: 500));
     expect(find.byKey(const Key('home_messages_button')), findsWidgets);
 
-    await tester.tap(find.text('Profile'));
-    await _pumpUntilFound(tester, find.byType(OrdersScreen));
+    await tester.tap(find.text('Account').hitTestable());
+    await _pumpUntilFound(tester, find.byType(WishlistScreen));
 
-    // Profile tab stack should be preserved (still on Orders screen).
-    expect(find.byType(OrdersScreen), findsOneWidget);
+    // Profile tab stack should be preserved (still on Wishlist screen).
+    expect(find.byType(WishlistScreen), findsOneWidget);
 
     // Back should pop to Profile root.
-    await tester.pageBack();
+    await tester.binding.handlePopRoute();
+    await tester.pump();
     await _pumpUntilFound(tester, find.byType(ProfileScreen).hitTestable());
     expect(find.byType(ProfileScreen).hitTestable(), findsOneWidget);
   });

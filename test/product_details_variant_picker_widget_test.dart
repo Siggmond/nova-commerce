@@ -85,7 +85,9 @@ void main() {
         overrides: [
           productRepositoryProvider.overrideWithValue(repo),
           cartRepositoryProvider.overrideWithValue(cartRepo),
-          wishlistViewModelProvider.overrideWith((ref) => _TestWishlistViewModel(ref)),
+          wishlistViewModelProvider.overrideWith(
+            (ref) => _TestWishlistViewModel(ref),
+          ),
         ],
         child: ScreenUtilInit(
           designSize: const Size(375, 812),
@@ -115,9 +117,18 @@ void main() {
     expect(whiteText, findsOneWidget);
     expect(sizeSText, findsOneWidget);
 
-    final blackChip = find.ancestor(of: blackText, matching: find.byType(ChoiceChip));
-    final whiteChip = find.ancestor(of: whiteText, matching: find.byType(ChoiceChip));
-    final sizeSChip = find.ancestor(of: sizeSText, matching: find.byType(ChoiceChip));
+    final blackChip = find.ancestor(
+      of: blackText,
+      matching: find.byType(ChoiceChip),
+    );
+    final whiteChip = find.ancestor(
+      of: whiteText,
+      matching: find.byType(ChoiceChip),
+    );
+    final sizeSChip = find.ancestor(
+      of: sizeSText,
+      matching: find.byType(ChoiceChip),
+    );
 
     expect(blackChip, findsOneWidget);
     expect(whiteChip, findsOneWidget);

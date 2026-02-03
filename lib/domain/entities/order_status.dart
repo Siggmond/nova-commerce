@@ -1,11 +1,4 @@
-enum OrderStatus {
-  placed,
-  processing,
-  shipped,
-  delivered,
-  cancelled,
-  unknown,
-}
+enum OrderStatus { placed, processing, shipped, delivered, cancelled, unknown }
 
 OrderStatus parseOrderStatus(String? raw) {
   final value = (raw ?? '').trim().toLowerCase();

@@ -19,8 +19,8 @@ final trendingProductsProvider = FutureProvider((ref) async {
   return page.items;
 });
 
-class TrendsScreen extends ConsumerWidget {
-  const TrendsScreen({super.key});
+class TrendsEditorialSliverSection extends ConsumerWidget {
+  const TrendsEditorialSliverSection({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -31,171 +31,187 @@ class TrendsScreen extends ConsumerWidget {
       ref.read(wishlistViewModelProvider.notifier).toggle(id);
     }
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Trends'),
+    return productsAsync.when(
+      loading: () => const SliverToBoxAdapter(
+        child: Padding(
+          padding: EdgeInsets.symmetric(vertical: 18),
+          child: Center(child: CircularProgressIndicator()),
+        ),
       ),
-      body: productsAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => AppErrorState(
+      error: (e, _) => SliverToBoxAdapter(
+        child: AppErrorState(
           title: 'Could not load trends',
           subtitle: e.toString(),
           actionText: 'Retry',
           onAction: () => ref.invalidate(trendingProductsProvider),
         ),
-        data: (products) {
-          if (products.isEmpty) {
-            return const AppEmptyState(
+      ),
+      data: (products) {
+        if (products.isEmpty) {
+          return const SliverToBoxAdapter(
+            child: AppEmptyState(
               title: 'No curated picks yet.',
               subtitle: '',
               icon: Icons.trending_up_outlined,
-            );
-          }
+            ),
+          );
+        }
 
-          final hero = products.first;
-          final favorites = products.skip(1).take(8).toList(growable: false);
-          final worthALook = products.skip(1 + favorites.length).take(6).toList(
-                growable: false,
-              );
-          final morePicks = products
-              .skip(1 + favorites.length + worthALook.length)
-              .take(8)
-              .toList(growable: false);
+        final hero = products.first;
+        final favorites = products.skip(1).take(8).toList(growable: false);
+        final worthALook = products
+            .skip(1 + favorites.length)
+            .take(6)
+            .toList(growable: false);
+        final morePicks = products
+            .skip(1 + favorites.length + worthALook.length)
+            .take(8)
+            .toList(growable: false);
 
-          return CustomScrollView(
-            slivers: [
+        return SliverMainAxisGroup(
+          slivers: [
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                child: _EditorialHero(
+                  product: hero,
+                  isSaved: ids.contains(hero.id),
+                  onToggleSaved: () => toggleSaved(hero.id),
+                  onTap: () =>
+                      context.push('${AppRoutes.product}?id=${hero.id}'),
+                ),
+              ),
+            ),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                child: _EditorialIntroCard(
+                  title: "This week’s edit",
+                  subtitle:
+                      'A curated selection from our catalog — chosen for style, versatility, and easy pairing. Not a popularity leaderboard.',
+                ),
+              ),
+            ),
+            if (favorites.isNotEmpty)
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-                  child: _EditorialHero(
-                    product: hero,
-                    isSaved: ids.contains(hero.id),
-                    onToggleSaved: () => toggleSaved(hero.id),
-                    onTap: () =>
-                        context.push('${AppRoutes.product}?id=${hero.id}'),
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+                  child: _SectionHeader(
+                    title: "Editor’s favorites",
+                    subtitle: 'Strong picks to start with.',
                   ),
                 ),
               ),
+            if (favorites.isNotEmpty)
               SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-                  child: _EditorialIntroCard(
-                    title: "This week’s edit",
-                    subtitle:
-                        'A curated selection from our catalog — chosen for style, versatility, and easy pairing. Not a popularity leaderboard.',
-                  ),
-                ),
-              ),
-              if (favorites.isNotEmpty)
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
-                    child: _SectionHeader(
-                      title: "Editor’s favorites",
-                      subtitle: 'Strong picks to start with.',
-                    ),
-                  ),
-                ),
-              if (favorites.isNotEmpty)
-                SliverToBoxAdapter(
-                  child: SizedBox(
-                    height: 228,
-                    child: ListView.separated(
-                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
-                      scrollDirection: Axis.horizontal,
-                      itemCount: favorites.length,
-                      separatorBuilder: (_, __) => SizedBox(width: AppSpace.md),
-                      itemBuilder: (context, index) {
-                        final product = favorites[index];
-                        return SizedBox(
-                          width: 160,
-                          child: NovaProductTile(
-                            product: product,
-                            onTap: () => context
-                                .push('${AppRoutes.product}?id=${product.id}'),
-                            isSaved: ids.contains(product.id),
-                            onToggleSaved: () => toggleSaved(product.id),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                ),
-              if (worthALook.isNotEmpty)
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
-                    child: _SectionHeader(
-                      title: 'Worth a look',
-                      subtitle: 'A few more curated picks for variety.',
-                    ),
-                  ),
-                ),
-              if (worthALook.isNotEmpty)
-                SliverPadding(
-                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-                  sliver: SliverGrid(
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: _gridCrossAxisCount(context),
-                      mainAxisSpacing: AppSpace.md,
-                      crossAxisSpacing: AppSpace.md,
-                      childAspectRatio: 1.9,
-                    ),
-                    delegate: SliverChildBuilderDelegate(
-                      (context, index) {
-                        final product = worthALook[index];
-                        return ProductCard(
+                child: SizedBox(
+                  height: 228,
+                  child: ListView.separated(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+                    scrollDirection: Axis.horizontal,
+                    itemCount: favorites.length,
+                    separatorBuilder: (_, __) => SizedBox(width: AppSpace.md),
+                    itemBuilder: (context, index) {
+                      final product = favorites[index];
+                      return SizedBox(
+                        width: 160,
+                        child: NovaProductTile(
                           product: product,
-                          onTap: () => context
-                              .push('${AppRoutes.product}?id=${product.id}'),
+                          onTap: () => context.push(
+                            '${AppRoutes.product}?id=${product.id}',
+                          ),
                           isSaved: ids.contains(product.id),
                           onToggleSaved: () => toggleSaved(product.id),
-                        );
-                      },
-                      childCount: worthALook.length,
-                    ),
+                        ),
+                      );
+                    },
                   ),
                 ),
-              if (morePicks.isNotEmpty)
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
-                    child: _SectionHeader(
-                      title: 'More curated picks',
-                      subtitle: 'If you want to explore beyond the edit.',
-                    ),
+              ),
+            if (worthALook.isNotEmpty)
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+                  child: _SectionHeader(
+                    title: 'Worth a look',
+                    subtitle: 'A few more curated picks for variety.',
                   ),
                 ),
-              if (morePicks.isNotEmpty)
-                SliverToBoxAdapter(
-                  child: SizedBox(
-                    height: 228,
-                    child: ListView.separated(
-                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                      scrollDirection: Axis.horizontal,
-                      itemCount: morePicks.length,
-                      separatorBuilder: (_, __) => SizedBox(width: AppSpace.md),
-                      itemBuilder: (context, index) {
-                        final product = morePicks[index];
-                        return SizedBox(
-                          width: 160,
-                          child: NovaProductTile(
-                            product: product,
-                            onTap: () => context
-                                .push('${AppRoutes.product}?id=${product.id}'),
-                            isSaved: ids.contains(product.id),
-                            onToggleSaved: () => toggleSaved(product.id),
+              ),
+            if (worthALook.isNotEmpty)
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                sliver: SliverGrid(
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: _gridCrossAxisCount(context),
+                    mainAxisSpacing: AppSpace.md,
+                    crossAxisSpacing: AppSpace.md,
+                    childAspectRatio: 1.9,
+                  ),
+                  delegate: SliverChildBuilderDelegate((context, index) {
+                    final product = worthALook[index];
+                    return ProductCard(
+                      product: product,
+                      onTap: () =>
+                          context.push('${AppRoutes.product}?id=${product.id}'),
+                      isSaved: ids.contains(product.id),
+                      onToggleSaved: () => toggleSaved(product.id),
+                    );
+                  }, childCount: worthALook.length),
+                ),
+              ),
+            if (morePicks.isNotEmpty)
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+                  child: _SectionHeader(
+                    title: 'More curated picks',
+                    subtitle: 'If you want to explore beyond the edit.',
+                  ),
+                ),
+              ),
+            if (morePicks.isNotEmpty)
+              SliverToBoxAdapter(
+                child: SizedBox(
+                  height: 228,
+                  child: ListView.separated(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                    scrollDirection: Axis.horizontal,
+                    itemCount: morePicks.length,
+                    separatorBuilder: (_, __) => SizedBox(width: AppSpace.md),
+                    itemBuilder: (context, index) {
+                      final product = morePicks[index];
+                      return SizedBox(
+                        width: 160,
+                        child: NovaProductTile(
+                          product: product,
+                          onTap: () => context.push(
+                            '${AppRoutes.product}?id=${product.id}',
                           ),
-                        );
-                      },
-                    ),
+                          isSaved: ids.contains(product.id),
+                          onToggleSaved: () => toggleSaved(product.id),
+                        ),
+                      );
+                    },
                   ),
                 ),
-              const SliverToBoxAdapter(child: SizedBox(height: 8)),
-            ],
-          );
-        },
-      ),
+              ),
+            const SliverToBoxAdapter(child: SizedBox(height: 8)),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class TrendsScreen extends ConsumerWidget {
+  const TrendsScreen({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Trends')),
+      body: CustomScrollView(slivers: const [TrendsEditorialSliverSection()]),
     );
   }
 }
@@ -207,10 +223,7 @@ int _gridCrossAxisCount(BuildContext context) {
 }
 
 class _SectionHeader extends StatelessWidget {
-  const _SectionHeader({
-    required this.title,
-    required this.subtitle,
-  });
+  const _SectionHeader({required this.title, required this.subtitle});
 
   final String title;
   final String subtitle;
@@ -223,18 +236,17 @@ class _SectionHeader extends StatelessWidget {
       children: [
         Text(
           title,
-          style: Theme.of(context)
-              .textTheme
-              .titleMedium
-              ?.copyWith(fontWeight: FontWeight.w900),
+          style: Theme.of(
+            context,
+          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900),
         ),
         SizedBox(height: AppSpace.xxs),
         Text(
           subtitle,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: cs.onSurface.withValues(alpha: 0.72),
-                height: 1.25,
-              ),
+            color: cs.onSurface.withValues(alpha: 0.72),
+            height: 1.25,
+          ),
         ),
       ],
     );
@@ -242,10 +254,7 @@ class _SectionHeader extends StatelessWidget {
 }
 
 class _EditorialIntroCard extends StatelessWidget {
-  const _EditorialIntroCard({
-    required this.title,
-    required this.subtitle,
-  });
+  const _EditorialIntroCard({required this.title, required this.subtitle});
 
   final String title;
   final String subtitle;
@@ -266,18 +275,17 @@ class _EditorialIntroCard extends StatelessWidget {
           children: [
             Text(
               title,
-              style: Theme.of(context)
-                  .textTheme
-                  .labelLarge
-                  ?.copyWith(fontWeight: FontWeight.w900),
+              style: Theme.of(
+                context,
+              ).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w900),
             ),
             SizedBox(height: AppSpace.xs),
             Text(
               subtitle,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    height: 1.28,
-                    color: cs.onSurface.withValues(alpha: 0.82),
-                  ),
+                height: 1.28,
+                color: cs.onSurface.withValues(alpha: 0.82),
+              ),
             ),
           ],
         ),
@@ -351,7 +359,10 @@ class _EditorialHero extends StatelessWidget {
                       ),
                     ),
                     child: const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 6,
+                      ),
                       child: Text(
                         'Editor’s pick',
                         style: TextStyle(fontWeight: FontWeight.w900),
@@ -380,8 +391,9 @@ class _EditorialHero extends StatelessWidget {
                       onPressed: onToggleSaved,
                       icon: Icon(
                         isSaved ? Icons.favorite : Icons.favorite_border,
-                        color:
-                            isSaved ? cs.primary : cs.onSurface.withValues(alpha: 0.78),
+                        color: isSaved
+                            ? cs.primary
+                            : cs.onSurface.withValues(alpha: 0.78),
                         size: 20,
                       ),
                     ),
@@ -397,9 +409,9 @@ class _EditorialHero extends StatelessWidget {
                       Text(
                         'This week’s hero pick',
                         style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                              color: Colors.white.withValues(alpha: 0.92),
-                              fontWeight: FontWeight.w900,
-                            ),
+                          color: Colors.white.withValues(alpha: 0.92),
+                          fontWeight: FontWeight.w900,
+                        ),
                       ),
                       SizedBox(height: AppSpace.xs),
                       Text(
@@ -407,15 +419,16 @@ class _EditorialHero extends StatelessWidget {
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w900,
-                              height: 1.08,
-                            ),
+                          color: Colors.white,
+                          fontWeight: FontWeight.w900,
+                          height: 1.08,
+                        ),
                       ),
                       SizedBox(height: AppSpace.xs),
                       Text(
                         '${product.currency} ${product.price.toStringAsFixed(0)}',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(
                               color: Colors.white.withValues(alpha: 0.92),
                               fontWeight: FontWeight.w900,
                             ),

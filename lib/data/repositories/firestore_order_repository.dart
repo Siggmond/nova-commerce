@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 
 import '../../core/errors/checkout_exceptions.dart';
 import '../../domain/entities/cart_item.dart';
@@ -27,20 +28,38 @@ class FirestoreOrderRepository implements OrderRepository {
       throw const CheckoutCartEmptyException();
     }
 
+    if (!kReleaseMode) {
+      debugPrint(
+        'FirestoreOrderRepository.placeOrder uid=${uid.trim()} deviceId=${deviceId.trim()} path=orders',
+      );
+    }
+
     return _db.runTransaction<String>((tx) async {
       final orderRef = _db.collection('orders').doc();
 
+      // Firestore requires all transaction reads to happen before any writes.
       final byProductId = <String, List<CartItem>>{};
       for (final item in items) {
         byProductId.putIfAbsent(item.product.id, () => <CartItem>[]).add(item);
       }
 
+      // READS FIRST
+      final productRefs = <String, DocumentReference<Map<String, dynamic>>>{};
+      final productSnaps = <String, DocumentSnapshot<Map<String, dynamic>>>{};
+      for (final productId in byProductId.keys) {
+        final ref = _db.collection('products').doc(productId);
+        productRefs[productId] = ref;
+        productSnaps[productId] = await tx.get(ref);
+      }
+
+      // Compute variant updates (pure in-memory) after reads.
+      final updatesByProductId = <String, List<Map<String, dynamic>>>{};
+
       for (final entry in byProductId.entries) {
         final productId = entry.key;
-        final productRef = _db.collection('products').doc(productId);
-        final snap = await tx.get(productRef);
-        final data = snap.data();
-        if (!snap.exists || data == null) {
+        final snap = productSnaps[productId];
+        final data = snap?.data();
+        if (snap == null || !snap.exists || data == null) {
           throw const CheckoutOutOfStockException(
             'A product is no longer available.',
           );
@@ -90,8 +109,16 @@ class FirestoreOrderRepository implements OrderRepository {
           updated[idx]['stock'] = currentStock - qty;
         }
 
+        updatesByProductId[productId] = updated;
+      }
+
+      // WRITES AFTER ALL READS
+      for (final entry in updatesByProductId.entries) {
+        final productId = entry.key;
+        final productRef = productRefs[productId];
+        if (productRef == null) continue;
         tx.update(productRef, {
-          'variants': updated,
+          'variants': entry.value,
           'updatedAt': FieldValue.serverTimestamp(),
         });
       }
@@ -127,6 +154,12 @@ class FirestoreOrderRepository implements OrderRepository {
         'updatedAt': FieldValue.serverTimestamp(),
       };
       tx.set(orderRef, payload);
+
+      if (!kReleaseMode) {
+        debugPrint(
+          'FirestoreOrderRepository.placeOrder created orderId=${orderRef.id}',
+        );
+      }
 
       return orderRef.id;
     });

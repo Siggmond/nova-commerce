@@ -53,17 +53,17 @@ final aiChatViewModelProvider =
 
 class AiChatViewModel extends StateNotifier<AiChatState> {
   AiChatViewModel(this._ref)
-      : super(
-          (() {
-            final seed = _seedSession();
-            return AiChatState(
-              sessions: [seed],
-              activeSessionId: seed.id,
-              isStreaming: false,
-              searchQuery: '',
-            );
-          })(),
-        ) {
+    : super(
+        (() {
+          final seed = _seedSession();
+          return AiChatState(
+            sessions: [seed],
+            activeSessionId: seed.id,
+            isStreaming: false,
+            searchQuery: '',
+          );
+        })(),
+      ) {
     _hydrate();
   }
 
@@ -205,9 +205,13 @@ class AiChatViewModel extends StateNotifier<AiChatState> {
     );
 
     final session = state.activeSession;
-    final baseMessages = addUserMessage ? session.messages : [...session.messages];
+    final baseMessages = addUserMessage
+        ? session.messages
+        : [...session.messages];
     final nextMessages = [...baseMessages, placeholder];
-    _replaceSession(session.copyWith(messages: nextMessages, updatedAt: DateTime.now()));
+    _replaceSession(
+      session.copyWith(messages: nextMessages, updatedAt: DateTime.now()),
+    );
 
     final reply = await repo.reply(history: nextMessages, userText: userText);
     final content = reply.text;
@@ -232,7 +236,9 @@ class AiChatViewModel extends StateNotifier<AiChatState> {
               : m,
         )
         .toList(growable: false);
-    _replaceSession(session.copyWith(messages: messages, updatedAt: DateTime.now()));
+    _replaceSession(
+      session.copyWith(messages: messages, updatedAt: DateTime.now()),
+    );
   }
 
   void _finalizeStreamingMessage(String id, String text, String? intent) {
@@ -244,7 +250,9 @@ class AiChatViewModel extends StateNotifier<AiChatState> {
               : m,
         )
         .toList(growable: false);
-    _replaceSession(session.copyWith(messages: messages, updatedAt: DateTime.now()));
+    _replaceSession(
+      session.copyWith(messages: messages, updatedAt: DateTime.now()),
+    );
   }
 
   void _replaceSession(ChatSession session) {

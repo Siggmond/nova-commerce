@@ -27,24 +27,30 @@ class HomeSectionState {
   }
 }
 
-final homeFeedControllerProvider = StateNotifierProvider<HomeFeedController, List<HomeSectionState>>(
-  (ref) => HomeFeedController(ref),
-);
+final homeFeedControllerProvider =
+    StateNotifierProvider<HomeFeedController, List<HomeSectionState>>(
+      (ref) => HomeFeedController(ref),
+    );
 
 class HomeFeedController extends StateNotifier<List<HomeSectionState>> {
   HomeFeedController(this._ref)
-      : super([
-          for (final def in homeSectionRegistry)
-            HomeSectionState(
-              id: def.id,
-              status: HomeSectionStatus.ready,
-              retryToken: 0,
-            ),
-        ]) {
+    : super([
+        for (final def in homeSectionRegistry)
+          HomeSectionState(
+            id: def.id,
+            status: HomeSectionStatus.ready,
+            retryToken: 0,
+          ),
+      ]) {
     _ref.listen<HomeState>(homeViewModelProvider, (_, __) => _recompute());
-    _ref.listen<List<dynamic>>(homeFilteredProductsProvider, (_, __) => _recompute());
-    _ref.listen<List<dynamic>>(homeUnder50ProductsProvider, (_, __) => _recompute());
-    _ref.listen<bool>(homePersonalizationEnabledProvider, (_, __) => _recompute());
+    _ref.listen<List<dynamic>>(
+      homeFilteredProductsProvider,
+      (_, __) => _recompute(),
+    );
+    _ref.listen<bool>(
+      homePersonalizationEnabledProvider,
+      (_, __) => _recompute(),
+    );
     _ref.listen<Set<String>>(wishlistIdsProvider, (_, __) => _recompute());
     _recompute();
   }
@@ -108,7 +114,6 @@ class HomeFeedController extends StateNotifier<List<HomeSectionState>> {
     final currentById = {for (final s in state) s.id: s};
     final isRefreshing = _isRefreshing();
     final browse = _ref.read(homeFilteredProductsProvider);
-    final under = _ref.read(homeUnder50ProductsProvider);
 
     final order = _desiredOrder();
     final next = <HomeSectionState>[];
@@ -119,17 +124,11 @@ class HomeFeedController extends StateNotifier<List<HomeSectionState>> {
 
       final status = switch (id) {
         HomeSectionId.browseResults => _statusForList(
-            id: id,
-            items: browse,
-            isRefreshing: isRefreshing,
-            current: currentById,
-          ),
-        HomeSectionId.underFeed => _statusForList(
-            id: id,
-            items: under,
-            isRefreshing: isRefreshing,
-            current: currentById,
-          ),
+          id: id,
+          items: browse,
+          isRefreshing: isRefreshing,
+          current: currentById,
+        ),
         _ => prevStatus,
       };
 
@@ -137,6 +136,21 @@ class HomeFeedController extends StateNotifier<List<HomeSectionState>> {
         HomeSectionState(id: id, status: status, retryToken: retryToken),
       );
     }
+
+    final current = state;
+    if (current.length == next.length) {
+      var same = true;
+      for (var i = 0; i < current.length; i++) {
+        final a = current[i];
+        final b = next[i];
+        if (a.id != b.id || a.status != b.status || a.retryToken != b.retryToken) {
+          same = false;
+          break;
+        }
+      }
+      if (same) return;
+    }
+
     state = next;
   }
 

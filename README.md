@@ -5,547 +5,529 @@
 ![State](https://img.shields.io/badge/State-Riverpod-3C873A)
 ![Routing](https://img.shields.io/badge/Routing-GoRouter-6E56CF)
 ![Backend](https://img.shields.io/badge/Backend-Firebase-FFCA28?logo=firebase&logoColor=000)
-![DB](https://img.shields.io/badge/DB-Firestore-FFA000?logo=firebase&logoColor=000)
-![AI](https://img.shields.io/badge/AI-TFLite%20(on--device)-FF6F00?logo=tensorflow&logoColor=white)
+![Database](https://img.shields.io/badge/Database-Firestore-FFA000?logo=firebase&logoColor=000)
+![Payments](https://img.shields.io/badge/Payments-Stripe-635BFF?logo=stripe&logoColor=white)
+![AI](https://img.shields.io/badge/AI-Concierge%20UI%20%2B%20TFLite-FF6F00?logo=tensorflow&logoColor=white)
 
-A Flutter + Firebase commerce app showcasing an end‑to‑end shopping loop with a clean, scalable architecture: **storefront browsing → product details (variants) → cart → checkout (shipping form) → orders**, plus a modular “AI layer” (chat placeholder) and an **on‑device TFLite navigation intent model**.
+NovaCommerce is a production-oriented Flutter/Firebase ecommerce app foundation with a polished mobile storefront, product discovery, product details with variants, cart, checkout, payment flow, orders, profile, wishlist, offers, loyalty rewards, localization, performance tooling, and an AI concierge surface.
 
-> **Scope / Intentional omissions:** Payments, carrier/logistics integrations, and admin tooling are intentionally out of scope for the current MVP.
+It is best understood as an advanced ecommerce MVP and customizable commerce app foundation, not a simple UI template. The project includes real app architecture, repository abstractions, local/demo repositories, Firebase integration, Firestore rules, Cloud Functions payment/order finalization architecture, Stripe payment flow support, and reusable feature modules that can be rebranded or extended for a real commerce product.
+
+> **Current readiness:** NovaCommerce is demo-ready and commercially valuable as a source-code foundation. It still needs production hardening before app-store launch, including test cleanup, final Firebase/Stripe configuration, app signing, fresh screenshots, production data, admin tooling, privacy/legal pages, and operational integrations.
 
 ---
 
-## Contents
+## Table of contents
 
+- [What NovaCommerce is](#what-novacommerce-is)
 - [Current status](#current-status)
-- [Features](#features)
-- [Screenshots](#screenshots)
-- [AI](#ai)
-- [UI / UX notes](#ui--ux-notes)
+- [Buyer / client positioning](#buyer--client-positioning)
+- [Feature overview](#feature-overview)
+- [Core user flows](#core-user-flows)
+- [Payments and orders](#payments-and-orders)
+- [AI surfaces](#ai-surfaces)
+- [Localization and design system](#localization-and-design-system)
+- [Architecture](#architecture)
+- [Backend and Firebase](#backend-and-firebase)
+- [Performance and resilience](#performance-and-resilience)
 - [Tech stack](#tech-stack)
 - [Project structure](#project-structure)
 - [Getting started](#getting-started)
-- [Configuration & feature flags](#configuration--feature-flags)
+- [Configuration and environment flags](#configuration-and-environment-flags)
 - [Firebase setup](#firebase-setup)
+- [Stripe setup](#stripe-setup)
 - [Emulators](#emulators)
 - [Demo mode](#demo-mode)
-- [Testing](#testing)
+- [Testing and quality](#testing-and-quality)
+- [Screenshots](#screenshots)
 - [Known limitations](#known-limitations)
+- [Pre-sale / pre-launch checklist](#pre-sale--pre-launch-checklist)
 - [Roadmap ideas](#roadmap-ideas)
 - [License](#license)
 
 ---
 
-## Current status
+## What NovaCommerce is
 
-### Fully implemented and stable
+NovaCommerce gives a buyer or development team the foundation for a modern mobile commerce product.
 
-- **Core browsing loop**
-  - Home feed loads products and supports **pull‑to‑refresh** + **infinite scroll** (pagination / “load more”).
-  - Product grid navigation into product details is stable.
-- **Cart**
-  - Cart persists locally and **syncs to Firestore when signed in** (falls back to local storage when signed out).
-  - Quantity management + selection behavior (used by checkout summary) is in place.
-- **Checkout**
-  - Shipping form flow is implemented (manual entry).
-  - Order placement is implemented via a **Firestore transaction** that decrements variant stock and creates an order document.
-- **Orders**
-  - Orders list + order details exist (Firestore-backed when not using fake repos).
-- **Auth**
-  - Anonymous (guest) sessions supported.
-  - Email/password sign‑in supported.
-  - Google sign‑in supported.
-  - Guest → signed‑in upgrade path exists at the UX level (sign‑in entry points are present).
-- **Wishlist**
-  - Implemented using **SharedPreferences** (local persistence).
-- **Recently viewed**
-  - Implemented using **SharedPreferences** (local persistence).
-- **AI assistant (optional)**
-  - Present as a feature/screen and currently backed by a **fake repository implementation** (deterministic placeholder behavior).
+It includes:
 
-### Partially implemented / placeholder
+- Cross-platform Flutter app structure.
+- Feature-first architecture.
+- Firebase Authentication integration.
+- Cloud Firestore integration.
+- Firebase Cloud Functions backend for payment/order finalization.
+- Stripe-oriented payment flow.
+- Demo payment mode for walkthroughs.
+- Product catalog, home feed, search, product details, cart, checkout, payment, orders, offers, loyalty, wishlist, profile, messages, trends, and AI assistant screens.
+- Local fallback/demo repositories so the app can be shown without a fully configured live backend.
+- Multi-language localization files.
+- Performance instrumentation and CI documentation.
+- Test suite covering unit, widget, integration, and golden-test areas.
 
-- **AI chat**
-  - Uses `FakeAiRepository` (no production inference service wired).
-  - “AI placeholder” env flags exist in `AppEnv`, but they’re disabled by default.
-- **Places autocomplete (checkout)**
-  - Optional integration exists behind `AppEnv.enablePlacesAutocomplete` and requires `GOOGLE_PLACES_API_KEY`.
-  - When not configured, checkout works in manual entry mode.
-- **“Nova UI” components**
-  - Parallel UI system (`NovaAppBar`, `NovaButton`, `NovaSurface`, …) gated behind `AppEnv.enableNovaUi` + per‑screen flags.
-  - Default behavior is still mostly standard Material widgets unless flags are enabled.
+NovaCommerce is suitable for:
 
-### Intentionally not implemented yet
-
-- **Payments:** no Stripe/PayPal, no real authorization/capture flow.
-- **Shipping/logistics integrations:** no carrier rates, tracking, fulfillment pipeline.
-- **Admin tooling:** no admin dashboard, inventory management UI, or order management UI.
-- **Personalization on Home:** Home is storefront-style, not personalized (even though flags exist for experimentation).
-- **Trusted server-side checkout:** the repo currently has **no Cloud Functions backend** committed (`functions/` exists but is empty). Checkout is **client → Firestore transaction**, not a trusted server.
+- Retail brands that want their own mobile shopping app.
+- Local marketplaces for fashion, grocery, pharmacy, electronics, coffee, lifestyle, or mixed categories.
+- Startups needing an ecommerce MVP for client or investor demos.
+- Software agencies that want a reusable Flutter/Firebase commerce foundation.
+- Buyers who want a white-label ecommerce app base instead of starting from zero.
 
 ---
 
-## Features
+## Current status
 
-### Home page (storefront feed)
+### Implemented
 
-- **AppBar**
-  - Title: **Nova**
-  - Actions: Messages (`/messages`), Sign in (`/signIn`), Wishlist (`/wishlist`), Cart (`/cart`)
-  - Cart navigation is guarded to prevent double navigation.
-- **Feed container**
-  - `CustomScrollView` with slivers
-  - Pull‑to‑refresh via `RefreshIndicator`
-  - Pagination triggers `loadMore()` near the bottom
-  - Light “scroll hint” auto‑scroll nudge on first load
-  - Image precache for the first ~4 product images
-- **Sections (Home v1 storefront)**
-  - AI entry card (navigates to AI screen; can auto‑send a prompt)
-  - “Trending drop” hero card (scroll-to-section)
-  - “Browse” section with search / filter / sort MVP UI
-  - Multiple product sections derived from the loaded list (e.g. trending, picked, “under $50” style selection via local rules)
+- Modern storefront home feed.
+- Product catalog browsing.
+- Search and filtering flow.
+- Product details with image carousel, variants, stock state, wishlist action, and add-to-cart behavior.
+- Local cart persistence.
+- Firestore cart sync for signed-in users.
+- Checkout shipping form and summary recalculation.
+- Payment method, payment confirmation, success, and failure screens.
+- Fake/demo payment repository for walkthroughs.
+- Stripe payment repository architecture.
+- Firebase Cloud Functions for Stripe PaymentIntent creation and order finalization.
+- Orders list and order details.
+- Firebase Authentication support.
+- Anonymous auth, email/password auth, and Google sign-in support.
+- Profile and account screens.
+- Wishlist.
+- Recently viewed products.
+- Offers and promotions module.
+- Gold loyalty/rewards module.
+- AI concierge chat UI.
+- TFLite navigation-intent model asset and app-side runner/controller architecture.
+- Messages and trends screens.
+- English, Arabic, French, and Spanish localization files.
+- Light and dark theme support.
+- Material 3 design system.
+- Shared UI components.
+- Performance tooling and documentation.
+- Unit, widget, golden, and integration-test assets.
 
-### Product browsing
+### Demo-ready but not production-final
 
-- Firestore-backed product repository (when not in fake mode).
-- Pagination / load-more behavior supported through the Home viewmodel flow.
+- The app can be presented as a strong ecommerce MVP/source-code asset.
+- Demo repositories and fake payment behavior make buyer walkthroughs easier.
+- Stripe architecture exists, but each buyer must configure their own Firebase project, Stripe account, webhook secret, app IDs, signing, and production data.
+- PayPal is present only as a demo/stub path, not a production PayPal integration.
+- The AI concierge UI is implemented, but it is currently backed by a fake deterministic repository rather than a real LLM/recommendation backend.
+- The TFLite navigation model asset and architecture exist, but live model loading is currently guarded/disabled in the inspected state.
+- Some production work remains before public app-store release.
+
+### Not included
+
+- Admin dashboard.
+- Inventory management UI.
+- Order management dashboard.
+- Refund management UI.
+- Real shipping carrier integration.
+- Delivery tracking.
+- Warehouse or fulfillment integration.
+- Production privacy policy and terms pages.
+- Final buyer branding.
+- Final Android/iOS release signing.
+- Production-ready catalog/content pipeline.
+
+---
+
+## Buyer / client positioning
+
+NovaCommerce can be positioned as:
+
+> A customizable Flutter/Firebase commerce app foundation with modern shopping flows, Stripe-oriented payment architecture, orders, offers, loyalty, localization, and AI concierge UI.
+
+Recommended honest positioning:
+
+- “Advanced ecommerce MVP.”
+- “Production-oriented Flutter commerce foundation.”
+- “White-label mobile commerce starter.”
+- “Buyer-ready source-code package after cleanup.”
+- “Demo-ready ecommerce app with real backend architecture.”
+
+Avoid positioning it as:
+
+- “Fully production ready today.”
+- “Complete marketplace platform.”
+- “Real AI-powered shopping assistant.”
+- “Ready to publish immediately.”
+- “Complete admin + logistics solution.”
+
+A strong buyer pitch:
+
+> NovaCommerce is not a single-screen template. It is a structured ecommerce app with real shopping flows, Firebase integration, Stripe-oriented backend functions, local demo mode, modular repositories, and a feature-first Flutter architecture. A buyer can rebrand it, connect their Firebase and Stripe accounts, replace seed data with their catalog, and continue building toward production.
+
+---
+
+## Feature overview
+
+### Storefront home
+
+The home experience is built around a modern commerce feed.
+
+It includes:
+
+- Brand app bar.
+- Delivery/city selector surface.
+- Messages shortcut.
+- Gold loyalty entry.
+- Search entry.
+- Category tiles.
+- Curated product sections.
+- Trending sections.
+- Picked-for-you sections.
+- Pull-to-refresh.
+- Infinite scroll/load-more behavior.
+- Skeleton/loading states.
+- Product cards.
+- Image preloading and performance markers.
+
+Commercial value:
+
+- Gives buyers a recognizable ecommerce first screen.
+- Can be adapted to many verticals: fashion, grocery, pharmacy, electronics, lifestyle, coffee, beauty, baby/family, or mixed local commerce.
+- Makes the app feel like a real shopping product instead of a static prototype.
+
+### Product discovery and search
+
+The app includes a dedicated search route and search view model.
+
+Implemented capabilities include:
+
+- Query filtering by product title and brand.
+- Category filtering.
+- Price-tier filtering.
+- Sort modes such as recommended, popular, and rating-like scoring.
+- Featured product preview.
+- Editorial collection routes.
+- Recent-searches infrastructure through local persistence.
+
+Future upgrade paths:
+
+- Algolia.
+- Meilisearch.
+- Firestore index-backed search.
+- Custom backend search.
+- Personalized recommendations.
 
 ### Product details
 
-- Product details screen exists.
-- Variant selection (size/color) integrates with cart selection.
-- “View cart” snackbar action includes guard logic to avoid crashes/double taps.
+The product details experience includes:
+
+- Product image pager.
+- Brand and title display.
+- Price display.
+- Product description.
+- Stock badge.
+- Color variant selection.
+- Size variant selection.
+- Disabled options based on availability.
+- Wishlist toggle.
+- Add-to-cart bar.
+- Snackbar action to view cart.
+- Loading, error, and not-found states.
+
+Commercial value:
+
+- Supports conversion-focused product browsing.
+- Variant support is useful for fashion, apparel, shoes, color/size-based inventory, and similar retail categories.
 
 ### Cart
 
-- Local persistence via a SharedPreferences-backed repository.
-- When signed in, a syncing repository bridges local cart and Firestore.
-- Remote cart stored in Firestore under `carts/<uid>` with an `items` array (via datasource/repository structure).
+The cart system includes:
+
+- SharedPreferences-backed local persistence.
+- Firestore sync when a signed-in user is available.
+- Syncing repository that bridges local and remote cart state.
+- Quantity updates.
+- Item removal.
+- Clear cart.
+- Selected-item checkout behavior.
+- Cart totals.
+- Recommended add-on items.
+- Selection messaging for all selected, partially selected, or no selected items.
+
+Commercial value:
+
+- Supports guest shopping.
+- Supports signed-in cart sync.
+- Enables a realistic buyer demo: add item, update quantity, select items, checkout.
 
 ### Checkout
 
-- Shipping form fields:
-  - full name, phone, address, city/state/postal/country
-- Phone normalization:
-  - special handling for **LB** + general normalization via `phone_number`
-- Optional **Places** autocomplete behind env flags (manual entry always available).
-- Checkout summary uses **selected cart items**:
-  - Subtotal derived from selected items
-  - Shipping fee currently **0.0** (constant)
-  - Total = subtotal + shippingFee
-- Submit calls `OrderRepository.placeOrder(...)` and navigates to a success screen.
+Checkout includes:
+
+- Shipping form.
+- Full name field.
+- Phone field.
+- Address field.
+- City field.
+- State/region field.
+- Postal code field.
+- Country field.
+- Required-field validation.
+- Phone normalization through `phone_number`.
+- Special Lebanese phone handling.
+- Optional Google Places autocomplete behind environment flags.
+- Manual address entry fallback.
+- Summary recalculation.
+- Tax and shipping fee calculation hooks.
+- Selected cart item checkout.
+- Sign-in gating.
+- Navigation into payment flow.
+
+Current behavior:
+
+- Checkout routes into payment flow.
+- Fake/demo payment can show payment success for demos.
+- Real Stripe order creation is handled through Firebase Cloud Functions in the Stripe path.
+
+### Payments
+
+NovaCommerce includes a payment architecture rather than only static payment screens.
+
+Implemented payment surfaces:
+
+- Payment method selection.
+- Payment confirmation screen.
+- Payment success screen.
+- Payment failure screen.
+- Fake/demo payment repository.
+- Stripe payment repository.
+- PayPal demo/stub repository.
+
+Fake/demo payment mode:
+
+- Supports Stripe and PayPal labels.
+- Can simulate success, failure, or cancellation.
+- Useful for sales demos without real credentials.
+
+Stripe real-mode architecture:
+
+- Uses Firebase Cloud Functions.
+- Creates Stripe PaymentIntent.
+- Initializes and presents Stripe payment sheet.
+- Finalizes order from PaymentIntent after successful payment.
+- Supports webhook-based finalization through `stripeWebhook`.
+- Uses locking/idempotency-style protection through `payment_intent_locks`.
+- Stores payment session context under `payment_sessions`.
+
+PayPal status:
+
+- Demo/stub flow exists.
+- Real PayPal integration is not production-configured in this build.
 
 ### Orders
 
-- Firestore-backed reads (list + fetch-by-id).
-- Order writes include (at minimum):
-  - `uid`, `deviceId`, `status`, totals, `shipping` map, `items` array, timestamps.
+Orders include:
 
-### Wishlist
+- Orders list.
+- Order details.
+- Order success route.
+- Firestore stream for signed-in user orders.
+- Order DTO and mapper layer.
+- Sorting by creation date.
+- Empty state.
+- Error state.
 
-- Local wishlist persistence via SharedPreferences.
-- Wishlist UI includes empty state + populated state.
+Backend order creation:
 
-### Search
+- Real Stripe payment path creates paid orders through Cloud Functions.
+- Orders are linked to `uid`.
+- Order payload includes user, device, status, currency, subtotal, shipping fee, total, amount in minor units, payment status, provider, PaymentIntent ID, shipping, items, and timestamps.
 
-- Search UI exists as part of the Home “Browse” section (and route navigation exists).
-- MVP-level search/filtering (not a dedicated search backend).
+### Authentication and account
 
-### Profile
+Authentication support includes:
 
-- Profile screen exists.
-- Profile details screens exist (some gated behind Nova UI flags).
+- Firebase anonymous authentication.
+- Email/password authentication.
+- Google sign-in.
+- Guest-to-signed-in credential linking path.
+- Demo fallback mode for invalid Firebase API key scenarios.
+- Auth state provider.
+- Profile screen.
+- Account details screen.
+- Display name update.
+- Email verification.
+- Phone verification flow.
+- Sign-in and sign-out UI.
 
-### Auth (guest / signed-in)
+Production note:
 
-- Firebase Auth providers:
-  - Anonymous auth
-  - Email/password
-  - Google sign‑in
-- App supports signed‑out/guest browsing and cart usage.
-- **Checkout requires sign‑in.**
+- Each buyer must configure Firebase Auth providers for their own Firebase project.
+- Google sign-in requires correct app IDs, SHA keys, OAuth client setup, and platform configuration.
 
-### Recently viewed
+### Wishlist and recently viewed
 
-- SharedPreferences-backed repository + feature exists.
+Wishlist:
 
----
+- Local SharedPreferences-backed repository.
+- Product heart toggle.
+- Wishlist screen.
+- Empty and populated states.
 
-## Screenshots
+Recently viewed:
 
-<!-- 4-column grid using HTML (renders well on GitHub) -->
-<div align="center">
-  <img src="assets/screenshots/Img1.jpeg" width="22%" alt="Home" />
-  <img src="assets/screenshots/Img2.jpeg" width="22%" alt="Home feed" />
-  <img src="assets/screenshots/Img3.jpeg" width="22%" alt="Product details" />
-  <img src="assets/screenshots/Img4.jpeg" width="22%" alt="Out of stock item" />
-  <img src="assets/screenshots/Img5.jpeg" width="22%" alt="Nova AI" />
-  <img src="assets/screenshots/Img6.jpeg" width="22%" alt="Trends" />
-</div>
+- Local SharedPreferences-backed repository.
+- Supports rediscovery and future personalization.
 
-<br/>
+Future upgrade path:
 
-<div align="center">
-  <img src="assets/screenshots/Img7.jpeg" width="22%" alt="Cart" />
-  <img src="assets/screenshots/Img8.jpeg" width="22%" alt="Cart is empty" />
-  <img src="assets/screenshots/Img9.jpeg" width="22%" alt="Checkout" />
-  <img src="assets/screenshots/Img10.jpeg" width="22%" alt="Profile" />
-  <img src="assets/screenshots/Img11.jpeg" width="22%" alt="Wishlist empty" />
-</div>
+- Sync wishlist and recently viewed data to user accounts.
+- Use recently viewed behavior for recommendations.
 
-<br/>
+### Offers
 
-<div align="center">
-  <img src="assets/screenshots/Img12.jpeg" width="22%" alt="Wishlist with item" />
-  <img src="assets/screenshots/Img13.jpeg" width="22%" alt="Orders" />
-  <img src="assets/screenshots/Img14.jpeg" width="22%" alt="Sign in" />
-  <img src="assets/screenshots/Img15.jpeg" width="22%" alt="Messages" />
-</div>
+The offers module includes:
 
----
+- Offers screen.
+- Offer details screen.
+- Offer cards.
+- Debounced search input.
+- Quick filters:
+  - All.
+  - New.
+  - Popular.
+  - Expiring.
+  - Online.
+  - In-store.
+- Sort modes:
+  - Recommended.
+  - Ending soon.
+  - Highest discount.
+  - Newest.
+- Tags and channel filtering.
+- Pagination/load more.
+- Firestore-backed repository.
+- Fake offers repository with seeded data.
+- Repository cache for page and detail reads.
+- Promo code support.
+- Terms URL support.
 
-## AI
+Commercial value:
 
-NovaCommerce currently contains **two separate “AI-ish” surfaces**:
+- Enables promotional campaigns.
+- Supports seasonal offers, online vs in-store deals, promo codes, and featured promotions.
 
-1) **On-device navigation intent classifier** (real on-device model)  
-2) **“Nova AI” chat assistant screen** (placeholder, fake repo)
+### Gold loyalty
 
-### 1) AI navigation intent model: `ai_nav_model_quant.tflite`
+The Gold loyalty feature includes:
 
-**What it is**
-- An **on-device TensorFlow Lite** model (quantized) used for lightweight classification.
-- Purpose: predict a navigation intent (“where the user likely wants to go next”).
+- Gold screen.
+- Points history screen.
+- Reward details screen.
+- Reward offer cards.
+- Gold balance provider.
+- Local and Firestore repositories.
+- Idempotent local order crediting.
+- Firestore user ledger path for credited orders.
+- Awarding logic based on order total.
 
-**Outputs (6 classes)**
-The model outputs 6 probabilities mapped to:
+Commercial value:
 
-```dart
-enum AiNavIntent { home, ai, trends, cart, profile, idle }
-```
+- Adds retention and repeat-purchase mechanics.
+- Can be adapted into rewards, wallet credit, paid membership, or customer tiering.
 
-**Inputs (5 numeric features)**
-The model expects **exactly 5 float features**, built from app signals:
+Production note:
 
-- `f0`: normalized current tab index (0..1)
-- `f1`: normalized cart count (`cartCount / 20`, clamped 0..1)
-- `f2`: normalized wishlist count (`wishlistCount / 50`, clamped 0..1)
-- `f3`: signed-in flag (1.0 if signed in, else 0.0)
-- `f4`: normalized hour-of-day (`hour / 23`, clamped 0..1)
+- Firestore rules and/or backend logic must be reviewed before production.
+- Loyalty awarding should ideally be server-side to prevent client-side reward manipulation.
 
-**How it runs**
-- Asset: `assets/models/ai_nav_model_quant.tflite`
-- Loaded via `rootBundle.load(...)`
-- Inference via `tflite_flutter` `Interpreter` (`Interpreter.fromBuffer(...)`)
-- Shapes:
-  - Input: `[[f0, f1, f2, f3, f4]]` (batch size 1)
-  - Output: `1 x 6` probability vector
-- The app:
-  - normalizes probabilities (guarding against numeric drift),
-  - picks argmax as intent,
-  - exposes intent, confidence, and the full vector.
+### Messages and trends
 
-**Safety rails**
-`AiNavController` adds guard logic:
-- never triggers on `idle`
-- minimum confidence threshold (default `minConfidence = 0.35`)
-- minimum margin vs runner-up (default `minMargin = 0.10`)
-- stability requirement:
-  - either high confidence (`>= 0.60`) **or**
-  - the same intent predicted consecutively (default 2 times)
-- cooldown after a suggestion is consumed (~800ms)
-- fail-safe: if the model can’t load (common in some test envs), it emits **no suggestion** (no crash).
+The app includes:
 
-**Where it’s wired**
-A Riverpod provider creates:
-- `AiNavModelRunner(assetPath: 'assets/models/ai_nav_model_quant.tflite')`
-- `AiNavController(modelRunner: runner)`
+- Messages screen.
+- Message tabs for order, activity, promo, and news.
+- Trends screen.
+- Trending-now route.
+- Picked-for-you route.
 
-UI can listen to the controller state and display smart navigation suggestions.
+Commercial value:
 
-### 2) Nova AI chat assistant (placeholder)
-
-- The chat assistant screen exists as a feature route.
-- It is currently backed by a **fake/deterministic** repository (`FakeAiRepository`).
-- No production inference endpoint is wired in the repo state.
+- Adds CRM, notification, editorial, and campaign expansion points.
+- Makes the product feel broader than a basic shopping/cart demo.
 
 ---
 
-## UI / UX notes
+## Core user flows
 
-### Home v1 direction
+### Buyer demo flow
 
-- Home is a **storefront feed** (not personalized).
-- Predictable sections + responsive grids.
-- Lightweight UX polish (prefetch + small scroll hint); no heavy animations.
+A recommended product demo:
 
-### ProductCard behavior
+1. Open the storefront home.
+2. Show categories and curated sections.
+3. Open product details.
+4. Select color/size variants.
+5. Add the product to cart.
+6. Open cart.
+7. Update quantity or selection.
+8. Continue to checkout.
+9. Fill shipping details.
+10. Choose a payment method.
+11. Simulate a successful demo payment or use configured Stripe mode.
+12. Show payment success / order success.
+13. Show orders.
+14. Show wishlist.
+15. Show offers.
+16. Show Gold loyalty.
+17. Show profile.
+18. Show AI concierge UI.
 
-From `lib/core/widgets/product_card.dart`:
-- Image uses `BoxFit.cover` (cropped to fill).
-- Uses `memCacheWidth` / `memCacheHeight` based on tile size + device pixel ratio.
-- Optional wishlist heart overlay / trailing overlay.
-- Text: brand (uppercase), title, price chip.
-- Compact behavior when narrow (`maxWidth < 180`) reduces title lines.
-- Default card height is `184.h`.
-- Supports `fillHeight` for grids that want tiles to expand.
-- Includes a very-tight constraint fallback (title + price only) to avoid overflow.
+### Technical review flow
 
-### Grid rules (columns by screen size)
+For a technical buyer or developer, show:
 
-From `home_screen.dart`:
-- Default grids use `SliverGridDelegateWithFixedCrossAxisCount` with `childAspectRatio: 0.6`.
-- `crossAxisCount` varies by width:
-  - `< 400`: 3
-  - `< 520`: 4
-  - `>= 520`: 5
-- Some sections use:
-  - `< 520`: 3
-  - `< 720`: 4
-  - `>= 720`: 5
-
-### Splash behavior
-
-- Uses **native** Android/iOS launch screens (no Flutter overlay splash).
-- Android: launch theme resources.
-- iOS: `LaunchScreen` storyboard.
-
----
-
-## Tech stack
-
-### Core
-
-- Flutter / Dart (SDK constraint: `sdk: ^3.8.1`)
-- Material 3
-- State management: `flutter_riverpod` (`^2.6.1`)
-- Routing: `go_router` (`^14.8.1`)
-
-### Firebase
-
-- `firebase_core` (`^3.15.0`)
-- `cloud_firestore` (`^5.6.0`)
-- `firebase_auth` (`^5.6.0`)
-- `google_sign_in` (`^6.2.2`)
-
-### Local storage / caching
-
-- `shared_preferences` (`^2.3.5`) — wishlist, recently viewed, local cart, checkout address persistence
-- `cached_network_image` (`^3.3.1`)
-- `flutter_secure_storage` (`^9.2.2`) via `SecureStore` abstraction
-- `hive` / `hive_flutter` (present in deps; used for some local storage)
-
-### Utilities
-
-- `flutter_screenutil` (`^5.9.3`)
-- `uuid` (`^4.5.1`)
-- `http` (`^1.2.2`)
-- `phone_number` (`^2.1.0`)
-- `country_picker` (`^2.0.26`)
-
-### On-device ML
-
-- `tflite_flutter` (model asset: `assets/models/ai_nav_model_quant.tflite`)
+- `lib/app/router/app_router.dart` for routing.
+- Dependency injection/providers.
+- Repository interfaces.
+- Fake/local/Firestore repository implementations.
+- Checkout and payment flow.
+- `functions/src/index.ts` for Stripe/Firebase Functions.
+- `firestore.rules` for security posture.
+- Test folders.
+- CI workflow.
+- Performance documentation and tooling.
 
 ---
 
-## Project structure
+## Payments and orders
 
-High-level layout:
+NovaCommerce uses a repository-based payment architecture.
+
+### Payment modes
+
+The app supports multiple payment modes conceptually:
+
+- Fake/demo payment for walkthroughs.
+- Stripe-backed real payment path.
+- PayPal demo/stub path.
+
+### Stripe flow
+
+At a high level:
+
+1. User completes checkout details.
+2. App creates or prepares a payment session.
+3. Firebase Cloud Function creates a Stripe PaymentIntent.
+4. App initializes Stripe payment sheet.
+5. User completes payment.
+6. Backend finalizes the order from the PaymentIntent.
+7. Webhook can also finalize/confirm payment state.
+8. Order is stored in Firestore and linked to the signed-in user.
+
+### Firestore collections related to payment/order flow
+
+Important paths include:
 
 ```text
-lib/
-  main.dart
-  app.dart
-  core/          # routing, theme, shared widgets, config, error mapping, telemetry abstractions
-  domain/        # entities + repository interfaces
-  data/          # datasources + repository implementations (Firestore, SharedPrefs, fakes), syncing strategies
-  features/      # feature-first UI (home, product, cart, checkout, wishlist, orders, auth, ai, profile, ...)
-test/            # unit + widget + golden tests
-```
-
----
-
-## Getting started
-
-### Prerequisites
-
-- Flutter SDK (3.x)
-- Dart SDK (3.x)
-
-Install dependencies:
-
-```bash
-flutter pub get
-```
-
-Run quality checks:
-
-```bash
-dart format .
-flutter analyze
-flutter test
-```
-
-Run the app:
-
-```bash
-flutter run
-```
-
----
-
-## Configuration & feature flags
-
-### Demo / repositories
-
-- `USE_FAKE_REPOS=true` → run using in-memory/fake repositories (no Firebase required)
-
-### Firebase emulators
-
-- `USE_FIRESTORE_EMULATOR=true`
-- `FIRESTORE_HOST` (e.g. `localhost` for iOS Simulator, `10.0.2.2` for Android Emulator)
-- `FIRESTORE_PORT` (default: `8080` in examples)
-- `AUTH_PORT` (default: `9099` in examples)
-
-### Optional integrations
-
-- **Places Autocomplete (Checkout)**
-  - Enable the feature flag in `AppEnv` (`enablePlacesAutocomplete`)
-  - Provide `GOOGLE_PLACES_API_KEY`
-  - Manual entry always remains available as a fallback
-
-### UI experiments
-
-- **Nova UI**
-  - Enable `AppEnv.enableNovaUi` and per-screen gates (e.g. checkout)
-  - Defaults to Material widgets when disabled
-
-> Notes:
-> - Feature flags are intentionally conservative and **off by default** for a stable MVP.
-> - In this repo, the “Nova AI chat” is also intentionally a placeholder (fake repo).
-
----
-
-## Firebase setup
-
-This app uses **client-side Firebase configuration** (no server-side secrets are included in this repository).
-
-### Option A — Use your own Firebase project (recommended)
-
-1. Create a Firebase project.
-2. Enable Authentication providers (Anonymous / Email-Password / Google).
-3. Create Firestore collections:
-   - `products`
-   - `orders`
-   - (optional) `carts` (for signed-in cart sync)
-4. From the repo root, run:
-
-```bash
-flutterfire configure
-```
-
-This generates:
-
-- `android/app/google-services.json`
-- `ios/Runner/GoogleService-Info.plist`
-- `lib/firebase_options.dart`
-
-> Tip: If your product query orders by `createdAt`, ensure product docs contain `createdAt` and any flags you filter on (e.g. `featured: true`).
-
----
-
-## Emulators
-
-Start emulators:
-
-```bash
-firebase emulators:start --only firestore,auth
-```
-
-Run app using emulators (examples):
-
-### iOS Simulator
-
-```bash
-flutter run   --dart-define=USE_FIRESTORE_EMULATOR=true   --dart-define=FIRESTORE_HOST=localhost   --dart-define=FIRESTORE_PORT=8080   --dart-define=AUTH_PORT=9099
-```
-
-### Android Emulator
-
-```bash
-flutter run   --dart-define=USE_FIRESTORE_EMULATOR=true   --dart-define=FIRESTORE_HOST=10.0.2.2   --dart-define=FIRESTORE_PORT=8080   --dart-define=AUTH_PORT=9099
-```
-
-> Notes:
-> - On Android Emulator, `10.0.2.2` routes to your host machine.
-> - On a physical device, use your machine’s LAN IP (e.g., `192.168.x.x`).
-
----
-
-## Demo mode
-
-Run with in-memory repositories (no Firebase required):
-
-```bash
-flutter run --dart-define=USE_FAKE_REPOS=true
-```
-
----
-
-## Testing
-
-This repository contains a large `test/` suite including:
-- unit tests for controllers/viewmodels/mappers
-- widget tests across features (AI chat, checkout viewmodel, orders controller, profile screens, product details, cart migration, …)
-- golden tests (tagged)
-
-### Windows note (goldens)
-
-Golden tests are skipped on Windows due to Flutter tool temp cleanup flakiness. They are intended to run in CI and on non‑Windows environments.
-
-### Commands
-
-```bash
-# Non-golden tests (all platforms)
-flutter test --exclude-tags=golden
-
-# Golden tests (CI / non-Windows)
-flutter test --tags=golden
-```
-
----
-
-## Known limitations
-
-- **Shipping fee** is currently a constant `0.0` (no rate quotes).
-- **Payments** are entirely out of scope.
-- **Checkout is not trusted server-side**:
-  - order placement + stock decrement currently happen in a client Firestore transaction.
-  - no Cloud Functions backend is committed (`functions/` exists but is empty).
-- **AI chat** is a placeholder (fake repo).
-- **No operational tooling**:
-  - no admin UI, no inventory editor, no order management UI.
-
----
-
-## Roadmap ideas
-
-Short “next phase” ideas (non-committal):
-
-- Move checkout/order placement to a **trusted server layer** (Cloud Functions / server) and tighten Firestore rules accordingly.
-- Add stronger server-side validation for pricing/totals and cart integrity.
-- Add operational tooling (admin workflows):
-  - inventory/variants editor
-  - orders management (status changes, cancellations/refunds if payments ever added)
-- Performance:
-  - further optimize image prefetching + caching policy
-  - consider background sync policies in poor connectivity scenarios
-
----
-
-## License
-
-This repository is provided for **review and evaluation purposes only**.
-It is **not open-source** and may not be reused, redistributed, or deployed without explicit written permission.
-
+orders/{orderId}
+payment_sessions/{paymentIntentId}
+payment_intent_locks/{paymentIntentId}
 See [LICENSE](LICENSE).

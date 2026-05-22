@@ -306,7 +306,10 @@ class _SmartSuggestionCardState extends State<_SmartSuggestionCard> {
                     child: SvgPicture.asset(
                       widget.suggestion.iconAsset,
                       fit: BoxFit.contain,
-                      colorFilter: ColorFilter.mode(cs.primary, BlendMode.srcIn),
+                      colorFilter: ColorFilter.mode(
+                        cs.primary,
+                        BlendMode.srcIn,
+                      ),
                     ),
                   ),
                   SizedBox(width: 10.w),

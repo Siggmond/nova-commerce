@@ -22,11 +22,7 @@ class _Span {
 }
 
 class _PhaseStats {
-  _PhaseStats({
-    required this.name,
-    required this.startUs,
-    required this.endUs,
-  });
+  _PhaseStats({required this.name, required this.startUs, required this.endUs});
 
   final String name;
   final int startUs;
@@ -57,7 +53,11 @@ class _PhaseStats {
       if (span.durUs >= 16000) rasterSlowCount++;
     }
     if (isUi || isRaster) {
-      eventTotalByName.update(span.name, (v) => v + span.durUs, ifAbsent: () => span.durUs);
+      eventTotalByName.update(
+        span.name,
+        (v) => v + span.durUs,
+        ifAbsent: () => span.durUs,
+      );
       eventCountByName.update(span.name, (v) => v + 1, ifAbsent: () => 1);
     }
 
@@ -84,13 +84,18 @@ class _PhaseStats {
 
 void main(List<String> args) async {
   if (args.isEmpty) {
-    stderr.writeln('Usage: dart run tool/analyze_timeline.dart <timelineJsonPath>');
+    stderr.writeln(
+      'Usage: dart run tool/analyze_timeline.dart <timelineJsonPath>',
+    );
     exit(64);
   }
 
   final timelinePath = args[0];
-  final data = jsonDecode(await File(timelinePath).readAsString()) as Map<String, dynamic>;
-  final traceEvents = (data['traceEvents'] as List<dynamic>).cast<Map<String, dynamic>>();
+  final data =
+      jsonDecode(await File(timelinePath).readAsString())
+          as Map<String, dynamic>;
+  final traceEvents = (data['traceEvents'] as List<dynamic>)
+      .cast<Map<String, dynamic>>();
 
   final threadNames = <String, String>{};
   int minTs = 1 << 62;
@@ -105,7 +110,8 @@ void main(List<String> args) async {
       final pid = (e['pid'] as num?)?.toInt();
       final tid = (e['tid'] as num?)?.toInt();
       final argsMap = e['args'];
-      if (pid == null || tid == null || argsMap is! Map<String, dynamic>) continue;
+      if (pid == null || tid == null || argsMap is! Map<String, dynamic>)
+        continue;
       final name = argsMap['name'];
       if (name is String) {
         threadNames['$pid:$tid'] = name;
@@ -171,14 +177,16 @@ void main(List<String> args) async {
     phaseFor(span).add(span);
   }
 
-  final slowUiOrRaster = spans
-      .where(
-        (s) =>
-            (s.threadName.contains('.ui') || s.threadName.contains('.raster')) &&
-            s.durUs >= 16000,
-      )
-      .toList()
-    ..sort((a, b) => b.durUs.compareTo(a.durUs));
+  final slowUiOrRaster =
+      spans
+          .where(
+            (s) =>
+                (s.threadName.contains('.ui') ||
+                    s.threadName.contains('.raster')) &&
+                s.durUs >= 16000,
+          )
+          .toList()
+        ..sort((a, b) => b.durUs.compareTo(a.durUs));
 
   final topSlow = slowUiOrRaster.take(25).map((s) {
     return <String, dynamic>{
@@ -191,7 +199,11 @@ void main(List<String> args) async {
 
   final out = <String, dynamic>{
     'timeline_path': timelinePath,
-    'time_range_us': <String, int>{'start': minTs, 'end': maxTs, 'extent': maxTs - minTs},
+    'time_range_us': <String, int>{
+      'start': minTs,
+      'end': maxTs,
+      'extent': maxTs - minTs,
+    },
     'phase_boundaries_us': <String, int>{
       'home_initial_end': phase1End,
       'offers_end': phase2End,
@@ -209,17 +221,18 @@ void main(List<String> args) async {
             'raster_max_us': p.rasterMaxUs,
             'ui_slow_events_ge_16ms': p.uiSlowCount,
             'raster_slow_events_ge_16ms': p.rasterSlowCount,
-            'top_events_by_total_us': (p.eventTotalByName.entries.toList()
-                  ..sort((a, b) => b.value.compareTo(a.value)))
-                .take(20)
-                .map(
-                  (e) => <String, dynamic>{
-                    'name': e.key,
-                    'total_us': e.value,
-                    'count': p.eventCountByName[e.key] ?? 0,
-                  },
-                )
-                .toList(),
+            'top_events_by_total_us':
+                (p.eventTotalByName.entries.toList()
+                      ..sort((a, b) => b.value.compareTo(a.value)))
+                    .take(20)
+                    .map(
+                      (e) => <String, dynamic>{
+                        'name': e.key,
+                        'total_us': e.value,
+                        'count': p.eventCountByName[e.key] ?? 0,
+                      },
+                    )
+                    .toList(),
             'marker_counts': p.markerCount,
           },
         )
@@ -228,6 +241,8 @@ void main(List<String> args) async {
   };
 
   final outPath = timelinePath.replaceAll('.json', '.summary.json');
-  await File(outPath).writeAsString(const JsonEncoder.withIndent('  ').convert(out));
+  await File(
+    outPath,
+  ).writeAsString(const JsonEncoder.withIndent('  ').convert(out));
   stdout.writeln('Wrote summary: $outPath');
 }

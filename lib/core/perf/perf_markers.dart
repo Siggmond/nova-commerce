@@ -168,7 +168,8 @@ class PerfMarkers {
       'memory_mb': _lastMemorySampleMb,
       'memory_sample_source': _lastMemorySampleSource,
       'memory_samples_mb': _memorySamplesMb,
-      if (_memorySampleNotes.isNotEmpty) 'memory_sample_notes': _memorySampleNotes,
+      if (_memorySampleNotes.isNotEmpty)
+        'memory_sample_notes': _memorySampleNotes,
     };
     final line = jsonEncode(payload);
     if (_deterministicTestMode) {

@@ -71,10 +71,7 @@ class FilterChipBar extends StatelessWidget {
             ] else ...[
               for (final chip in chips) ...[
                 SizedBox(width: 8.w),
-                _ActiveFilterChip(
-                  label: chip.label,
-                  onRemove: chip.onRemove,
-                ),
+                _ActiveFilterChip(label: chip.label, onRemove: chip.onRemove),
               ],
             ],
             if (chips.length > 1 && onClearAll != null) ...[
@@ -142,10 +139,7 @@ class _PrimaryFilterChip extends StatelessWidget {
 }
 
 class _ActiveFilterChip extends StatelessWidget {
-  const _ActiveFilterChip({
-    required this.label,
-    required this.onRemove,
-  });
+  const _ActiveFilterChip({required this.label, required this.onRemove});
 
   final String label;
   final VoidCallback onRemove;
@@ -167,9 +161,9 @@ class _ActiveFilterChip extends StatelessWidget {
           children: [
             Text(
               label,
-              style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                fontWeight: FontWeight.w700,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w700),
             ),
             SizedBox(width: 6.w),
             GestureDetector(
@@ -215,10 +209,7 @@ class _NeutralChip extends StatelessWidget {
 }
 
 class _ActiveFilterChipData {
-  const _ActiveFilterChipData({
-    required this.label,
-    required this.onRemove,
-  });
+  const _ActiveFilterChipData({required this.label, required this.onRemove});
 
   final String label;
   final VoidCallback onRemove;

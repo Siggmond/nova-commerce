@@ -71,7 +71,7 @@ class SearchBarFrame extends StatelessWidget {
                   child: child,
                 ),
               ),
-        ),
+      ),
     );
   }
 }

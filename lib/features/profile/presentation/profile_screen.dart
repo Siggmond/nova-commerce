@@ -128,17 +128,17 @@ class ProfileScreen extends ConsumerWidget {
           maxWidth: maxContentWidth,
           padding: AppInsets.screen,
           children: [
-              _AccountHeader(
-                cs: cs,
-                isSignedIn: false,
-                isAnonymous: true,
-                email: '',
-                gold: gold,
-                goldSource: goldSource,
-                reduceEffects: reduceEffects,
-                onTapGold: () => context.push(AppRoutes.gold),
-                onTapSignIn: () => context.push(AppRoutes.signIn),
-              ),
+            _AccountHeader(
+              cs: cs,
+              isSignedIn: false,
+              isAnonymous: true,
+              email: '',
+              gold: gold,
+              goldSource: goldSource,
+              reduceEffects: reduceEffects,
+              onTapGold: () => context.push(AppRoutes.gold),
+              onTapSignIn: () => context.push(AppRoutes.signIn),
+            ),
           ],
         ),
         data: (value) {
@@ -844,10 +844,7 @@ class _ActionTileData {
 }
 
 class _QuickActionTile extends StatelessWidget {
-  const _QuickActionTile({
-    required this.data,
-    required this.reduceEffects,
-  });
+  const _QuickActionTile({required this.data, required this.reduceEffects});
   final _ActionTileData data;
   final bool reduceEffects;
 

@@ -70,12 +70,7 @@ Future<void> _runAdb(List<String> args, {Duration? delayAfter}) async {
   final code = await process.exitCode;
   if (code != 0) {
     final stderr = await utf8.decodeStream(process.stderr);
-    throw ProcessException(
-      'adb',
-      args,
-      stderr,
-      code,
-    );
+    throw ProcessException('adb', args, stderr, code);
   }
   if (delayAfter != null) {
     await Future<void>.delayed(delayAfter);
@@ -85,12 +80,7 @@ Future<void> _runAdb(List<String> args, {Duration? delayAfter}) async {
 Future<String> _runAdbStdout(List<String> args) async {
   final result = await Process.run('adb', args);
   if (result.exitCode != 0) {
-    throw ProcessException(
-      'adb',
-      args,
-      '${result.stderr}',
-      result.exitCode,
-    );
+    throw ProcessException('adb', args, '${result.stderr}', result.exitCode);
   }
   return '${result.stdout}'.trim();
 }
@@ -104,21 +94,18 @@ Future<void> _scrollFor({
 }) async {
   final endAt = DateTime.now().add(total);
   while (DateTime.now().isBefore(endAt)) {
-    await _runAdb(
-      <String>[
-        '-s',
-        deviceId,
-        'shell',
-        'input',
-        'swipe',
-        '$x',
-        '$yFrom',
-        '$x',
-        '$yTo',
-        '300',
-      ],
-      delayAfter: const Duration(milliseconds: 500),
-    );
+    await _runAdb(<String>[
+      '-s',
+      deviceId,
+      'shell',
+      'input',
+      'swipe',
+      '$x',
+      '$yFrom',
+      '$x',
+      '$yTo',
+      '300',
+    ], delayAfter: const Duration(milliseconds: 500));
   }
 }
 
@@ -150,11 +137,12 @@ Future<void> main(List<String> args) async {
   final rpc = _RpcClient(ws);
 
   try {
-    await rpc.call('setVMTimelineFlags', params: <String, dynamic>{
-      'recordedStreams': <String>[
-        'Embedder',
-      ],
-    });
+    await rpc.call(
+      'setVMTimelineFlags',
+      params: <String, dynamic>{
+        'recordedStreams': <String>['Embedder'],
+      },
+    );
     await rpc.call('clearVMTimeline');
     final start = await rpc.call('getVMTimelineMicros');
     final startMicros = (start['timestamp'] as num?)?.toInt();
@@ -202,18 +190,15 @@ Future<void> main(List<String> args) async {
     final scrollToY = (height * 0.34).round();
 
     // Ensure we begin from Home.
-    await _runAdb(
-      <String>[
-        '-s',
-        deviceId,
-        'shell',
-        'input',
-        'tap',
-        '$homeX',
-        '$navY',
-      ],
-      delayAfter: const Duration(milliseconds: 800),
-    );
+    await _runAdb(<String>[
+      '-s',
+      deviceId,
+      'shell',
+      'input',
+      'tap',
+      '$homeX',
+      '$navY',
+    ], delayAfter: const Duration(milliseconds: 800));
 
     stdout.writeln('Phase 1: Home scroll 10s');
     await _scrollFor(
@@ -225,18 +210,15 @@ Future<void> main(List<String> args) async {
     );
 
     stdout.writeln('Phase 2: Switch to Offers + scroll 10s');
-    await _runAdb(
-      <String>[
-        '-s',
-        deviceId,
-        'shell',
-        'input',
-        'tap',
-        '$offersX',
-        '$navY',
-      ],
-      delayAfter: const Duration(seconds: 1),
-    );
+    await _runAdb(<String>[
+      '-s',
+      deviceId,
+      'shell',
+      'input',
+      'tap',
+      '$offersX',
+      '$navY',
+    ], delayAfter: const Duration(seconds: 1));
     await _scrollFor(
       deviceId: deviceId,
       x: scrollX,
@@ -246,18 +228,15 @@ Future<void> main(List<String> args) async {
     );
 
     stdout.writeln('Phase 3: Switch to Account + scroll 12s');
-    await _runAdb(
-      <String>[
-        '-s',
-        deviceId,
-        'shell',
-        'input',
-        'tap',
-        '$accountX',
-        '$navY',
-      ],
-      delayAfter: const Duration(seconds: 1),
-    );
+    await _runAdb(<String>[
+      '-s',
+      deviceId,
+      'shell',
+      'input',
+      'tap',
+      '$accountX',
+      '$navY',
+    ], delayAfter: const Duration(seconds: 1));
     await _scrollFor(
       deviceId: deviceId,
       x: scrollX,
@@ -267,18 +246,15 @@ Future<void> main(List<String> args) async {
     );
 
     stdout.writeln('Phase 4: Leave Account -> Home + scroll 10s');
-    await _runAdb(
-      <String>[
-        '-s',
-        deviceId,
-        'shell',
-        'input',
-        'tap',
-        '$homeX',
-        '$navY',
-      ],
-      delayAfter: const Duration(milliseconds: 800),
-    );
+    await _runAdb(<String>[
+      '-s',
+      deviceId,
+      'shell',
+      'input',
+      'tap',
+      '$homeX',
+      '$navY',
+    ], delayAfter: const Duration(milliseconds: 800));
     await _scrollFor(
       deviceId: deviceId,
       x: scrollX,

@@ -1018,9 +1018,12 @@ class _GroupCard extends StatelessWidget {
         borderRadius: radius,
         border: Border.all(color: cs.outlineVariant.withValues(alpha: 0.55)),
       ),
-      child: Padding(
-        padding: padding ?? EdgeInsets.zero,
-        child: Column(children: children),
+      child: Material(
+        type: MaterialType.transparency,
+        child: Padding(
+          padding: padding ?? EdgeInsets.zero,
+          child: Column(children: children),
+        ),
       ),
     );
   }

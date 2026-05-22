@@ -110,8 +110,9 @@ void main(List<String> args) async {
       final pid = (e['pid'] as num?)?.toInt();
       final tid = (e['tid'] as num?)?.toInt();
       final argsMap = e['args'];
-      if (pid == null || tid == null || argsMap is! Map<String, dynamic>)
+      if (pid == null || tid == null || argsMap is! Map<String, dynamic>) {
         continue;
+      }
       final name = argsMap['name'];
       if (name is String) {
         threadNames['$pid:$tid'] = name;

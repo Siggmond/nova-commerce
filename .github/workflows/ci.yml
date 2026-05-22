@@ -30,5 +30,4 @@ jobs:
 
       # Golden tests are excluded until stable baselines are committed.
 
-      - name: Build APK (release)
-        run: flutter build apk --release
+      # Release APK builds require Firebase config/signing files and are excluded from public PR CI.

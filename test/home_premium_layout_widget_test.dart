@@ -3,13 +3,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:nova_commerce/domain/entities/home_config.dart';
-import 'package:nova_commerce/domain/entities/product.dart';
-import 'package:nova_commerce/domain/entities/variant.dart';
-import 'package:nova_commerce/features/home/presentation/home_premium_providers.dart';
+import 'package:nova_commerce/features/home/domain/entities/home_config.dart';
+import 'package:nova_commerce/core/domain/entities/product.dart';
+import 'package:nova_commerce/core/domain/entities/variant.dart';
+import 'package:nova_commerce/features/home/presentation/state/home_premium_providers.dart';
 import 'package:nova_commerce/features/home/presentation/home_screen.dart';
 import 'package:nova_commerce/features/home/presentation/home_viewmodel.dart';
-import 'package:nova_commerce/features/wishlist/presentation/wishlist_viewmodel.dart';
+import 'package:nova_commerce/features/wishlist/wishlist.dart';
+import 'package:nova_commerce/features/trends/presentation/trends_screen.dart';
+import 'package:nova_commerce/gen_l10n/app_localizations.dart';
 
 class TestHomeViewModel extends HomeViewModel {
   TestHomeViewModel(super.ref) {
@@ -43,7 +45,7 @@ void main() {
     WidgetTester tester,
   ) async {
     final binding = TestWidgetsFlutterBinding.ensureInitialized();
-    await binding.setSurfaceSize(const Size(375, 1800));
+    await binding.setSurfaceSize(const Size(375, 5200));
     addTearDown(() => binding.setSurfaceSize(null));
 
     await tester.pumpWidget(
@@ -51,6 +53,9 @@ void main() {
         overrides: [
           homeViewModelProvider.overrideWith((ref) => TestHomeViewModel(ref)),
           wishlistIdsProvider.overrideWith((ref) => const <String>{}),
+          trendingProductsProvider.overrideWith(
+            (ref) => Future.value(const <Product>[]),
+          ),
           homeConfigProvider.overrideWith(
             (ref) => Stream<HomeConfig>.value(HomeConfig.defaults),
           ),
@@ -63,7 +68,11 @@ void main() {
           minTextAdapt: true,
           splitScreenMode: true,
           builder: (context, child) {
-            return const MaterialApp(home: HomeScreen());
+            return const MaterialApp(
+              localizationsDelegates: AppLocalizations.localizationsDelegates,
+              supportedLocales: AppLocalizations.supportedLocales,
+              home: HomeScreen(),
+            );
           },
         ),
       ),
@@ -71,23 +80,19 @@ void main() {
 
     await tester.pumpAndSettle(const Duration(milliseconds: 800));
 
-    final quick = find.byKey(const Key('home_quick_squares_section'));
-    final catalog = find.byKey(const Key('home_catalog_section'));
-    final styles = find.byKey(const Key('home_styles_section'));
-    final deals = find.byKey(const Key('home_super_deals_header'));
+    final categories = find.text('Shop by category');
+    final trending = find.text('Trending now');
+    final picked = find.text('Picked for you').first;
 
-    expect(quick, findsOneWidget);
-    expect(catalog, findsOneWidget);
-    expect(styles, findsOneWidget);
-    expect(deals, findsOneWidget);
+    expect(categories, findsOneWidget);
+    expect(trending, findsOneWidget);
+    expect(find.text('Picked for you'), findsWidgets);
 
-    final yQuick = tester.getTopLeft(quick).dy;
-    final yCatalog = tester.getTopLeft(catalog).dy;
-    final yStyles = tester.getTopLeft(styles).dy;
-    final yDeals = tester.getTopLeft(deals).dy;
+    final yCategories = tester.getTopLeft(categories).dy;
+    final yTrending = tester.getTopLeft(trending).dy;
+    final yPicked = tester.getTopLeft(picked).dy;
 
-    expect(yQuick < yCatalog, true);
-    expect(yCatalog < yStyles, true);
-    expect(yStyles < yDeals, true);
+    expect(yCategories < yTrending, true);
+    expect(yTrending < yPicked, true);
   });
 }

@@ -1,12 +1,12 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:nova_commerce/core/config/providers.dart';
-import 'package:nova_commerce/domain/entities/product.dart';
-import 'package:nova_commerce/domain/entities/variant.dart';
-import 'package:nova_commerce/domain/repositories/product_repository.dart';
-import 'package:nova_commerce/domain/repositories/recently_viewed_repository.dart';
-import 'package:nova_commerce/features/product/presentation/product_details_viewmodel.dart';
+import 'package:nova_commerce/app/di/app_providers.dart';
+import 'package:nova_commerce/core/domain/entities/product.dart';
+import 'package:nova_commerce/core/domain/entities/variant.dart';
+import 'package:nova_commerce/core/domain/repositories/product_repository.dart';
+import 'package:nova_commerce/features/recently_viewed/domain/repositories/recently_viewed_repository.dart';
+import 'package:nova_commerce/features/products/presentation/product_details_viewmodel.dart';
 
 class _SingleVariantProductRepo implements ProductRepository {
   @override

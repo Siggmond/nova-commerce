@@ -1,0 +1,649 @@
+{
+  "@@locale": "fr",
+
+  "appTitle": "NovaCommerce",
+  "@appTitle": {
+    "description": "Application title"
+  },
+
+  "brandName": "Nova",
+
+  "navShop": "Boutique",
+  "navSearch": "Recherche",
+  "navAi": "Concierge",
+  "navOffers": "Offres",
+  "navCart": "Panier",
+  "navAccount": "Compte",
+
+  "aiChatTitle": "Concierge Nova",
+  "aiChatSubtitle": "Trouvez, comparez et achetez plus vite",
+  "aiChatPrivacyNote": "Les réponses de Nova IA sont générées et peuvent être inexactes. Cette démo ne fournit pas de citations. Vos conversations sont enregistrées localement sur cet appareil et peuvent être effacées à tout moment.",
+  "aiChatTooltipSessions": "Sessions",
+  "aiChatTooltipInfo": "Infos",
+  "aiChatTooltipClearChat": "Effacer la discussion",
+  "aiChatTooltipAdd": "Ajouter",
+  "aiChatTooltipSend": "Envoyer",
+  "aiChatHint": "Budget, style, usage…",
+  "aiChatSnackbarChatCleared": "Discussion effacée",
+  "aiChatSessionsTitle": "Sessions",
+  "aiChatNewSessionCta": "Nouveau",
+  "aiChatSearchSessionsHint": "Rechercher des sessions",
+  "aiChatNewChatTitle": "Nouvelle discussion",
+  "aiChatSeedAssistantMessage": "Je peux vous aider à affiner rapidement. Dites-moi votre budget + style + usage, et je vous proposerai une courte sélection d’options.\n\nExemple : \"hoodie noir à moins de $50, oversize\".",
+  "aiChatSnackbarCopied": "Copié",
+  "aiChatCopyCta": "Copier",
+  "aiChatRegenerateCta": "Régénérer",
+  "aiChatPickedForYouTitle": "Sélectionné pour vous",
+  "aiChatInlineAddCta": "Ajouter",
+  "aiChatSnackbarAddedToCart": "Ajouté au panier",
+  "aiChatDefaultOption": "Par défaut",
+  "aiChatLandingGreeting": "Salut {name}",
+  "@aiChatLandingGreeting": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "aiChatLandingPrompt": "Que puis-je vous aider à acheter aujourd’hui ?",
+  "aiChatQuickActionFindDealsTitle": "Trouver des offres aujourd’hui",
+  "aiChatQuickActionPickOutfitTitle": "Composer une tenue",
+  "aiChatQuickActionGiftIdeasTitle": "Idées cadeaux",
+  "aiChatQuickActionTrackOrderTitle": "Suivre ma commande",
+  "aiChatCartItemsCount": "{count} articles",
+  "@aiChatCartItemsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "aiChatWishlistSavedCount": "{count} enregistrés",
+  "@aiChatWishlistSavedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+
+  "language": "Langue",
+  "languageSystem": "Par défaut du système",
+
+  "commonComingSoon": "Bientôt disponible",
+
+  "messagesTitle": "Messages",
+  "messagesTabOrder": "Commande",
+  "messagesTabActivity": "Activité",
+  "messagesTabPromo": "Promo",
+  "messagesTabNews": "Actualités",
+
+  "trendsTitle": "Tendances",
+
+  "homePickedForYouTitle": "Sélectionné pour vous",
+  "homePickedForYouSubtitle": "Des correspondances rapides selon vos goûts (démo)",
+  "homePicksLoadErrorTitle": "Impossible de charger les sélections",
+  "homeNoPicksTitle": "Aucune sélection pour le moment",
+
+  "homeTrendingNowTitle": "Tendances du moment",
+  "homeTrendingNowSubtitle": "Classé selon ce que les gens consultent aujourd’hui",
+  "homeTrendingNowLoadErrorTitle": "Impossible de charger les tendances",
+  "homeNoTrendingPicksTitle": "Aucune tendance pour le moment",
+
+  "homeCuratedTrendsTitle": "Tendances sélectionnées",
+  "homeCuratedTrendsSubtitle": "Sélections de l’éditeur — stylées, polyvalentes et faciles à associer.",
+
+  "homeShopByCategoryTitle": "Acheter par catégorie",
+  "homeShopByCategorySubtitle": "Accès rapides",
+
+  "homeBadgeNew": "Nouveau",
+  "homeUpdatedToday": "Mis à jour aujourd’hui",
+
+  "homeCategoryItemsCount": "{count} articles",
+  "@homeCategoryItemsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+
+  "homeWeekendSaleTitle": "Soldes du week-end",
+  "homeWeekendSaleSubtitle": "-15 % supplémentaires sur une sélection d’articles",
+  "homeWeekendSaleCta": "Acheter maintenant",
+
+  "homeDeliverToCity": "Livrer à {city}",
+  "@homeDeliverToCity": {
+    "placeholders": {
+      "city": {
+        "type": "String"
+      }
+    }
+  },
+
+  "homeCityBeirut": "Beyrouth",
+  "homeCityTripoli": "Tripoli",
+  "homeCitySidon": "Saïda",
+  "homeCityTyre": "Tyr",
+  "homeCityJounieh": "Jounieh",
+  "homeCityByblos": "Byblos",
+  "homeCityZahle": "Zahlé",
+  "homeCityBaalbek": "Baalbek",
+  "homeCityNabatieh": "Nabatiyé",
+  "homeCityBatroun": "Batroun",
+  "homeCityBsharri": "Bcharré",
+  "homeCityAley": "Aley",
+
+  "homeCategoryGroceries": "Épicerie",
+  "homeCategoryRestaurants": "Restaurants",
+  "homeCategoryPharmacy": "Pharmacie",
+  "homeCategoryCoffee": "Café",
+  "homeCategoryBakery": "Boulangerie",
+  "homeCategoryElectronics": "Électronique",
+  "homeCategoryFlowers": "Fleurs",
+  "homeCategoryPetSupplies": "Animaux",
+  "homeCategoryCosmetics": "Cosmétiques",
+  "homeCategorySnacks": "Snacks",
+  "homeCategoryDrinks": "Boissons",
+  "homeCategoryBaby": "Bébé",
+
+  "homeCuratedTrendsLoadErrorTitle": "Impossible de charger les tendances sélectionnées",
+  "homeCuratedTrendsEmptyTitle": "Aucune sélection pour le moment.",
+  "homeCuratedTrendsIntroTitle": "La sélection de la semaine",
+  "homeCuratedTrendsIntroSubtitle": "Une sélection de notre catalogue — choisie pour le style, la polyvalence et la facilité d’assortiment. Ce n’est pas un classement de popularité.",
+  "homeCuratedTrendsEditorsFavoritesTitle": "Les favoris de l’éditeur",
+  "homeCuratedTrendsEditorsFavoritesSubtitle": "Des choix solides pour commencer.",
+  "homeCuratedTrendsWorthALookTitle": "À voir",
+  "homeCuratedTrendsWorthALookSubtitle": "Encore quelques choix pour varier.",
+  "homeCuratedTrendsMorePicksTitle": "Plus de sélections",
+  "homeCuratedTrendsMorePicksSubtitle": "Pour aller au-delà de la sélection.",
+  "homeCuratedTrendsEditorsPickBadge": "Choix de l’éditeur",
+  "homeCuratedTrendsHeroPickLabel": "Le choix phare de la semaine",
+
+  "commonBack": "Retour",
+  "commonSeeAll": "Voir tout",
+
+  "collectionTitle": "Collection",
+  "collectionNotFound": "Collection introuvable.",
+  "collectionLoadProductsErrorTitle": "Impossible de charger les produits",
+  "collectionLoadProductsErrorSubtitle": "Vérifiez votre connexion et réessayez.",
+  "collectionNoResultsTitle": "Aucun résultat",
+  "collectionNoResultsSubtitle": "Essayez un autre mot-clé ou des filtres.",
+
+  "searchNoResultsSubtitle": "Essayez un autre mot-clé.",
+  "searchFeaturedTitle": "En vedette",
+  "searchCollectionsTitle": "Collections",
+  "searchCollectionsSubtitle": "Sélections éditoriales pour inspirer votre prochain panier.",
+  "searchBackToShopTooltip": "Retour à la boutique",
+  "searchHintSearchForProducts": "Rechercher des produits",
+  "searchHintSearchInCollection": "Rechercher dans cette collection",
+  "searchTooltipSearch": "Rechercher",
+  "searchTooltipFilters": "Filtres",
+  "searchFiltersTitle": "Filtres",
+  "searchFiltersClearAll": "Tout effacer",
+  "searchFiltersApply": "Appliquer",
+  "searchFiltersSortByTitle": "Trier par",
+  "searchFiltersSortRecommended": "Recommandé",
+  "searchFiltersSortPopular": "Populaire",
+  "searchFiltersSortRating": "Note",
+  "searchFiltersPriceTierTitle": "Gamme de prix",
+  "searchFiltersPriceTierLowest": "Prix le plus bas",
+  "searchFiltersPriceTierMid": "Milieu de gamme",
+  "searchFiltersPriceTierHigh": "Haut de gamme",
+  "searchFiltersCategoriesTitle": "Catégories",
+  "searchRecentSearchesTitle": "Recherches récentes",
+  "searchRecentSearchesEmptyHint": "Recherchez des produits pour les voir ici.",
+  "searchCollectionsExplore": "Explorer",
+  "searchCollectionEditorial1Title": "Sélection de l’éditeur",
+  "searchCollectionEditorial1Subtitle": "Trouvailles sélectionnées avec des finitions premium",
+  "searchCollectionEditorial2Title": "Essentiels du week-end",
+  "searchCollectionEditorial2Subtitle": "Peu d’effort, beaucoup d’impact",
+  "searchCollectionEditorial3Title": "Tech épurée",
+  "searchCollectionEditorial3Subtitle": "Choix minimalistes et modernes",
+  "searchCollectionEditorial4Title": "Coin café",
+  "searchCollectionEditorial4Subtitle": "Petites améliorations qui font premium",
+  "searchCollectionEditorial5Title": "Petits plaisirs",
+  "searchCollectionEditorial5Subtitle": "Snacks favoris",
+  "searchCollectionEditorial6Title": "Bébé & famille",
+  "searchCollectionEditorial6Subtitle": "Choix doux et délicats",
+
+  "commonClear": "Effacer",
+  "commonCancel": "Annuler",
+  "commonSave": "Enregistrer",
+  "commonSaving": "Enregistrement…",
+  "commonEdit": "Modifier",
+  "commonRefresh": "Actualiser",
+  "commonSignIn": "Se connecter",
+  "commonSignOut": "Se déconnecter",
+  "commonEnabled": "Activé",
+  "commonDisabled": "Désactivé",
+  "commonVerified": "Vérifié",
+  "commonNotVerified": "Non vérifié",
+  "commonSeeAll": "Voir tout",
+
+  "languageNameEnglish": "English",
+  "languageNameArabic": "العربية",
+  "languageNameFrench": "Français",
+  "languageNameSpanish": "Español",
+
+  "profileThemeTitle": "Thème",
+  "profileThemeSystem": "Système",
+  "profileThemeLight": "Clair",
+  "profileThemeDark": "Sombre",
+
+  "profileSignOutDialogTitle": "Se déconnecter ?",
+  "profileSignOutDialogBody": "Vous pouvez vous reconnecter à tout moment.",
+
+  "profileSnackbarSignInToAccess": "Connectez-vous pour accéder à {feature}.",
+  "@profileSnackbarSignInToAccess": {
+    "placeholders": {
+      "feature": {
+        "type": "String"
+      }
+    }
+  },
+  "profileNotAvailableYet": "{feature} n’est pas encore disponible.",
+  "@profileNotAvailableYet": {
+    "placeholders": {
+      "feature": {
+        "type": "String"
+      }
+    }
+  },
+
+  "profileSectionAccount": "Compte",
+  "profileSectionMyShopping": "Mes achats",
+  "profileSectionSupport": "Assistance",
+  "profileSectionApp": "Application",
+  "profileSectionAuth": "Authentification",
+
+  "profileAccountDetailsTitle": "Détails du compte",
+  "profileAccountDetailsTileSubtitle": "Profil et vérification",
+  "profileAccountDetailsSubtitle": "Gérez votre profil et la vérification",
+
+  "profileAddressesTitle": "Adresses",
+  "profileAddressesSubtitle": "Adresses de livraison",
+  "profilePaymentMethodsTitle": "Moyens de paiement",
+  "profilePaymentMethodsSubtitle": "Cartes et portefeuilles",
+
+  "profileOrdersTitle": "Commandes",
+  "profileOrdersSubtitle": "Suivre les achats et la livraison",
+  "profileWishlistTitle": "Liste de souhaits",
+  "profileWishlistSubtitle": "Articles enregistrés",
+  "profileCartTitle": "Panier",
+  "profileCartSubtitle": "Articles prêts pour le paiement",
+  "profileMessagesTitle": "Messages",
+
+  "profileHelpCenterTitle": "Centre d’aide",
+  "profileHelpCenterSubtitle": "Réponses aux questions courantes",
+  "profileContactSupportTitle": "Contacter l’assistance",
+  "profileContactSupportSubtitle": "Nous sommes là pour aider",
+
+  "profileBuildStatusTelemetryTitle": "Télémétrie",
+  "profileBuildStatusPersonalizationTitle": "Personnalisation",
+  "profileBuildStatusSubtitle": "Défini par la configuration de build",
+
+  "profileSignInSubtitle": "Débloquez la synchro des commandes et les messages",
+  "profileSignOutSubtitle": "Vous pouvez vous reconnecter à tout moment",
+
+  "profileFeatureOrders": "Commandes",
+  "profileFeatureMessages": "Messages",
+
+  "profileGuestLabel": "Invité",
+  "profileMemberLabel": "Membre",
+  "profileGuestInitial": "I",
+  "profileAccountConnected": "Compte connecté",
+  "profileSignInToUnlockBenefits": "Connectez-vous pour débloquer des avantages",
+  "profileSignInBannerBody": "Connectez-vous pour synchroniser les commandes et accéder aux messages sur plusieurs appareils.",
+  "profileGoldPoints": "{value} Gold",
+  "@profileGoldPoints": {
+    "placeholders": {
+      "value": {
+        "type": "int"
+      }
+    }
+  },
+
+  "goldTitle": "Gold",
+  "goldInfoTooltip": "Infos",
+  "goldTierRulesPlaceholder": "Les règles du niveau ne sont pas encore disponibles.",
+  "goldRetentionMonthPlaceholder": "ce mois-ci",
+  "goldRetentionMessage": "Effectuez encore {remaining} commandes ce mois-ci pour conserver le niveau Gold en {month}.",
+  "@goldRetentionMessage": {
+    "placeholders": {
+      "remaining": {
+        "type": "int"
+      },
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "goldPointsLabel": "Points",
+  "goldPointsHistoryCta": "Historique des points",
+  "goldOrdersCompletedLabel": "{count} commande(s)",
+  "@goldOrdersCompletedLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "goldOrdersOutOfLabel": "sur {count}",
+  "@goldOrdersOutOfLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "goldNoticeSimplifiedPoints": "Nous avons simplifié la façon dont les points de fidélité sont gagnés et utilisés… la valeur reste la même.",
+  "goldDiscountsAndOffersTitle": "Réductions et offres",
+  "goldRewardsUnavailableBody": "Les récompenses ne sont pas encore disponibles.",
+  "goldPointsHistoryTitle": "Historique des points",
+  "goldPointsHistoryUnavailableBody": "L’historique des points n’est pas encore disponible.",
+  "goldRewardDetailsTitle": "Détails de la récompense",
+  "goldClose": "Fermer",
+  "goldRewardDetailsPlaceholderTitle": "Récompense",
+  "goldRewardDetailsPlaceholderSubtitle": "Cette récompense n’est pas encore disponible.",
+  "goldRewardPointsChip": "Ou {points} pts",
+  "@goldRewardPointsChip": {
+    "placeholders": {
+      "points": {
+        "type": "int"
+      }
+    }
+  },
+  "goldRewardTermsPlaceholder": "Les conditions et l’éligibilité ne sont pas encore disponibles.",
+  "goldClaimRewardCta": "Utiliser la récompense",
+
+  "profileSignInRequiredTitle": "Connexion requise",
+  "profileSignInRequiredSubtitle": "Connectez-vous pour consulter et mettre à jour les détails de votre compte.",
+
+  "profileSectionDisplayName": "Nom affiché",
+  "profileSectionEmail": "E-mail",
+  "profileSectionPhoneNumber": "Numéro de téléphone",
+  "profileFieldNameLabel": "Nom",
+  "profileFieldNameHint": "Votre nom",
+  "profileAnonymousEditBlocked": "Connectez-vous pour modifier votre profil.",
+  "profileNoEmail": "Aucun e-mail",
+  "profileVerifyEmailCta": "Vérifier l’e-mail",
+  "profileAnonymousEmailBlocked": "Connectez-vous pour vérifier votre e-mail.",
+  "profileAnonymousPhoneBlocked": "Connectez-vous pour vérifier votre téléphone.",
+  "profileNoPhoneLinked": "Aucun téléphone associé",
+  "profileFieldPhoneLabel": "Numéro de téléphone",
+  "profileFieldPhoneHint": "+12025550123",
+  "profileSendCodeCta": "Envoyer le code",
+  "profileFieldSmsCodeLabel": "Code SMS",
+  "profileVerifyPhoneCta": "Vérifier le téléphone",
+  "profileSnackbarNameUpdated": "Nom mis à jour",
+  "profileSnackbarVerificationEmailSent": "E-mail de vérification envoyé",
+  "profileSnackbarSmsCodeSent": "Code SMS envoyé",
+  "profileSnackbarPhoneVerified": "Téléphone vérifié",
+  "profileSnackbarPleaseSignInToEditName": "Veuillez vous connecter pour modifier votre nom.",
+  "profileSnackbarNoEmailAttached": "Aucun e-mail associé à ce compte.",
+  "profileSnackbarPleaseSignInToVerifyPhone": "Veuillez vous connecter pour vérifier un numéro de téléphone.",
+  "profileSnackbarEnterPhone": "Saisissez un numéro de téléphone",
+  "profileSnackbarStartPhoneVerificationFirst": "Commencez d’abord la vérification du téléphone.",
+  "profileSnackbarEnterSmsCode": "Saisissez le code SMS",
+
+  "profileVerifiedCountLabel": "{count}/2 vérifiés",
+  "@profileVerifiedCountLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "profileSectionProfileTitle": "Profil",
+  "profileSectionProfileSubtitle": "Gardez les informations de votre compte à jour.",
+  "profileSectionEmailTitle": "E-mail",
+  "profileSectionEmailSubtitle": "Vérifiez pour activer la synchro des commandes.",
+  "profileSectionPhoneTitle": "Téléphone",
+  "profileSectionPhoneSubtitle": "Vérifiez pour la récupération de compte et les mises à jour de livraison.",
+  "profileResendAvailableInSeconds": "Renvoi disponible dans {seconds}s",
+  "@profileResendAvailableInSeconds": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "profileGuestSessionTitle": "Session invité",
+  "profileYourAccountTitle": "Votre compte",
+  "profileAnonymousSyncHint": "Connectez-vous pour synchroniser sur plusieurs appareils.",
+  "profileSignedInLabel": "Connecté",
+  "profileAnonymousSyncAndVerifyHint": "Connectez-vous pour synchroniser et vérifier votre compte.",
+  "profileDemoBadgeLabel": "DÉMO",
+
+  "offersTitle": "Offres",
+  "offersSubtitle": "Des bons plans exclusifs sélectionnés pour vous",
+  "offersTooltipFilters": "Filtres",
+  "offersSearchHint": "Rechercher des offres",
+  "offersLoadErrorTitle": "Impossible de charger les offres",
+  "offersEmptyTitle": "Aucune offre trouvée",
+  "offersEmptySubtitle": "Essayez un autre filtre ou une autre recherche.",
+
+  "offersQuickAll": "Tous",
+  "offersQuickNew": "Nouveau",
+  "offersQuickPopular": "Populaire",
+  "offersQuickExpiring": "Expire bientôt",
+  "offersQuickOnline": "En ligne",
+  "offersQuickInStore": "En magasin",
+
+  "offersFeaturedDealBadge": "Offre en vedette",
+  "offersFeaturedShopDeal": "Voir l’offre",
+
+  "offersFiltersTitle": "Filtres",
+  "offersFiltersClearAll": "Tout effacer",
+  "offersFiltersSortBy": "Trier par",
+  "offersFiltersPriceTier": "Gamme de prix",
+  "offersFiltersChannel": "Canal",
+  "offersFiltersCategories": "Catégories",
+  "offersFiltersApply": "Appliquer",
+
+  "offersSortRecommended": "Recommandé",
+  "offersSortEndingSoon": "Se termine bientôt",
+  "offersSortHighestDiscount": "Meilleure réduction",
+  "offersSortNewest": "Le plus récent",
+
+  "offersPriceUnder25": "Moins de 25$",
+  "offersPriceUnder50": "Moins de 50$",
+  "offersPriceHighValue": "Bon rapport qualité/prix",
+
+  "offersChannelAll": "Tous",
+  "offersChannelOnline": "En ligne",
+  "offersChannelInStore": "En magasin",
+
+  "offersCategoryFashion": "Mode",
+  "offersCategoryShoes": "Chaussures",
+  "offersCategoryBeauty": "Beauté",
+  "offersCategoryElectronics": "Électronique",
+  "offersCategoryHome": "Maison",
+  "offersCategoryGrocery": "Épicerie",
+  "offersCategoryFitness": "Fitness",
+
+  "offersBadgePercentOff": "-{value}%",
+  "@offersBadgePercentOff": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "offersBadgeAmountOff": "-{value}$",
+  "@offersBadgeAmountOff": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "offersBadgeBogo": "1+1",
+  "offersBadgeDeal": "BON PLAN",
+  "offersPillCode": "Code",
+  "offersPillFeatured": "À la une",
+  "offersViewDealCta": "Voir l’offre",
+
+  "offerDetailsTitle": "Détails de l’offre",
+  "offerLoadErrorTitle": "Impossible de charger l’offre",
+  "offerNotFoundTitle": "Offre introuvable",
+  "offerExpiresExpired": "Expiré",
+  "offerExpiresEndsSoon": "Se termine bientôt",
+  "offerExpiresEndsInDays": "Se termine dans {days} j",
+  "@offerExpiresEndsInDays": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "offerExpiresEndsInHours": "Se termine dans {hours} h",
+  "@offerExpiresEndsInHours": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "offerPromoCodeCopied": "Code promo copié",
+  "offerRedeemTitle": "Utiliser",
+  "offerTerms": "Conditions",
+  "offerCopyCodeTooltip": "Copier le code",
+  "offerUseCodeAtCheckout": "Utilisez ce code au paiement.",
+  "offerNoPromoCodeRequired": "Aucun code promo requis.",
+  "offerShopProductsInThisOffer": "Voir les produits de cette offre",
+
+  "productItemTitle": "Article",
+  "productClearSelectionTooltip": "Effacer la sélection",
+  "productRemoveFromWishlistTooltip": "Retirer des favoris",
+  "productSaveToWishlistTooltip": "Ajouter aux favoris",
+
+  "commonRetry": "Réessayer",
+  "commonRequired": "Requis",
+  "commonSomethingWentWrongTryAgain": "Une erreur est survenue. Veuillez réessayer.",
+
+  "authWelcomeBackSubtitle": "Bon retour — connectez-vous pour continuer",
+  "authSignInTitle": "Se connecter",
+  "authSignInBody": "Utilisez votre e-mail et votre mot de passe pour accéder à votre compte.",
+  "authEmailLabel": "E-mail",
+  "authEmailHint": "you@example.com",
+  "authPasswordLabel": "Mot de passe",
+  "authPasswordHint": "••••••••",
+  "authEmailRequired": "L’e-mail est requis",
+  "authPasswordRequired": "Le mot de passe est requis",
+  "authInvalidEmail": "Saisissez une adresse e-mail valide",
+  "authForgotPassword": "Mot de passe oublié ?",
+  "authPasswordResetUnavailable": "La réinitialisation du mot de passe n’est pas encore disponible.",
+  "authCreateAccount": "Créer un compte",
+  "authContinueWithGoogle": "Continuer avec Google",
+  "authContinueAsGuest": "Continuer en invité",
+
+  "trustSecure": "Sécurisé",
+  "trustFastDelivery": "Livraison rapide",
+  "trustSupport": "Support",
+
+  "wishlistTitle": "Favoris",
+  "wishlistLoadErrorTitle": "Impossible de charger les favoris",
+  "wishlistEmptyTitle": "Aucun article enregistré",
+  "wishlistEmptySubtitle": "Appuyez sur le cœur d’un produit pour l’enregistrer ici.",
+
+  "cartTitle": "Panier",
+  "cartSelectAll": "Tout sélectionner",
+  "cartDeselectAll": "Tout désélectionner",
+  "cartLoadErrorTitle": "Impossible de charger votre panier",
+  "cartSyncNotice": "Connectez-vous pour synchroniser ce panier sur vos appareils. Sinon, il reste sur cet appareil.",
+  "cartYouMightLikeTitle": "Vous aimerez peut-être",
+  "cartYouMightLikeSubtitle": "Ajouts optionnels. Appuyez pour voir les détails.",
+  "cartFilterAll": "Tous",
+  "cartFilterHotDeals": "Bons plans",
+  "cartFilterFrequentFavorites": "Favoris fréquents",
+
+  "cartSelectionAllSelectedMessage": "Tous les articles sont sélectionnés pour le paiement. Décochez des articles pour les garder dans votre sac.",
+  "cartSelectionSomeSelectedMessage": "Le paiement inclura uniquement les articles sélectionnés. Les articles non sélectionnés restent dans votre sac.",
+  "cartSelectionNoneSelectedMessage": "Sélectionnez des articles pour continuer vers le paiement.",
+
+  "cartSubtotalLabel": "Sous-total",
+  "cartSelectedSubtotalLabel": "Sous-total sélectionné",
+  "cartTaxesAndShippingNote": "Les taxes et la livraison sont calculées au paiement.",
+  "cartSelectItemsToContinue": "Sélectionnez des articles pour continuer",
+  "cartProceedToCheckout": "Passer au paiement",
+
+  "cartEmptyTitle": "Votre panier est vide",
+  "cartEmptySubtitle1": "Ajoutez des articles que vous souhaitez acheter, puis vérifiez-les ici avant de payer.",
+  "cartEmptySubtitle2": "Ajoutez des articles depuis n’importe quelle page produit, puis revenez ici pour les vérifier et payer.",
+  "cartContinueShopping": "Continuer vos achats",
+
+  "checkoutTitle": "Paiement",
+  "checkoutShippingTitle": "Livraison",
+  "checkoutShippingSubtitle": "Saisissez les détails de livraison pour passer votre commande.",
+  "checkoutHintSelectItems": "Sélectionnez des articles du panier pour continuer",
+  "checkoutHintSignIn": "Connectez-vous pour passer la commande",
+  "checkoutPlaceOrder": "Passer la commande",
+  "checkoutPlacingOrder": "Commande en cours…",
+  "checkoutDeliveryTitle": "Adresse de livraison",
+  "checkoutFullNameLabel": "Nom complet",
+  "checkoutPhoneLabel": "Téléphone",
+  "checkoutAddressLabel": "Adresse",
+  "checkoutCityLabel": "Ville",
+  "checkoutStateLabel": "État/Région",
+  "checkoutPostalCodeLabel": "Code postal",
+  "checkoutCountryLabel": "Pays",
+
+  "checkoutSubtotalLabel": "Sous-total",
+  "checkoutShippingFeeLabel": "Livraison",
+  "checkoutFreeShipping": "Livraison gratuite",
+  "checkoutTotalLabel": "Total",
+
+  "paymentsTitle": "Paiement",
+  "paymentsChooseMethod": "Choisissez un moyen de paiement",
+  "paymentsContinueCta": "Continuer",
+
+  "paymentsConfirmTitle": "Confirmer le paiement",
+  "paymentsSelectedMethod": "Vous avez choisi : {method}",
+  "@paymentsSelectedMethod": {
+    "placeholders": {
+      "method": {
+        "type": "String"
+      }
+    }
+  },
+  "paymentsPayCta": "Payer",
+
+  "paymentsSuccessTitle": "Paiement réussi",
+  "paymentsSuccessHeadline": "Paiement effectué",
+  "paymentsOrderIdLabel": "ID de commande : {orderId}",
+  "@paymentsOrderIdLabel": {
+    "placeholders": {
+      "orderId": {
+        "type": "String"
+      }
+    }
+  },
+  "paymentsViewOrderCta": "Voir la commande",
+  "paymentsViewOrdersCta": "Voir les commandes",
+  "paymentsContinueShoppingCta": "Continuer vos achats",
+
+  "paymentsFailureTitle": "Échec du paiement",
+  "paymentsFailureBody": "Nous n’avons pas pu finaliser votre paiement. Veuillez réessayer.",
+
+  "paymentsSummaryTitle": "Récapitulatif",
+  "paymentsSummaryItems": "Articles",
+  "paymentsSummarySubtotal": "Sous-total",
+  "paymentsSummaryShipping": "Livraison",
+  "paymentsSummaryFree": "Gratuit",
+  "paymentsSummaryTotal": "Total",
+
+  "paymentsMethodStripe": "Stripe",
+  "paymentsMethodStripeSubtitle": "Carte",
+  "paymentsMethodPaypal": "PayPal",
+  "paymentsMethodPaypalSubtitle": "Paiement PayPal",
+
+  "checkoutCartEmpty": "Votre panier est vide.",
+  "checkoutSignInRequired": "Veuillez vous connecter pour continuer.",
+  "checkoutInvalidPhone": "Numéro de téléphone invalide",
+
+  "checkoutAddressSearching": "Recherche…",
+  "checkoutAddressSuggestionsUnavailable": "Suggestions d’adresse indisponibles — vous pouvez saisir manuellement.",
+  "checkoutUseManualEntry": "Saisie manuelle"
+}

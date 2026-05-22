@@ -2,9 +2,15 @@ package com.novacommerce.nova_commerce
 
 import android.os.Bundle
 import android.util.Log
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.os.LocaleListCompat
 import io.flutter.embedding.android.FlutterActivity
+import io.flutter.embedding.engine.FlutterEngine
+import io.flutter.plugin.common.MethodChannel
 
 class MainActivity : FlutterActivity() {
+    private val channelName = "com.novacommerce.nova_commerce/platform_app_locale"
+
     override fun onCreate(savedInstanceState: Bundle?) {
         try {
             val firebaseAppClass = Class.forName("com.google.firebase.FirebaseApp")
@@ -32,5 +38,27 @@ class MainActivity : FlutterActivity() {
         }
 
         super.onCreate(savedInstanceState)
+    }
+
+    override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
+        super.configureFlutterEngine(flutterEngine)
+
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, channelName)
+            .setMethodCallHandler { call, result ->
+                if (call.method != "setLocale") {
+                    result.notImplemented()
+                    return@setMethodCallHandler
+                }
+
+                val tag = (call.argument<String>("languageTag") ?: "").trim()
+                val locales = if (tag.isEmpty()) {
+                    LocaleListCompat.getEmptyLocaleList()
+                } else {
+                    LocaleListCompat.forLanguageTags(tag)
+                }
+
+                AppCompatDelegate.setApplicationLocales(locales)
+                result.success(null)
+            }
     }
 }

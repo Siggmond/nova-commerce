@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/config/providers.dart';
-import '../../../domain/entities/product.dart';
+import 'package:nova_commerce/app/di/app_providers.dart';
+import '../../../core/domain/entities/product.dart';
 
 sealed class HomeState {
   const HomeState();
@@ -89,6 +89,8 @@ class HomeViewModel extends StateNotifier<HomeState> {
   static const int _pageSize = 20;
 
   Object? _cursor;
+  int _requestToken = 0;
+  bool _isDisposed = false;
 
   List<Product> _dedupeById(Iterable<Product> items) {
     final seen = <String>{};
@@ -102,43 +104,52 @@ class HomeViewModel extends StateNotifier<HomeState> {
   }
 
   Future<void> refresh({bool showLoading = false}) async {
+    if (_isDisposed) return;
+    final requestToken = ++_requestToken;
     final current = state;
     if (current is HomeData && !showLoading) {
-      state = current.copyWith(isRefreshing: true);
+      _publish(current.copyWith(isRefreshing: true));
     } else {
-      state = const HomeState.loading();
+      _publish(const HomeState.loading());
     }
     _cursor = null;
     try {
       final repo = _ref.read(productRepositoryProvider);
       final page = await repo.getFeaturedProducts(limit: _pageSize);
+      if (!_isRequestActive(requestToken)) return;
       _cursor = page.cursor;
       final items = _dedupeById(page.items);
-      state = HomeState.data(
-        items: items,
-        isRefreshing: false,
-        isLoadingMore: false,
-        hasMore: page.items.length == _pageSize && _cursor != null,
+      _publish(
+        HomeState.data(
+          items: items,
+          isRefreshing: false,
+          isLoadingMore: false,
+          hasMore: page.items.length == _pageSize && _cursor != null,
+        ),
       );
     } catch (e) {
-      state = HomeState.error(e);
+      if (!_isRequestActive(requestToken)) return;
+      _publish(HomeState.error(e));
     }
   }
 
   Future<void> loadMore() async {
+    if (_isDisposed) return;
     final s = state;
     if (s is! HomeData) return;
     if (s.isLoadingMore || !s.hasMore) return;
     if (s.items.isEmpty) return;
     if (_cursor == null) return;
 
-    state = s.copyWith(isLoadingMore: true);
+    final requestToken = ++_requestToken;
+    _publish(s.copyWith(isLoadingMore: true));
     try {
       final repo = _ref.read(productRepositoryProvider);
       final page = await repo.getFeaturedProducts(
         limit: _pageSize,
         startAfter: _cursor,
       );
+      if (!_isRequestActive(requestToken)) return;
 
       _cursor = page.cursor;
       final next = page.items;
@@ -152,13 +163,38 @@ class HomeViewModel extends StateNotifier<HomeState> {
         }
       }
 
-      state = s.copyWith(
-        items: merged,
-        isLoadingMore: false,
-        hasMore: fetchedCount == _pageSize && _cursor != null,
+      _publish(
+        s.copyWith(
+          items: merged,
+          isLoadingMore: false,
+          hasMore: fetchedCount == _pageSize && _cursor != null,
+        ),
       );
     } catch (_) {
-      state = s.copyWith(isLoadingMore: false);
+      if (!_isRequestActive(requestToken)) return;
+      _publish(s.copyWith(isLoadingMore: false));
     }
+  }
+
+  /// Firestore reads are not truly cancelable; this invalidates pending
+  /// responses so route disposal cannot apply stale fetch completions.
+  void cancelInFlightPageFetches() {
+    _requestToken += 1;
+  }
+
+  bool _isRequestActive(int token) {
+    return !_isDisposed && token == _requestToken;
+  }
+
+  void _publish(HomeState nextState) {
+    if (_isDisposed || !mounted) return;
+    state = nextState;
+  }
+
+  @override
+  void dispose() {
+    _isDisposed = true;
+    _requestToken += 1;
+    super.dispose();
   }
 }

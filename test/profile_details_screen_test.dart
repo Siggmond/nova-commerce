@@ -1,12 +1,13 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:nova_commerce/core/config/auth_providers.dart';
+import 'package:nova_commerce/app/di/app_providers.dart';
 import 'package:nova_commerce/core/widgets/app_button.dart';
-import 'package:nova_commerce/data/repositories/fake_auth_repository.dart';
+import 'package:nova_commerce/features/auth/auth.dart';
 import 'package:nova_commerce/features/profile/presentation/profile_details_screen.dart';
+import 'package:nova_commerce/gen_l10n/app_localizations.dart';
 
 void main() {
   testWidgets('Profile Details screen renders for signed-in user', (
@@ -22,7 +23,11 @@ void main() {
           designSize: const Size(375, 812),
           minTextAdapt: true,
           splitScreenMode: true,
-          builder: (_, __) => const MaterialApp(home: ProfileDetailsScreen()),
+          builder: (_, __) => const MaterialApp(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: ProfileDetailsScreen(),
+          ),
         ),
       ),
     );
@@ -46,7 +51,11 @@ void main() {
           designSize: const Size(375, 812),
           minTextAdapt: true,
           splitScreenMode: true,
-          builder: (_, __) => const MaterialApp(home: ProfileDetailsScreen()),
+          builder: (_, __) => const MaterialApp(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: ProfileDetailsScreen(),
+          ),
         ),
       ),
     );
@@ -76,7 +85,11 @@ void main() {
           designSize: const Size(375, 812),
           minTextAdapt: true,
           splitScreenMode: true,
-          builder: (_, __) => const MaterialApp(home: ProfileDetailsScreen()),
+          builder: (_, __) => const MaterialApp(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: ProfileDetailsScreen(),
+          ),
         ),
       ),
     );
@@ -109,7 +122,11 @@ void main() {
           designSize: const Size(375, 812),
           minTextAdapt: true,
           splitScreenMode: true,
-          builder: (_, __) => const MaterialApp(home: ProfileDetailsScreen()),
+          builder: (_, __) => const MaterialApp(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: ProfileDetailsScreen(),
+          ),
         ),
       ),
     );

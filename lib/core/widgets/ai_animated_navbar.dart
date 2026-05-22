@@ -1,6 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+const int _tabShop = 0;
+const int _tabSearch = 1;
+const int _tabAi = 2;
+const int _tabOffers = 3;
+const int _tabCart = 4;
+const int _tabAccount = 5;
+
+const List<BoxShadow> _navBarShadows = <BoxShadow>[
+  BoxShadow(color: Color(0x1A000000), blurRadius: 24, offset: Offset(0, -10)),
+];
+
 enum _AiSuggestionMode { none, glow, pulse, strong }
 
 class AiAnimatedNavBar extends StatefulWidget {
@@ -8,19 +19,24 @@ class AiAnimatedNavBar extends StatefulWidget {
     super.key,
     required this.currentIndex,
     required this.onSelect,
+    required this.labels,
     required this.cartCount,
     required this.suggestedIndex,
     required this.suggestedConfidence,
+    required this.reduceAnimations,
   });
 
   final int currentIndex;
   final ValueChanged<int> onSelect;
+
+  final List<String> labels;
 
   final int cartCount;
 
   final int? suggestedIndex;
 
   final double? suggestedConfidence;
+  final bool reduceAnimations;
 
   @override
   State<AiAnimatedNavBar> createState() => _AiAnimatedNavBarState();
@@ -36,6 +52,7 @@ class _AiAnimatedNavBarState extends State<AiAnimatedNavBar>
 
     final c = (widget.suggestedConfidence ?? 0.0).clamp(0.0, 1.0).toDouble();
     if (c < 0.35) return _AiSuggestionMode.none;
+    if (widget.reduceAnimations) return _AiSuggestionMode.glow;
     if (c < 0.45) return _AiSuggestionMode.glow;
     if (c < 0.60) return _AiSuggestionMode.pulse;
     return _AiSuggestionMode.strong;
@@ -55,7 +72,8 @@ class _AiAnimatedNavBarState extends State<AiAnimatedNavBar>
   void didUpdateWidget(covariant AiAnimatedNavBar oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.suggestedIndex != widget.suggestedIndex ||
-        oldWidget.suggestedConfidence != widget.suggestedConfidence) {
+        oldWidget.suggestedConfidence != widget.suggestedConfidence ||
+        oldWidget.reduceAnimations != widget.reduceAnimations) {
       _syncPulse();
     }
   }
@@ -94,13 +112,7 @@ class _AiAnimatedNavBarState extends State<AiAnimatedNavBar>
         child: DecoratedBox(
           decoration: BoxDecoration(
             color: cs.surface,
-            boxShadow: [
-              BoxShadow(
-                blurRadius: 24.r,
-                offset: Offset(0, -10.h),
-                color: Colors.black.withValues(alpha: 0.10),
-              ),
-            ],
+            boxShadow: _navBarShadows,
           ),
           child: AnimatedBuilder(
             animation: _pulse,
@@ -109,64 +121,89 @@ class _AiAnimatedNavBarState extends State<AiAnimatedNavBar>
               return Row(
                 children: [
                   _Item(
-                    label: 'Shop',
-                    selected: widget.currentIndex == 0,
-                    suggested: effectiveSuggestedIndex == 0,
+                    tabKey: const Key('nav_tab_shop'),
+                    label: widget.labels[_tabShop],
+                    selected: widget.currentIndex == _tabShop,
+                    suggested: effectiveSuggestedIndex == _tabShop,
                     suggestionMode: mode,
                     confidence: confidence,
                     pulseT: t,
+                    reduceAnimations: widget.reduceAnimations,
                     accent: cs.primary,
-                    onTap: () => widget.onSelect(0),
+                    onTap: () => widget.onSelect(_tabShop),
                     icon: Icons.storefront_outlined,
                     selectedIcon: Icons.storefront,
                   ),
                   _Item(
-                    label: 'AI',
-                    selected: widget.currentIndex == 1,
-                    suggested: effectiveSuggestedIndex == 1,
+                    tabKey: const Key('nav_tab_search'),
+                    label: widget.labels[_tabSearch],
+                    selected: widget.currentIndex == _tabSearch,
+                    suggested: effectiveSuggestedIndex == _tabSearch,
                     suggestionMode: mode,
                     confidence: confidence,
                     pulseT: t,
+                    reduceAnimations: widget.reduceAnimations,
                     accent: cs.primary,
-                    onTap: () => widget.onSelect(1),
+                    onTap: () => widget.onSelect(_tabSearch),
+                    icon: Icons.search_outlined,
+                    selectedIcon: Icons.search,
+                  ),
+                  _Item(
+                    tabKey: const Key('nav_tab_ai'),
+                    label: widget.labels[_tabAi],
+                    selected: widget.currentIndex == _tabAi,
+                    suggested: effectiveSuggestedIndex == _tabAi,
+                    suggestionMode: mode,
+                    confidence: confidence,
+                    pulseT: t,
+                    reduceAnimations: widget.reduceAnimations,
+                    accent: cs.primary,
+                    onTap: () => widget.onSelect(_tabAi),
                     icon: Icons.auto_awesome_outlined,
                     selectedIcon: Icons.auto_awesome,
                   ),
                   _Item(
-                    label: 'Trends',
-                    selected: widget.currentIndex == 2,
-                    suggested: effectiveSuggestedIndex == 2,
+                    tabKey: const Key('nav_tab_offers'),
+                    label: widget.labels[_tabOffers],
+                    selected: widget.currentIndex == _tabOffers,
+                    suggested: effectiveSuggestedIndex == _tabOffers,
                     suggestionMode: mode,
                     confidence: confidence,
                     pulseT: t,
+                    reduceAnimations: widget.reduceAnimations,
                     accent: cs.primary,
-                    onTap: () => widget.onSelect(2),
-                    icon: Icons.trending_up_outlined,
-                    selectedIcon: Icons.trending_up,
+                    onTap: () => widget.onSelect(_tabOffers),
+                    icon: Icons.local_offer_outlined,
+                    selectedIcon: Icons.local_offer,
                   ),
                   _Item(
-                    label: 'Cart',
-                    selected: widget.currentIndex == 3,
-                    suggested: effectiveSuggestedIndex == 3,
+                    tabKey: const Key('nav_tab_cart'),
+                    label: widget.labels[_tabCart],
+                    selected: widget.currentIndex == _tabCart,
+                    suggested: effectiveSuggestedIndex == _tabCart,
                     suggestionMode: mode,
                     confidence: confidence,
                     pulseT: t,
+                    reduceAnimations: widget.reduceAnimations,
                     accent: cs.primary,
-                    onTap: () => widget.onSelect(3),
+                    onTap: () => widget.onSelect(_tabCart),
                     iconWidget: _CartIcon(
                       count: widget.cartCount,
-                      selected: widget.currentIndex == 3,
+                      selected: widget.currentIndex == _tabCart,
+                      reduceAnimations: widget.reduceAnimations,
                     ),
                   ),
                   _Item(
-                    label: 'Profile',
-                    selected: widget.currentIndex == 4,
-                    suggested: effectiveSuggestedIndex == 4,
+                    tabKey: const Key('nav_tab_account'),
+                    label: widget.labels[_tabAccount],
+                    selected: widget.currentIndex == _tabAccount,
+                    suggested: effectiveSuggestedIndex == _tabAccount,
                     suggestionMode: mode,
                     confidence: confidence,
                     pulseT: t,
+                    reduceAnimations: widget.reduceAnimations,
                     accent: cs.primary,
-                    onTap: () => widget.onSelect(4),
+                    onTap: () => widget.onSelect(_tabAccount),
                     icon: Icons.person_outline,
                     selectedIcon: Icons.person,
                   ),
@@ -182,12 +219,14 @@ class _AiAnimatedNavBarState extends State<AiAnimatedNavBar>
 
 class _Item extends StatelessWidget {
   const _Item({
+    required this.tabKey,
     required this.label,
     required this.selected,
     required this.suggested,
     required this.suggestionMode,
     required this.confidence,
     required this.pulseT,
+    required this.reduceAnimations,
     required this.accent,
     required this.onTap,
     this.icon,
@@ -195,12 +234,14 @@ class _Item extends StatelessWidget {
     this.iconWidget,
   });
 
+  final Key tabKey;
   final String label;
   final bool selected;
   final bool suggested;
   final _AiSuggestionMode suggestionMode;
   final double confidence;
   final double pulseT;
+  final bool reduceAnimations;
   final Color accent;
   final VoidCallback onTap;
 
@@ -213,27 +254,31 @@ class _Item extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
 
     final intensity = suggested
-        ? switch (suggestionMode) {
-            _AiSuggestionMode.glow =>
-              (0.10 + 0.06 * ((confidence - 0.35) / 0.10).clamp(0.0, 1.0))
-                  .toDouble(),
-            _AiSuggestionMode.pulse =>
-              (0.12 + 0.10 * ((confidence - 0.45) / 0.15).clamp(0.0, 1.0))
-                      .toDouble() *
-                  (0.35 + 0.65 * pulseT),
-            _AiSuggestionMode.strong =>
-              (0.22 + 0.18 * ((confidence - 0.60) / 0.40).clamp(0.0, 1.0))
-                      .toDouble() *
-                  (0.45 + 0.55 * pulseT),
-            _AiSuggestionMode.none => 0.0,
-          }
+        ? (reduceAnimations
+              ? 0.08
+              : switch (suggestionMode) {
+                  _AiSuggestionMode.glow =>
+                    (0.10 + 0.06 * ((confidence - 0.35) / 0.10).clamp(0.0, 1.0))
+                        .toDouble(),
+                  _AiSuggestionMode.pulse =>
+                    (0.12 + 0.10 * ((confidence - 0.45) / 0.15).clamp(0.0, 1.0))
+                            .toDouble() *
+                        (0.35 + 0.65 * pulseT),
+                  _AiSuggestionMode.strong =>
+                    (0.22 + 0.18 * ((confidence - 0.60) / 0.40).clamp(0.0, 1.0))
+                            .toDouble() *
+                        (0.45 + 0.55 * pulseT),
+                  _AiSuggestionMode.none => 0.0,
+                })
         : 0.0;
 
-    final scale = selected
-        ? 1.07
-        : (suggested && suggestionMode == _AiSuggestionMode.strong
-              ? 1.03
-              : 1.0);
+    final scale = reduceAnimations
+        ? 1.0
+        : (selected
+              ? 1.07
+              : (suggested && suggestionMode == _AiSuggestionMode.strong
+                    ? 1.03
+                    : 1.0));
 
     final iconColor = selected
         ? cs.onSurface
@@ -249,10 +294,13 @@ class _Item extends StatelessWidget {
 
     return Expanded(
       child: InkWell(
+        key: tabKey,
         onTap: onTap,
         child: Center(
           child: AnimatedScale(
-            duration: const Duration(milliseconds: 180),
+            duration: reduceAnimations
+                ? Duration.zero
+                : const Duration(milliseconds: 180),
             curve: Curves.easeOutCubic,
             scale: scale,
             child: Column(
@@ -294,10 +342,15 @@ class _Item extends StatelessWidget {
 }
 
 class _CartIcon extends StatelessWidget {
-  const _CartIcon({required this.count, required this.selected});
+  const _CartIcon({
+    required this.count,
+    required this.selected,
+    required this.reduceAnimations,
+  });
 
   final int count;
   final bool selected;
+  final bool reduceAnimations;
 
   @override
   Widget build(BuildContext context) {
@@ -315,7 +368,9 @@ class _CartIcon extends StatelessWidget {
           top: (-4).h,
           right: (-6).w,
           child: AnimatedContainer(
-            duration: const Duration(milliseconds: 220),
+            duration: reduceAnimations
+                ? Duration.zero
+                : const Duration(milliseconds: 220),
             curve: Curves.easeOutCubic,
             padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
             decoration: BoxDecoration(

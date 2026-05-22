@@ -1,13 +1,14 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:hive/hive.dart';
 
-import 'package:nova_commerce/core/config/providers.dart';
-import 'package:nova_commerce/data/repositories/fake_ai_repository.dart';
-import 'package:nova_commerce/domain/entities/chat_message.dart';
-import 'package:nova_commerce/domain/repositories/ai_repository.dart';
-import 'package:nova_commerce/features/ai_assistant/presentation/ai_chat_viewmodel.dart';
-import 'test_helper.dart';
+import 'package:nova_commerce/app/di/app_providers.dart';
+import 'package:nova_commerce/features/ai_assistant/data/repositories/fake_ai_repository.dart';
+import 'package:nova_commerce/features/ai_assistant/domain/entities/ai_chat_snapshot.dart';
+import 'package:nova_commerce/features/ai_assistant/domain/entities/chat_message.dart';
+import 'package:nova_commerce/features/ai_assistant/domain/entities/chat_session.dart';
+import 'package:nova_commerce/features/ai_assistant/domain/repositories/ai_chat_store.dart';
+import 'package:nova_commerce/features/ai_assistant/domain/repositories/ai_repository.dart';
+import 'package:nova_commerce/features/ai_assistant/ai_assistant.dart';
 
 class _ImmediateAiRepo implements AiRepository {
   @override
@@ -28,24 +29,31 @@ class _ImmediateAiRepo implements AiRepository {
   }
 }
 
+class _InMemoryAiChatStore implements AiChatStore {
+  AiChatSnapshot? snapshot;
+
+  @override
+  Future<AiChatSnapshot?> load() async => snapshot;
+
+  @override
+  Future<void> save({
+    required List<ChatSession> sessions,
+    required String activeSessionId,
+  }) async {
+    snapshot = AiChatSnapshot(
+      sessions: List<ChatSession>.of(sessions),
+      activeSessionId: activeSessionId,
+    );
+  }
+}
+
 void main() {
-  setUpAll(initHiveForTests);
-
-  tearDownAll(disposeHiveForTests);
-
-  setUp(() async {
-    final box = await Hive.openBox<dynamic>('ai_chat');
-    await box.clear();
-    await box.close();
-  });
-
-  tearDown(() async {
-    await Hive.close();
-  });
-
   test('AiChatViewModel.clear() resets to seed message only', () {
     final container = ProviderContainer(
-      overrides: [aiRepositoryProvider.overrideWithValue(FakeAiRepository())],
+      overrides: [
+        aiRepositoryProvider.overrideWithValue(FakeAiRepository()),
+        aiChatStoreProvider.overrideWithValue(_InMemoryAiChatStore()),
+      ],
     );
     addTearDown(container.dispose);
 
@@ -62,7 +70,10 @@ void main() {
     'AiChatViewModel keeps user message before assistant reply when timestamps match',
     () async {
       final container = ProviderContainer(
-        overrides: [aiRepositoryProvider.overrideWithValue(_ImmediateAiRepo())],
+        overrides: [
+          aiRepositoryProvider.overrideWithValue(_ImmediateAiRepo()),
+          aiChatStoreProvider.overrideWithValue(_InMemoryAiChatStore()),
+        ],
       );
       addTearDown(container.dispose);
 

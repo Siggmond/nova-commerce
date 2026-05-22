@@ -1,11 +1,19 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:nova_commerce/features/wishlist/wishlist.dart';
+
 import 'home_feed_registry.dart';
 import 'home_filters.dart';
 import 'home_viewmodel.dart';
-import '../../wishlist/presentation/wishlist_viewmodel.dart';
 
 enum HomeSectionStatus { loading, ready, empty, error }
+
+typedef _HomeSectionSignal = ({
+  int phase,
+  bool isRefreshing,
+  int itemCount,
+  int itemIdsHash,
+});
 
 class HomeSectionState {
   const HomeSectionState({
@@ -42,24 +50,56 @@ class HomeFeedController extends StateNotifier<List<HomeSectionState>> {
             retryToken: 0,
           ),
       ]) {
-    _ref.listen<HomeState>(homeViewModelProvider, (_, __) => _recompute());
-    _ref.listen<List<dynamic>>(
-      homeFilteredProductsProvider,
-      (_, __) => _recompute(),
-    );
-    _ref.listen<List<dynamic>>(
-      homeUnder50ProductsProvider,
-      (_, __) => _recompute(),
+    _ref.listen<_HomeSectionSignal>(
+      homeViewModelProvider.select(
+        (s) => switch (s) {
+          HomeLoading() => (
+            phase: 0,
+            isRefreshing: false,
+            itemCount: 0,
+            itemIdsHash: 0,
+          ),
+          HomeError() => (
+            phase: 1,
+            isRefreshing: false,
+            itemCount: 0,
+            itemIdsHash: 0,
+          ),
+          HomeData(:final items, :final isRefreshing) => (
+            phase: 2,
+            isRefreshing: isRefreshing,
+            itemCount: items.length,
+            itemIdsHash: Object.hashAll(items.map((e) => e.id)),
+          ),
+        },
+      ),
+      (_, __) {
+        if (_isDisposed) return;
+        _recompute();
+      },
     );
     _ref.listen<bool>(
-      homePersonalizationEnabledProvider,
-      (_, __) => _recompute(),
+      homeFilteredProductsProvider.select((items) => items.isNotEmpty),
+      (_, __) {
+        if (_isDisposed) return;
+        _recompute();
+      },
     );
-    _ref.listen<Set<String>>(wishlistIdsProvider, (_, __) => _recompute());
+    _ref.listen<bool>(homePersonalizationEnabledProvider, (_, __) {
+      if (_isDisposed) return;
+      _recompute();
+    });
+    _ref.listen<Set<String>>(wishlistIdsProvider, (_, __) {
+      if (_isDisposed) return;
+      if (_ref.read(homePersonalizationEnabledProvider)) {
+        _recompute();
+      }
+    });
     _recompute();
   }
 
   final Ref _ref;
+  bool _isDisposed = false;
 
   bool _isRefreshing() {
     final s = _ref.read(homeViewModelProvider);
@@ -101,24 +141,25 @@ class HomeFeedController extends StateNotifier<List<HomeSectionState>> {
   }
 
   HomeSectionStatus _statusForList({
-    required HomeSectionId id,
-    required List<dynamic> items,
+    required bool hasItems,
     required bool isRefreshing,
-    required Map<HomeSectionId, HomeSectionState> current,
+    required HomeSectionStatus previousStatus,
   }) {
-    final prev = current[id]?.status ?? HomeSectionStatus.ready;
+    final prev = previousStatus;
     if (isRefreshing) {
       if (prev == HomeSectionStatus.ready) return HomeSectionStatus.ready;
       return prev;
     }
-    return items.isEmpty ? HomeSectionStatus.empty : HomeSectionStatus.ready;
+    return hasItems ? HomeSectionStatus.ready : HomeSectionStatus.empty;
   }
 
   void _recompute() {
+    if (_isDisposed || !mounted) return;
     final currentById = {for (final s in state) s.id: s};
     final isRefreshing = _isRefreshing();
-    final browse = _ref.read(homeFilteredProductsProvider);
-    final under = _ref.read(homeUnder50ProductsProvider);
+    final hasBrowseItems = _ref.read(
+      homeFilteredProductsProvider.select((items) => items.isNotEmpty),
+    );
 
     final order = _desiredOrder();
     final next = <HomeSectionState>[];
@@ -129,16 +170,9 @@ class HomeFeedController extends StateNotifier<List<HomeSectionState>> {
 
       final status = switch (id) {
         HomeSectionId.browseResults => _statusForList(
-          id: id,
-          items: browse,
+          hasItems: hasBrowseItems,
           isRefreshing: isRefreshing,
-          current: currentById,
-        ),
-        HomeSectionId.underFeed => _statusForList(
-          id: id,
-          items: under,
-          isRefreshing: isRefreshing,
-          current: currentById,
+          previousStatus: prevStatus,
         ),
         _ => prevStatus,
       };
@@ -147,10 +181,29 @@ class HomeFeedController extends StateNotifier<List<HomeSectionState>> {
         HomeSectionState(id: id, status: status, retryToken: retryToken),
       );
     }
+
+    final current = state;
+    if (current.length == next.length) {
+      var same = true;
+      for (var i = 0; i < current.length; i++) {
+        final a = current[i];
+        final b = next[i];
+        if (a.id != b.id ||
+            a.status != b.status ||
+            a.retryToken != b.retryToken) {
+          same = false;
+          break;
+        }
+      }
+      if (same) return;
+    }
+
+    if (_isDisposed || !mounted) return;
     state = next;
   }
 
   void retrySection(HomeSectionId id) {
+    if (_isDisposed || !mounted) return;
     state = [
       for (final s in state)
         if (s.id == id)
@@ -161,5 +214,11 @@ class HomeFeedController extends StateNotifier<List<HomeSectionState>> {
         else
           s,
     ];
+  }
+
+  @override
+  void dispose() {
+    _isDisposed = true;
+    super.dispose();
   }
 }

@@ -3,8 +3,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:nova_commerce/core/widgets/product_tile_compact.dart';
-import 'package:nova_commerce/domain/entities/product.dart';
-import 'package:nova_commerce/domain/entities/variant.dart';
+import 'package:nova_commerce/core/domain/entities/product.dart';
+import 'package:nova_commerce/core/domain/entities/variant.dart';
 
 void main() {
   testWidgets(

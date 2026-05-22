@@ -1,8 +1,20 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/config/auth_providers.dart';
-import '../../../domain/entities/auth_account_details.dart';
-import '../../../domain/repositories/auth_repository.dart';
+import 'package:nova_commerce/app/di/app_providers.dart';
+import 'package:nova_commerce/features/auth/auth.dart';
+
+enum ProfileDetailsEvent {
+  nameUpdated,
+  verificationEmailSent,
+  smsCodeSent,
+  phoneVerified,
+  pleaseSignInToEditName,
+  noEmailAttached,
+  pleaseSignInToVerifyPhone,
+  enterPhoneNumber,
+  startPhoneVerificationFirst,
+  enterSmsCode,
+}
 
 class ProfileDetailsState {
   const ProfileDetailsState({
@@ -14,6 +26,7 @@ class ProfileDetailsState {
     this.isLinkingPhone = false,
     this.phoneVerificationId,
     this.event,
+    this.eventError,
     this.eventId = 0,
   });
 
@@ -25,7 +38,8 @@ class ProfileDetailsState {
   final bool isLinkingPhone;
   final String? phoneVerificationId;
 
-  final String? event;
+  final ProfileDetailsEvent? event;
+  final String? eventError;
   final int eventId;
 
   static const Object _unset = Object();
@@ -39,6 +53,7 @@ class ProfileDetailsState {
     bool? isLinkingPhone,
     String? phoneVerificationId,
     Object? event = _unset,
+    Object? eventError = _unset,
     int? eventId,
   }) {
     return ProfileDetailsState(
@@ -49,7 +64,10 @@ class ProfileDetailsState {
       isSendingPhoneCode: isSendingPhoneCode ?? this.isSendingPhoneCode,
       isLinkingPhone: isLinkingPhone ?? this.isLinkingPhone,
       phoneVerificationId: phoneVerificationId ?? this.phoneVerificationId,
-      event: event == _unset ? this.event : event as String?,
+      event: event == _unset ? this.event : event as ProfileDetailsEvent?,
+      eventError: eventError == _unset
+          ? this.eventError
+          : eventError as String?,
       eventId: eventId ?? this.eventId,
     );
   }
@@ -78,7 +96,7 @@ class ProfileDetailsViewModel extends StateNotifier<ProfileDetailsState> {
     } catch (e) {
       if (requestId != _requestId) return;
       state = state.copyWith(isLoading: false);
-      _emit(e.toString());
+      _emitError(e.toString());
     }
   }
 
@@ -92,7 +110,7 @@ class ProfileDetailsViewModel extends StateNotifier<ProfileDetailsState> {
     } catch (e) {
       if (requestId != _requestId) return;
       state = state.copyWith(isLoading: false);
-      _emit(e.toString());
+      _emitError(e.toString());
     }
   }
 
@@ -100,7 +118,7 @@ class ProfileDetailsViewModel extends StateNotifier<ProfileDetailsState> {
     final details = state.details;
     if (details == null) return;
     if (details.isAnonymous) {
-      _emit('Please sign in to edit your name.');
+      _emit(ProfileDetailsEvent.pleaseSignInToEditName);
       return;
     }
 
@@ -111,11 +129,11 @@ class ProfileDetailsViewModel extends StateNotifier<ProfileDetailsState> {
       final updated = await _auth.reloadAccountDetails();
       if (requestId != _requestId) return;
       state = state.copyWith(details: updated, isSavingName: false);
-      _emit('Name updated');
+      _emit(ProfileDetailsEvent.nameUpdated);
     } catch (e) {
       if (requestId != _requestId) return;
       state = state.copyWith(isSavingName: false);
-      _emit(e.toString());
+      _emitError(e.toString());
     }
   }
 
@@ -125,7 +143,7 @@ class ProfileDetailsViewModel extends StateNotifier<ProfileDetailsState> {
     if (details.isAnonymous ||
         details.email == null ||
         details.email!.isEmpty) {
-      _emit('No email attached to this account.');
+      _emit(ProfileDetailsEvent.noEmailAttached);
       return;
     }
 
@@ -135,11 +153,11 @@ class ProfileDetailsViewModel extends StateNotifier<ProfileDetailsState> {
       await _auth.sendEmailVerification();
       if (requestId != _requestId) return;
       state = state.copyWith(isSendingEmail: false);
-      _emit('Verification email sent');
+      _emit(ProfileDetailsEvent.verificationEmailSent);
     } catch (e) {
       if (requestId != _requestId) return;
       state = state.copyWith(isSendingEmail: false);
-      _emit(e.toString());
+      _emitError(e.toString());
     }
   }
 
@@ -147,11 +165,11 @@ class ProfileDetailsViewModel extends StateNotifier<ProfileDetailsState> {
     final details = state.details;
     if (details == null) return;
     if (details.isAnonymous) {
-      _emit('Please sign in to verify a phone number.');
+      _emit(ProfileDetailsEvent.pleaseSignInToVerifyPhone);
       return;
     }
     if (phoneNumber.trim().isEmpty) {
-      _emit('Enter a phone number');
+      _emit(ProfileDetailsEvent.enterPhoneNumber);
       return;
     }
 
@@ -168,11 +186,11 @@ class ProfileDetailsViewModel extends StateNotifier<ProfileDetailsState> {
             ? null
             : session.verificationId,
       );
-      _emit('SMS code sent');
+      _emit(ProfileDetailsEvent.smsCodeSent);
     } catch (e) {
       if (requestId != _requestId) return;
       state = state.copyWith(isSendingPhoneCode: false);
-      _emit(e.toString());
+      _emitError(e.toString());
     }
   }
 
@@ -181,11 +199,11 @@ class ProfileDetailsViewModel extends StateNotifier<ProfileDetailsState> {
     final verificationId = state.phoneVerificationId;
     if (details == null) return;
     if (verificationId == null || verificationId.isEmpty) {
-      _emit('Start phone verification first.');
+      _emit(ProfileDetailsEvent.startPhoneVerificationFirst);
       return;
     }
     if (smsCode.trim().isEmpty) {
-      _emit('Enter the SMS code');
+      _emit(ProfileDetailsEvent.enterSmsCode);
       return;
     }
 
@@ -203,15 +221,27 @@ class ProfileDetailsViewModel extends StateNotifier<ProfileDetailsState> {
         isLinkingPhone: false,
         phoneVerificationId: null,
       );
-      _emit('Phone verified');
+      _emit(ProfileDetailsEvent.phoneVerified);
     } catch (e) {
       if (requestId != _requestId) return;
       state = state.copyWith(isLinkingPhone: false);
-      _emit(e.toString());
+      _emitError(e.toString());
     }
   }
 
-  void _emit(String message) {
-    state = state.copyWith(event: message, eventId: state.eventId + 1);
+  void _emit(ProfileDetailsEvent event) {
+    state = state.copyWith(
+      event: event,
+      eventError: null,
+      eventId: state.eventId + 1,
+    );
+  }
+
+  void _emitError(String message) {
+    state = state.copyWith(
+      event: null,
+      eventError: message,
+      eventId: state.eventId + 1,
+    );
   }
 }

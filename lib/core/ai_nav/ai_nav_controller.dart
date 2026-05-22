@@ -79,14 +79,16 @@ class AiNavController extends StateNotifier<AiNavSuggestion?> {
   }
 
   void updateFeatures(List<double> features) {
-    if (features.length != 5) return;
+    if (features.length < 5) return;
+
+    final effective = features.length == 5 ? features : features.sublist(0, 5);
 
     final last = _lastFeatures;
-    if (last != null && _sameVector(last, features)) {
+    if (last != null && _sameVector(last, effective)) {
       return;
     }
 
-    _lastFeatures = List<double>.unmodifiable(features);
+    _lastFeatures = List<double>.unmodifiable(effective);
     if (_suppressed) return;
     _scheduleInference();
   }

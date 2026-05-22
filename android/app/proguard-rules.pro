@@ -1,3 +1,2 @@
--keep class org.tensorflow.lite.** { *; }
--keep class org.tensorflow.lite.gpu.** { *; }
--dontwarn org.tensorflow.lite.**
+-dontwarn com.stripe.android.pushProvisioning.**
+-dontwarn org.tensorflow.lite.gpu.**

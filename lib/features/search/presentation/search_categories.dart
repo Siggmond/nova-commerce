@@ -1,0 +1,15 @@
+const searchCategoryIds = <String>[
+  'all',
+  'groceries',
+  'restaurants',
+  'pharmacy',
+  'coffee',
+  'bakery',
+  'electronics',
+  'flowers',
+  'pet',
+  'cosmetics',
+  'snacks',
+  'drinks',
+  'baby',
+];

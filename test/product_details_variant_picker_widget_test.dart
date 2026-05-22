@@ -3,14 +3,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:nova_commerce/core/config/providers.dart';
-import 'package:nova_commerce/domain/entities/product.dart';
-import 'package:nova_commerce/domain/entities/variant.dart';
-import 'package:nova_commerce/domain/entities/cart_line.dart';
-import 'package:nova_commerce/domain/repositories/cart_repository.dart';
-import 'package:nova_commerce/domain/repositories/product_repository.dart';
-import 'package:nova_commerce/features/product/presentation/product_details_screen.dart';
-import 'package:nova_commerce/features/wishlist/presentation/wishlist_viewmodel.dart';
+import 'package:nova_commerce/app/di/app_providers.dart';
+import 'package:nova_commerce/core/domain/entities/product.dart';
+import 'package:nova_commerce/core/domain/entities/variant.dart';
+import 'package:nova_commerce/core/domain/repositories/product_repository.dart';
+import 'package:nova_commerce/features/cart/cart.dart';
+import 'package:nova_commerce/features/products/presentation/product_details_screen.dart';
+import 'package:nova_commerce/features/wishlist/wishlist.dart';
+import 'package:nova_commerce/gen_l10n/app_localizations.dart';
 
 class _TestProductRepo implements ProductRepository {
   @override
@@ -95,6 +95,8 @@ void main() {
           splitScreenMode: true,
           builder: (context, child) {
             return const MaterialApp(
+              localizationsDelegates: AppLocalizations.localizationsDelegates,
+              supportedLocales: AppLocalizations.supportedLocales,
               home: ProductDetailsScreen(productId: 'p_test'),
             );
           },
@@ -117,36 +119,24 @@ void main() {
     expect(whiteText, findsOneWidget);
     expect(sizeSText, findsOneWidget);
 
-    final blackChip = find.ancestor(
-      of: blackText,
-      matching: find.byType(ChoiceChip),
-    );
-    final whiteChip = find.ancestor(
-      of: whiteText,
-      matching: find.byType(ChoiceChip),
-    );
-    final sizeSChip = find.ancestor(
-      of: sizeSText,
-      matching: find.byType(ChoiceChip),
-    );
-
-    expect(blackChip, findsOneWidget);
-    expect(whiteChip, findsOneWidget);
-    expect(sizeSChip, findsOneWidget);
-
     await tester.tap(blackText);
     await tester.pump();
 
+    await tester.ensureVisible(sizeSText);
+    await tester.pump();
     await tester.tap(sizeSText);
     await tester.pump();
 
-    expect(tester.widget<ChoiceChip>(blackChip).selected, isTrue);
-    expect(tester.widget<ChoiceChip>(sizeSChip).selected, isTrue);
+    expect(find.text('Color: Black'), findsOneWidget);
+    expect(find.text('Size: S'), findsOneWidget);
 
     // Changing to another color should remain tappable and update selection.
-    await tester.tap(whiteText);
+    await tester.ensureVisible(find.text('White'));
+    await tester.pump();
+    await tester.tap(find.text('White'));
     await tester.pump();
 
-    expect(tester.widget<ChoiceChip>(whiteChip).selected, isTrue);
+    expect(find.text('Color: White'), findsOneWidget);
+    expect(find.text('Size: S'), findsOneWidget);
   });
 }

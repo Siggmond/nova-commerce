@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:nova_commerce/domain/entities/home_config.dart';
+import 'package:nova_commerce/features/home/domain/entities/home_config.dart';
 
 void main() {
   test('HomeConfig.fromMap falls back to defaults when input is null', () {

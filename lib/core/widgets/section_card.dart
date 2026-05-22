@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../theme/app_tokens.dart';
+import '../../app/theme/app_tokens.dart';
 
 class SectionCard extends StatelessWidget {
   const SectionCard({super.key, required this.child, this.padding});

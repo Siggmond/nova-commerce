@@ -24,7 +24,6 @@ migrate_working_dir/
 ####################################
 # Flutter / Dart
 ####################################
-flutter/
 .dart_tool/
 .flutter-plugins
 .flutter-plugins-dependencies
@@ -50,6 +49,7 @@ coverage/
 ####################################
 # Firebase platform config (DO NOT COMMIT)
 ####################################
+android/app/google-services.json
 ios/Runner/GoogleService-Info.plist
 macos/Runner/GoogleService-Info.plist
 
@@ -88,17 +88,27 @@ flutter_*.log
 firebase-debug.log
 firestore-debug.log
 hs_err_pid*.log
+android/replay_pid*.log
+logs/
+test_report.json
 
 ####################################
 # Temp / local work dirs
 ####################################
+.snapshots/
+.tmp*
 .tmp/
 tmp/
+devtools_options.yaml
 
 ####################################
-# Backend (future – keep ignored until implemented)
+# Firebase Functions local/generated files
 ####################################
-functions/
+functions/node_modules/
+functions/lib/
+functions/.runtimeconfig.json
+functions/.env
+functions/.env.*
 
 ####################################
 # Local scripts / tools

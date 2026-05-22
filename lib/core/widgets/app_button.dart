@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../theme/app_tokens.dart';
+import '../../app/theme/app_tokens.dart';
 
 class AppButton extends StatelessWidget {
   const AppButton.primary({
@@ -45,9 +46,9 @@ class AppButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final effectiveOnPressed = isLoading ? null : onPressed;
     final content = isLoading
-        ? const SizedBox(
-            width: 18,
-            height: 18,
+        ? SizedBox(
+            width: 18.r,
+            height: 18.r,
             child: CircularProgressIndicator(strokeWidth: 2),
           )
         : (icon == null
@@ -62,9 +63,7 @@ class AppButton extends StatelessWidget {
                 ));
 
     final style = ButtonStyle(
-      minimumSize: const WidgetStatePropertyAll(
-        Size.fromHeight(AppHitTargets.min),
-      ),
+      minimumSize: WidgetStatePropertyAll(Size(0, AppHitTargets.min)),
       padding: WidgetStatePropertyAll(AppInsets.button),
       shape: WidgetStatePropertyAll(
         RoundedRectangleBorder(

@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import 'package:go_router/go_router.dart';
+import 'package:nova_commerce/gen_l10n/app_localizations.dart';
 
-import '../../../core/config/app_routes.dart';
+import '../../../app/router/app_routes.dart';
 import '../../../core/widgets/app_button.dart';
 import 'profile_details_viewmodel.dart';
 
@@ -58,16 +60,46 @@ class _ProfileDetailsScreenState extends ConsumerState<ProfileDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    assert(() {
+      debugPrint('OPENED: LEGACY ProfileDetailsScreen');
+      return true;
+    }());
     final state = ref.watch(profileDetailsViewModelProvider);
     final vm = ref.read(profileDetailsViewModelProvider.notifier);
+    final t = AppLocalizations.of(context)!;
 
     ref.listen<ProfileDetailsState>(profileDetailsViewModelProvider, (
       prev,
       next,
     ) {
       if (prev?.eventId == next.eventId) return;
-      final msg = next.event;
-      if (msg == null || msg.trim().isEmpty) return;
+
+      final err = next.eventError;
+      if (err != null && err.trim().isNotEmpty) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(err)));
+        return;
+      }
+
+      final event = next.event;
+      if (event == null) return;
+      final msg = switch (event) {
+        ProfileDetailsEvent.nameUpdated => t.profileSnackbarNameUpdated,
+        ProfileDetailsEvent.verificationEmailSent =>
+          t.profileSnackbarVerificationEmailSent,
+        ProfileDetailsEvent.smsCodeSent => t.profileSnackbarSmsCodeSent,
+        ProfileDetailsEvent.phoneVerified => t.profileSnackbarPhoneVerified,
+        ProfileDetailsEvent.pleaseSignInToEditName =>
+          t.profileSnackbarPleaseSignInToEditName,
+        ProfileDetailsEvent.noEmailAttached => t.profileSnackbarNoEmailAttached,
+        ProfileDetailsEvent.pleaseSignInToVerifyPhone =>
+          t.profileSnackbarPleaseSignInToVerifyPhone,
+        ProfileDetailsEvent.enterPhoneNumber => t.profileSnackbarEnterPhone,
+        ProfileDetailsEvent.startPhoneVerificationFirst =>
+          t.profileSnackbarStartPhoneVerificationFirst,
+        ProfileDetailsEvent.enterSmsCode => t.profileSnackbarEnterSmsCode,
+      };
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
     });
 
@@ -81,10 +113,11 @@ class _ProfileDetailsScreenState extends ConsumerState<ProfileDetailsScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Account details'),
+        title: Text(t.profileAccountDetailsTitle),
         actions: [
           IconButton(
             onPressed: state.isLoading ? null : () => vm.reload(),
+            tooltip: t.commonRefresh,
             icon: const Icon(Icons.refresh),
           ),
         ],
@@ -92,36 +125,36 @@ class _ProfileDetailsScreenState extends ConsumerState<ProfileDetailsScreen> {
       body: state.isLoading
           ? const Center(child: CircularProgressIndicator())
           : ListView(
-              padding: const EdgeInsets.fromLTRB(12, 8, 12, 14),
+              padding: EdgeInsets.fromLTRB(12.w, 8.h, 12.w, 14.h),
               children: [
                 if (details == null)
                   _LegacySignInRequiredCard(
                     onSignIn: () => context.push(AppRoutes.signIn),
                   )
                 else ...[
-                  _sectionTitle(context, 'Display name'),
+                  _sectionTitle(context, t.profileSectionDisplayName),
                   Card(
                     child: Padding(
-                      padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
+                      padding: EdgeInsets.fromLTRB(12.w, 10.h, 12.w, 10.h),
                       child: Row(
                         children: [
                           Expanded(
                             child: TextField(
                               controller: _nameController,
                               enabled: _editingName && !state.isSavingName,
-                              decoration: const InputDecoration(
+                              decoration: InputDecoration(
                                 border: OutlineInputBorder(),
-                                labelText: 'Name',
+                                labelText: t.profileFieldNameLabel,
                               ),
                             ),
                           ),
-                          const SizedBox(width: 8),
+                          SizedBox(width: 8.w),
                           if (!_editingName)
                             TextButton(
                               onPressed: details.isAnonymous
                                   ? null
                                   : () => setState(() => _editingName = true),
-                              child: const Text('Edit'),
+                              child: Text(t.commonEdit),
                             )
                           else
                             TextButton(
@@ -136,8 +169,8 @@ class _ProfileDetailsScreenState extends ConsumerState<ProfileDetailsScreen> {
                                       }
                                     },
                               child: state.isSavingName
-                                  ? const Text('Saving...')
-                                  : const Text('Save'),
+                                  ? Text(t.commonSaving)
+                                  : Text(t.commonSave),
                             ),
                         ],
                       ),
@@ -145,30 +178,32 @@ class _ProfileDetailsScreenState extends ConsumerState<ProfileDetailsScreen> {
                   ),
                   if (details.isAnonymous)
                     Padding(
-                      padding: const EdgeInsets.only(top: 6),
+                      padding: EdgeInsets.only(top: 6.h),
                       child: Text(
-                        'Sign in to edit your profile.',
+                        t.profileAnonymousEditBlocked,
                         style: Theme.of(context).textTheme.bodySmall,
                       ),
                     ),
-                  const SizedBox(height: 14),
-                  _sectionTitle(context, 'Email'),
+                  SizedBox(height: 14.h),
+                  _sectionTitle(context, t.profileSectionEmail),
                   Card(
                     child: ListTile(
                       title: Text(
                         details.email?.isNotEmpty == true
                             ? details.email!
-                            : 'No email',
+                            : t.profileNoEmail,
                       ),
                       subtitle: Text(
-                        details.isEmailVerified ? 'Verified' : 'Not verified',
+                        details.isEmailVerified
+                            ? t.commonVerified
+                            : t.commonNotVerified,
                       ),
                       trailing: details.isEmailVerified
                           ? const Icon(Icons.verified)
                           : ConstrainedBox(
-                              constraints: const BoxConstraints(maxWidth: 140),
+                              constraints: BoxConstraints(maxWidth: 140.w),
                               child: AppButton.tonal(
-                                label: 'Verify email',
+                                label: t.profileVerifyEmailCta,
                                 isLoading: state.isSendingEmail,
                                 onPressed: state.isSendingEmail
                                     ? null
@@ -181,34 +216,34 @@ class _ProfileDetailsScreenState extends ConsumerState<ProfileDetailsScreen> {
                   ),
                   if (details.isAnonymous)
                     Padding(
-                      padding: const EdgeInsets.only(top: 6),
+                      padding: EdgeInsets.only(top: 6.h),
                       child: Text(
-                        'Sign in to verify your email.',
+                        t.profileAnonymousEmailBlocked,
                         style: Theme.of(context).textTheme.bodySmall,
                       ),
                     ),
-                  const SizedBox(height: 14),
-                  _sectionTitle(context, 'Phone number'),
+                  SizedBox(height: 14.h),
+                  _sectionTitle(context, t.profileSectionPhoneNumber),
                   Card(
                     child: Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+                      padding: EdgeInsets.fromLTRB(16.w, 14.h, 16.w, 14.h),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
                             details.phoneNumber?.isNotEmpty == true
                                 ? details.phoneNumber!
-                                : 'No phone linked',
+                                : t.profileNoPhoneLinked,
                             style: Theme.of(context).textTheme.titleMedium,
                           ),
-                          const SizedBox(height: 6),
+                          SizedBox(height: 6.h),
                           Text(
                             details.isPhoneVerified
-                                ? 'Verified'
-                                : 'Not verified',
+                                ? t.commonVerified
+                                : t.commonNotVerified,
                             style: Theme.of(context).textTheme.bodyMedium,
                           ),
-                          const SizedBox(height: 12),
+                          SizedBox(height: 12.h),
                           if (!details.isPhoneVerified) ...[
                             TextField(
                               controller: _phoneController,
@@ -216,16 +251,16 @@ class _ProfileDetailsScreenState extends ConsumerState<ProfileDetailsScreen> {
                                   !details.isAnonymous &&
                                   !state.isSendingPhoneCode &&
                                   !state.isLinkingPhone,
-                              decoration: const InputDecoration(
+                              decoration: InputDecoration(
                                 border: OutlineInputBorder(),
-                                labelText: 'Phone number',
-                                hintText: '+12025550123',
+                                labelText: t.profileFieldPhoneLabel,
+                                hintText: t.profileFieldPhoneHint,
                               ),
                               keyboardType: TextInputType.phone,
                             ),
-                            const SizedBox(height: 10),
+                            SizedBox(height: 10.h),
                             AppButton.primary(
-                              label: 'Send code',
+                              label: t.profileSendCodeCta,
                               isLoading: state.isSendingPhoneCode,
                               onPressed:
                                   state.isSendingPhoneCode ||
@@ -235,20 +270,20 @@ class _ProfileDetailsScreenState extends ConsumerState<ProfileDetailsScreen> {
                                       _phoneController.text,
                                     ),
                             ),
-                            const SizedBox(height: 10),
+                            SizedBox(height: 10.h),
                             if (state.phoneVerificationId != null) ...[
                               TextField(
                                 controller: _smsController,
                                 enabled: !state.isLinkingPhone,
-                                decoration: const InputDecoration(
+                                decoration: InputDecoration(
                                   border: OutlineInputBorder(),
-                                  labelText: 'SMS code',
+                                  labelText: t.profileFieldSmsCodeLabel,
                                 ),
                                 keyboardType: TextInputType.number,
                               ),
-                              const SizedBox(height: 10),
+                              SizedBox(height: 10.h),
                               AppButton.primary(
-                                label: 'Verify phone',
+                                label: t.profileVerifyPhoneCta,
                                 isLoading: state.isLinkingPhone,
                                 onPressed:
                                     state.isLinkingPhone || details.isAnonymous
@@ -265,9 +300,9 @@ class _ProfileDetailsScreenState extends ConsumerState<ProfileDetailsScreen> {
                   ),
                   if (details.isAnonymous)
                     Padding(
-                      padding: const EdgeInsets.only(top: 6),
+                      padding: EdgeInsets.only(top: 6.h),
                       child: Text(
-                        'Sign in to verify your phone.',
+                        t.profileAnonymousPhoneBlocked,
                         style: Theme.of(context).textTheme.bodySmall,
                       ),
                     ),
@@ -279,7 +314,7 @@ class _ProfileDetailsScreenState extends ConsumerState<ProfileDetailsScreen> {
 
   Widget _sectionTitle(BuildContext context, String title) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
+      padding: EdgeInsets.only(bottom: 8.h),
       child: Text(
         title,
         style: Theme.of(
@@ -298,34 +333,35 @@ class _LegacySignInRequiredCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final t = AppLocalizations.of(context)!;
     return Card(
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
+        padding: EdgeInsets.fromLTRB(12.w, 12.h, 12.w, 12.h),
         child: Row(
           children: [
             Container(
-              width: 44,
-              height: 44,
+              width: 44.r,
+              height: 44.r,
               decoration: BoxDecoration(
                 color: cs.primary.withValues(alpha: 0.10),
-                borderRadius: BorderRadius.circular(14),
+                borderRadius: BorderRadius.circular(14.r),
               ),
               child: Icon(Icons.person_outline, color: cs.primary),
             ),
-            const SizedBox(width: 12),
+            SizedBox(width: 12.w),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Sign in required',
+                    t.profileSignInRequiredTitle,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.w900,
                     ),
                   ),
-                  const SizedBox(height: 2),
+                  SizedBox(height: 2.h),
                   Text(
-                    'Sign in to view and update your account details.',
+                    t.profileSignInRequiredSubtitle,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       color: cs.onSurface.withValues(alpha: 0.70),
                     ),
@@ -333,12 +369,12 @@ class _LegacySignInRequiredCard extends StatelessWidget {
                 ],
               ),
             ),
-            const SizedBox(width: 10),
+            SizedBox(width: 10.w),
             SizedBox(
-              height: 36,
+              height: 36.h,
               child: FilledButton(
                 onPressed: onSignIn,
-                child: const Text('Sign in'),
+                child: Text(t.commonSignIn),
               ),
             ),
           ],

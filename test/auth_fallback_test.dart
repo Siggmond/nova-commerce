@@ -1,16 +1,14 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
-import 'package:nova_commerce/core/config/auth_providers.dart';
-import 'package:nova_commerce/data/repositories/fallback_auth_repository.dart';
-import 'package:nova_commerce/data/repositories/fake_auth_repository.dart';
-import 'package:nova_commerce/domain/entities/auth_user.dart';
-import 'package:nova_commerce/domain/entities/auth_account_details.dart';
-import 'package:nova_commerce/domain/repositories/auth_repository.dart';
-import 'package:nova_commerce/features/auth/presentation/sign_in_screen.dart';
+import 'package:nova_commerce/app/di/app_providers.dart';
+import 'package:nova_commerce/features/auth/auth.dart';
+import 'package:nova_commerce/gen_l10n/app_localizations.dart';
 
 class _FailingAuthRepository implements AuthRepository {
   @override
@@ -150,17 +148,28 @@ void main() {
         overrides: [authRepositoryProvider.overrideWithValue(repo)],
         child: ScreenUtilInit(
           designSize: const Size(360, 690),
-          builder: (_, __) => MaterialApp.router(routerConfig: router),
+          builder: (_, __) => MaterialApp.router(
+            routerConfig: router,
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+          ),
         ),
       ),
     );
-    router.push('/sign-in');
+    unawaited(router.push('/sign-in'));
     await tester.pumpAndSettle();
+
+    expect(find.byType(SignInScreen), findsOneWidget);
+    final l10n = AppLocalizations.of(
+      tester.element(find.byType(SignInScreen)),
+    )!;
+
+    expect(find.byType(TextField), findsNWidgets(2));
 
     await tester.enterText(find.byType(TextField).at(0), 'demo@nova.dev');
     await tester.enterText(find.byType(TextField).at(1), 'secret');
-    await tester.tap(find.text('Create account'));
-    await tester.pump();
+    await tester.tap(find.text(l10n.authCreateAccount));
+    await tester.pumpAndSettle();
 
     expect(
       find.text('Auth not configured on this build — using demo account mode.'),

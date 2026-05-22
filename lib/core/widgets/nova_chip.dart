@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../theme/app_tokens.dart';
-import '../theme/nova_tokens.dart';
+import '../../app/theme/app_tokens.dart';
+import '../../app/theme/nova_tokens.dart';
 
 class NovaChip extends StatelessWidget {
   const NovaChip({

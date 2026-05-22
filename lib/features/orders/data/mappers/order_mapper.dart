@@ -1,6 +1,6 @@
-import '../../../../domain/entities/order.dart';
-import '../../../../domain/entities/order_item.dart';
-import '../../../../domain/entities/order_status.dart';
+import 'package:nova_commerce/features/orders/domain/entities/order.dart';
+import 'package:nova_commerce/features/orders/domain/entities/order_item.dart';
+import 'package:nova_commerce/features/orders/domain/entities/order_status.dart';
 import '../dto/order_dto.dart';
 
 class OrderMapper {

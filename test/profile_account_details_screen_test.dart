@@ -1,16 +1,14 @@
-import 'dart:async';
+﻿import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:nova_commerce/core/config/auth_providers.dart';
-import 'package:nova_commerce/data/repositories/fake_auth_repository.dart';
-import 'package:nova_commerce/domain/entities/auth_account_details.dart';
-import 'package:nova_commerce/domain/entities/auth_user.dart';
-import 'package:nova_commerce/domain/repositories/auth_repository.dart';
+import 'package:nova_commerce/app/di/app_providers.dart';
+import 'package:nova_commerce/features/auth/auth.dart';
 import 'package:nova_commerce/features/profile/presentation/profile_account_details_screen.dart';
+import 'package:nova_commerce/gen_l10n/app_localizations.dart';
 
 class _RecordingAuthRepository implements AuthRepository {
   _RecordingAuthRepository();
@@ -140,8 +138,11 @@ Future<void> _pumpAccountDetails(
         designSize: const Size(375, 812),
         minTextAdapt: true,
         splitScreenMode: true,
-        builder: (_, __) =>
-            const MaterialApp(home: ProfileAccountDetailsScreen()),
+        builder: (_, __) => const MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: ProfileAccountDetailsScreen(),
+        ),
       ),
     ),
   );
@@ -176,8 +177,8 @@ void main() {
       await tester.tap(verifyEmail);
       await tester.pump();
 
-      await _pumpUntilFound(tester, find.text('Verified ✅'));
-      expect(find.text('Verified ✅'), findsWidgets);
+      await _pumpUntilFound(tester, find.text('Verified'));
+      expect(find.text('Verified'), findsWidgets);
 
       // Demo mode immediately verifies, so the verify/resend button disappears.
       expect(find.textContaining('Resend in'), findsNothing);
@@ -200,7 +201,7 @@ void main() {
 
       expect(repo.sendEmailVerificationCalls, 1);
       expect(repo.reloadCalls, greaterThanOrEqualTo(1));
-      final resendLabel = find.textContaining('Resend in');
+      final resendLabel = find.textContaining('Resend available in');
       await _pumpUntilFound(tester, resendLabel);
       expect(resendLabel, findsOneWidget);
 
@@ -227,8 +228,8 @@ void main() {
 
       expect(repo.linkPhoneWithSmsCodeCalls, 1);
 
-      await _pumpUntilFound(tester, find.text('Verified ✅'));
-      expect(find.text('Verified ✅'), findsWidgets);
+      await _pumpUntilFound(tester, find.text('Verified'));
+      expect(find.text('Verified'), findsWidgets);
     },
   );
 }

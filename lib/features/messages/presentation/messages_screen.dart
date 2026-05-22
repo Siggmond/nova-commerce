@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:nova_commerce/gen_l10n/app_localizations.dart';
 
 class MessagesScreen extends StatefulWidget {
   const MessagesScreen({super.key});
@@ -12,6 +14,7 @@ class _MessagesScreenState extends State<MessagesScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
     final cs = Theme.of(context).colorScheme;
 
     Widget item({
@@ -27,14 +30,14 @@ class _MessagesScreenState extends State<MessagesScreen> {
       return Expanded(
         child: InkWell(
           onTap: () => setState(() => _selected = index),
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(14.r),
           child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 12),
+            padding: EdgeInsets.symmetric(vertical: 12.h),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Icon(icon, color: color),
-                const SizedBox(height: 6),
+                SizedBox(height: 6.h),
                 Text(
                   label,
                   style: Theme.of(context).textTheme.labelMedium?.copyWith(
@@ -56,33 +59,41 @@ class _MessagesScreenState extends State<MessagesScreen> {
           icon: const Icon(Icons.arrow_back),
         ),
         centerTitle: true,
-        title: const Text('Messages'),
+        title: Text(t.messagesTitle),
       ),
       body: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+        padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 16.h),
         child: Column(
           children: [
             Row(
               children: [
-                item(index: 0, icon: Icons.receipt_long, label: 'Order'),
+                item(
+                  index: 0,
+                  icon: Icons.receipt_long,
+                  label: t.messagesTabOrder,
+                ),
                 item(
                   index: 1,
                   icon: Icons.notifications_none,
-                  label: 'Activity',
+                  label: t.messagesTabActivity,
                 ),
                 item(
                   index: 2,
                   icon: Icons.local_offer_outlined,
-                  label: 'Promo',
+                  label: t.messagesTabPromo,
                 ),
-                item(index: 3, icon: Icons.newspaper_outlined, label: 'News'),
+                item(
+                  index: 3,
+                  icon: Icons.newspaper_outlined,
+                  label: t.messagesTabNews,
+                ),
               ],
             ),
-            const SizedBox(height: 18),
+            SizedBox(height: 18.h),
             Expanded(
               child: Center(
                 child: Text(
-                  'Coming soon',
+                  t.commonComingSoon,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w800,
                     color: cs.onSurface.withValues(alpha: 0.7),

@@ -1,13 +1,13 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:nova_commerce/domain/entities/product.dart';
-import 'package:nova_commerce/domain/entities/variant.dart';
+import 'package:nova_commerce/core/domain/entities/product.dart';
+import 'package:nova_commerce/core/domain/entities/variant.dart';
 import 'package:nova_commerce/features/home/presentation/home_feed_controller.dart';
 import 'package:nova_commerce/features/home/presentation/home_feed_registry.dart';
 import 'package:nova_commerce/features/home/presentation/home_filters.dart';
 import 'package:nova_commerce/features/home/presentation/home_viewmodel.dart';
-import 'package:nova_commerce/features/wishlist/presentation/wishlist_viewmodel.dart';
+import 'package:nova_commerce/features/wishlist/wishlist.dart';
 
 class TestHomeViewModel extends HomeViewModel {
   TestHomeViewModel(super.ref) {
@@ -63,7 +63,6 @@ void main() {
     final browseState = StateProvider<List<Product>>(
       (ref) => const <Product>[],
     );
-    final underState = StateProvider<List<Product>>((ref) => const <Product>[]);
 
     final container = ProviderContainer(
       overrides: [
@@ -72,9 +71,6 @@ void main() {
         wishlistIdsProvider.overrideWith((ref) => const {}),
         homeFilteredProductsProvider.overrideWith(
           (ref) => ref.watch(browseState),
-        ),
-        homeUnder50ProductsProvider.overrideWith(
-          (ref) => ref.watch(underState),
         ),
       ],
     );
@@ -88,44 +84,29 @@ void main() {
 
     // Initial loaded state (sections have items).
     container.read(browseState.notifier).state = [_product];
-    container.read(underState.notifier).state = [_product];
     vm.emitData([_product]);
 
     expect(
       _status(container, HomeSectionId.browseResults),
-      HomeSectionStatus.ready,
-    );
-    expect(
-      _status(container, HomeSectionId.underFeed),
       HomeSectionStatus.ready,
     );
 
     // Refresh starts; derived providers blink empty.
     vm.emitRefreshing([_product]);
     container.read(browseState.notifier).state = const <Product>[];
-    container.read(underState.notifier).state = const <Product>[];
 
     // Must not show EmptyState mid-refresh.
     expect(
       _status(container, HomeSectionId.browseResults),
       HomeSectionStatus.ready,
     );
-    expect(
-      _status(container, HomeSectionId.underFeed),
-      HomeSectionStatus.ready,
-    );
 
     // Refresh completes with data; lists recover.
     container.read(browseState.notifier).state = [_product];
-    container.read(underState.notifier).state = [_product];
     vm.emitData([_product]);
 
     expect(
       _status(container, HomeSectionId.browseResults),
-      HomeSectionStatus.ready,
-    );
-    expect(
-      _status(container, HomeSectionId.underFeed),
       HomeSectionStatus.ready,
     );
   });
@@ -136,9 +117,6 @@ void main() {
       final browseState = StateProvider<List<Product>>(
         (ref) => const <Product>[],
       );
-      final underState = StateProvider<List<Product>>(
-        (ref) => const <Product>[],
-      );
 
       final container = ProviderContainer(
         overrides: [
@@ -147,9 +125,6 @@ void main() {
           wishlistIdsProvider.overrideWith((ref) => const {}),
           homeFilteredProductsProvider.overrideWith(
             (ref) => ref.watch(browseState),
-          ),
-          homeUnder50ProductsProvider.overrideWith(
-            (ref) => ref.watch(underState),
           ),
         ],
       );
@@ -162,34 +137,23 @@ void main() {
 
       // Initial loaded state (sections have items).
       container.read(browseState.notifier).state = [_product];
-      container.read(underState.notifier).state = [_product];
       vm.emitData([_product]);
 
       // Refresh starts; lists blink empty.
       vm.emitRefreshing([_product]);
       container.read(browseState.notifier).state = const <Product>[];
-      container.read(underState.notifier).state = const <Product>[];
 
       expect(
         _status(container, HomeSectionId.browseResults),
-        HomeSectionStatus.ready,
-      );
-      expect(
-        _status(container, HomeSectionId.underFeed),
         HomeSectionStatus.ready,
       );
 
       // Refresh completes but final result is empty.
       container.read(browseState.notifier).state = <Product>[];
-      container.read(underState.notifier).state = <Product>[];
       vm.emitData([_product]);
 
       expect(
         _status(container, HomeSectionId.browseResults),
-        HomeSectionStatus.empty,
-      );
-      expect(
-        _status(container, HomeSectionId.underFeed),
         HomeSectionStatus.empty,
       );
     },

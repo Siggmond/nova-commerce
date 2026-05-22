@@ -516,6 +516,7 @@ class _HomeV2FeedState extends ConsumerState<HomeV2Feed> {
           onNotification: _onScrollNotification,
           child: CustomScrollView(
             key: const Key('home_scroll_view'),
+            // ignore: deprecated_member_use
             cacheExtent: homeCacheExtent,
             controller: _scrollController,
             slivers: [

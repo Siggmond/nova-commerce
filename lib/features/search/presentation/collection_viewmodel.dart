@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../domain/entities/product.dart';
+import '../../../core/domain/entities/product.dart';
 import 'collection_catalog.dart';
 import 'search_filters.dart';
 import 'search_viewmodel.dart';
@@ -23,7 +23,7 @@ final collectionProductsProvider = Provider.autoDispose
       final categoryFor = ref.watch(searchCategoryForProductProvider);
 
       final base = catalog
-          .where((p) => categoryFor(p) == collection.category)
+          .where((p) => categoryFor(p) == collection.categoryId)
           .toList(growable: false);
 
       final filters = ref.watch(collectionFiltersProvider(collectionId));
@@ -36,14 +36,25 @@ List<Product> _applyCollectionFilters({
   required SearchFilters filters,
 }) {
   final q = filters.query.trim().toLowerCase();
+  final hasPriceTier = filters.priceTier != null;
+  final hasQuery = q.isNotEmpty;
+  final hasSort = filters.sort != SearchSort.recommended;
 
-  final prices = items.map((p) => p.price).toList(growable: false)..sort();
-  final p33 = prices.isEmpty
-      ? 0.0
-      : prices[(prices.length * 0.33).floor().clamp(0, prices.length - 1)];
-  final p66 = prices.isEmpty
-      ? 0.0
-      : prices[(prices.length * 0.66).floor().clamp(0, prices.length - 1)];
+  if (!hasPriceTier && !hasQuery && !hasSort) {
+    return items;
+  }
+
+  var p33 = 0.0;
+  var p66 = 0.0;
+  if (hasPriceTier) {
+    final prices = items.map((p) => p.price).toList(growable: false)..sort();
+    p33 = prices.isEmpty
+        ? 0.0
+        : prices[(prices.length * 0.33).floor().clamp(0, prices.length - 1)];
+    p66 = prices.isEmpty
+        ? 0.0
+        : prices[(prices.length * 0.66).floor().clamp(0, prices.length - 1)];
+  }
 
   bool matchesPriceTier(Product p) {
     final tier = filters.priceTier;

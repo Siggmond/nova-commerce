@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/config/providers.dart';
-import '../../../domain/entities/product.dart';
+import 'package:nova_commerce/app/di/app_providers.dart';
+import '../../../core/domain/entities/product.dart';
 
 const int _recentlyViewedLimit = 12;
 

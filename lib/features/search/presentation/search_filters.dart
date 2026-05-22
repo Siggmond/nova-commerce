@@ -11,7 +11,7 @@ class SearchFilters {
     this.query = '',
     this.sort = SearchSort.recommended,
     this.priceTier,
-    this.category = 'All',
+    this.category = 'all',
   });
 
   final String query;
@@ -22,7 +22,7 @@ class SearchFilters {
   bool get hasNonQueryFilters {
     return sort != SearchSort.recommended ||
         priceTier != null ||
-        category != 'All';
+        category != 'all';
   }
 
   SearchFilters copyWith({

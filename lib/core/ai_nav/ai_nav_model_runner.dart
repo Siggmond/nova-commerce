@@ -6,6 +6,10 @@ import 'package:tflite_flutter/tflite_flutter.dart';
 import 'ai_nav_intent.dart';
 import 'ai_nav_suggestion.dart';
 
+// Temporary performance safeguard:
+// keep all local TFLite model loading/inference disabled.
+const bool kAiNavModelEnabled = false;
+
 abstract class AiNavRunner {
   Future<void> ensureLoaded();
   AiNavSuggestion run({required List<double> features});
@@ -23,6 +27,14 @@ class AiNavModelRunner implements AiNavRunner {
 
   @override
   Future<void> ensureLoaded() async {
+    if (!kAiNavModelEnabled) {
+      _loadFailed = true;
+      _loadError = StateError('AI nav model loading is temporarily disabled.');
+      _interpreter?.close();
+      _interpreter = null;
+      return;
+    }
+
     if (_interpreter != null) return;
     if (_loadFailed) return;
 
@@ -52,8 +64,15 @@ class AiNavModelRunner implements AiNavRunner {
       throw ArgumentError('Expected 5 float features, got ${features.length}.');
     }
 
+    if (!kAiNavModelEnabled) {
+      return _idleSuggestion();
+    }
+
     final interpreter = _interpreter;
     if (interpreter == null) {
+      if (_loadFailed) {
+        return _idleSuggestion();
+      }
       throw StateError(
         'Model not loaded. Call ensureLoaded() first. Error=$_loadError',
       );
@@ -80,6 +99,20 @@ class AiNavModelRunner implements AiNavRunner {
       intent: intent,
       confidence: confidence,
       probabilities: normalized,
+    );
+  }
+
+  static AiNavSuggestion _idleSuggestion() {
+    final probs = List<double>.filled(
+      AiNavIntent.values.length,
+      0.0,
+      growable: false,
+    );
+    probs[AiNavIntent.idle.index] = 1.0;
+    return AiNavSuggestion(
+      intent: AiNavIntent.idle,
+      confidence: 1.0,
+      probabilities: probs,
     );
   }
 

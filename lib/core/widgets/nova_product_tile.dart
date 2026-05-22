@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../domain/entities/product.dart';
+import '../../core/domain/entities/product.dart';
 import 'product_tile_compact.dart';
 
 class NovaProductTile extends StatelessWidget {

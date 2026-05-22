@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import 'app_cached_network_image.dart';
-import '../theme/app_shadows.dart';
-import '../theme/app_tokens.dart';
-import '../../domain/entities/product.dart';
+import '../../app/theme/app_shadows.dart';
+import '../../app/theme/app_tokens.dart';
+import '../../core/domain/entities/product.dart';
+import '../../core/images/image_policy.dart';
+import '../../core/images/nova_image.dart';
 
 class ProductCard extends StatelessWidget {
   const ProductCard({
@@ -39,7 +40,6 @@ class ProductCard extends StatelessWidget {
       builder: (context, constraints) {
         final cs = Theme.of(context).colorScheme;
         final radius = BorderRadius.circular(16.r);
-        final dpr = ScreenUtil().pixelRatio ?? 1.0;
 
         final defaultCardHeight = 184.h;
         final effectiveCardHeight = fillHeight
@@ -54,30 +54,20 @@ class ProductCard extends StatelessWidget {
 
         final effectiveImageWidth = imageWidth ?? constraints.maxWidth;
 
-        final memCacheWidth = effectiveImageWidth.isFinite
-            ? (effectiveImageWidth * dpr).round()
-            : null;
-
-        final memCacheHeight =
-            (effectiveImageHeight.isFinite && effectiveImageHeight > 0)
-            ? (effectiveImageHeight * dpr).round()
-            : null;
-
         Widget imageStack() {
           return Stack(
             children: [
               Positioned.fill(
                 child: Hero(
                   tag: 'product-${product.id}',
-                  child: ClipRRect(
+                  child: NovaImage(
+                    url: product.imageUrl,
+                    route: NovaImageRoute.productsGrid,
+                    fit: BoxFit.cover,
                     borderRadius: BorderRadius.vertical(top: radius.topLeft),
-                    child: AppCachedNetworkImage(
-                      url: product.imageUrl,
-                      fit: BoxFit.cover,
-                      memCacheWidth: memCacheWidth,
-                      memCacheHeight: memCacheHeight,
-                      backgroundColor: cs.surfaceContainerHigh,
-                    ),
+                    logicalDecodeWidth: effectiveImageWidth,
+                    logicalDecodeHeight: effectiveImageHeight,
+                    backgroundColor: cs.surfaceContainerHigh,
                   ),
                 ),
               ),
@@ -245,7 +235,7 @@ class ProductCard extends StatelessWidget {
                 elevation: AppElevation.card,
                 shadowColor: AppShadows.shadowColor.withValues(alpha: 0.10),
                 surfaceTintColor: cs.surface,
-                clipBehavior: Clip.antiAlias,
+                clipBehavior: Clip.none,
                 shape: RoundedRectangleBorder(borderRadius: radius),
                 child: fillHeight
                     ? SizedBox.expand(child: cardChild)
@@ -267,7 +257,7 @@ class _NewDropBadge extends StatelessWidget {
       padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 3.h),
       decoration: BoxDecoration(
         color: cs.primary.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(999),
+        borderRadius: BorderRadius.circular(999.r),
       ),
       child: Text(
         'New',

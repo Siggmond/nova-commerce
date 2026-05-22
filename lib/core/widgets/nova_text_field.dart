@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../theme/nova_tokens.dart';
+import '../../app/theme/nova_tokens.dart';
 
 enum NovaFieldDensity { compact, comfortable }
 
@@ -43,9 +44,9 @@ class NovaTextField extends StatelessWidget {
 
     final isComfortable = density == NovaFieldDensity.comfortable;
     final contentPadding = isComfortable
-        ? const EdgeInsets.symmetric(horizontal: 16, vertical: 16)
-        : const EdgeInsets.symmetric(horizontal: 14, vertical: 12);
-    final minHeight = isComfortable ? 52.0 : 44.0;
+        ? EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h)
+        : EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h);
+    final minHeight = isComfortable ? 52.h : 44.h;
 
     final textStyle = isComfortable ? t.bodyMedium : t.bodySmall;
 

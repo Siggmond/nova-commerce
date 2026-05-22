@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'package:nova_commerce/data/datasources/shared_prefs_cart_datasource.dart';
+import 'package:nova_commerce/features/cart/data/datasources/shared_prefs_cart_datasource.dart';
 
 void main() {
   test('SharedPrefsCartDataSource fresh install loads empty cart', () async {

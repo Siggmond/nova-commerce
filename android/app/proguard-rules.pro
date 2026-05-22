@@ -1,0 +1,2 @@
+-dontwarn com.stripe.android.pushProvisioning.**
+-dontwarn org.tensorflow.lite.gpu.**

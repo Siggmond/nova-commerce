@@ -1,0 +1,648 @@
+{
+  "@@locale": "ar",
+
+  "appTitle": "نوفا كوميرس",
+  "@appTitle": {
+    "description": "Application title"
+  },
+
+  "brandName": "نوفا",
+
+  "navShop": "تسوق",
+  "navSearch": "بحث",
+  "navAi": "مساعد",
+  "navOffers": "عروض",
+  "navCart": "السلة",
+  "navAccount": "الحساب",
+
+  "aiChatTitle": "مساعد نوفا",
+  "aiChatSubtitle": "اعثر وقارن واشترِ بشكل أسرع",
+  "aiChatPrivacyNote": "ردود نوفا بالذكاء الاصطناعي مُولَّدة وقد تكون غير دقيقة. هذا العرض التجريبي لا يوفر مصادر. يتم حفظ محادثاتك محليًا على هذا الجهاز ويمكنك مسحها في أي وقت.",
+  "aiChatTooltipSessions": "الجلسات",
+  "aiChatTooltipInfo": "معلومات",
+  "aiChatTooltipClearChat": "مسح المحادثة",
+  "aiChatTooltipAdd": "إضافة",
+  "aiChatTooltipSend": "إرسال",
+  "aiChatHint": "الميزانية، الذوق، الاستخدام…",
+  "aiChatSnackbarChatCleared": "تم مسح المحادثة",
+  "aiChatSessionsTitle": "الجلسات",
+  "aiChatNewSessionCta": "جديد",
+  "aiChatSearchSessionsHint": "ابحث في الجلسات",
+  "aiChatNewChatTitle": "محادثة جديدة",
+  "aiChatSeedAssistantMessage": "يمكنني مساعدتك على التضييق بسرعة. أخبرني بميزانيتك + أسلوبك + الاستخدام، وسأقترح مجموعة قصيرة من الخيارات.\n\nمثال: \"هودي أسود أقل من $50، واسع\".",
+  "aiChatSnackbarCopied": "تم النسخ",
+  "aiChatCopyCta": "نسخ",
+  "aiChatRegenerateCta": "إعادة توليد",
+  "aiChatPickedForYouTitle": "مختار لك",
+  "aiChatInlineAddCta": "إضافة",
+  "aiChatSnackbarAddedToCart": "تمت الإضافة إلى السلة",
+  "aiChatDefaultOption": "افتراضي",
+  "aiChatLandingGreeting": "مرحبًا {name}",
+  "@aiChatLandingGreeting": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "aiChatLandingPrompt": "بماذا يمكنني مساعدتك في التسوق اليوم؟",
+  "aiChatQuickActionFindDealsTitle": "اعثر على عروض اليوم",
+  "aiChatQuickActionPickOutfitTitle": "اختر إطلالة",
+  "aiChatQuickActionGiftIdeasTitle": "أفكار هدايا",
+  "aiChatQuickActionTrackOrderTitle": "تتبع طلبي",
+  "aiChatCartItemsCount": "{count} عناصر",
+  "@aiChatCartItemsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "aiChatWishlistSavedCount": "{count} محفوظ",
+  "@aiChatWishlistSavedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+
+  "language": "اللغة",
+  "languageSystem": "افتراضي النظام",
+
+  "commonComingSoon": "قريبًا",
+
+  "messagesTitle": "الرسائل",
+  "messagesTabOrder": "الطلبات",
+  "messagesTabActivity": "النشاط",
+  "messagesTabPromo": "عروض",
+  "messagesTabNews": "أخبار",
+
+  "trendsTitle": "الترند",
+
+  "homePickedForYouTitle": "مختار لك",
+  "homePickedForYouSubtitle": "اقتراحات سريعة بناءً على ذوقك (تجريبي)",
+  "homePicksLoadErrorTitle": "تعذر تحميل الاختيارات",
+  "homeNoPicksTitle": "لا توجد اختيارات بعد",
+
+  "homeTrendingNowTitle": "الأكثر رواجًا الآن",
+  "homeTrendingNowSubtitle": "مرتبة حسب ما ينقر عليه الناس اليوم",
+  "homeTrendingNowLoadErrorTitle": "تعذر تحميل الأكثر رواجًا الآن",
+  "homeNoTrendingPicksTitle": "لا توجد اختيارات رائجة بعد",
+
+  "homeCuratedTrendsTitle": "اتجاهات مختارة",
+  "homeCuratedTrendsSubtitle": "اختيارات المحرر — أنيقة ومتعددة الاستخدام وسهلة التنسيق.",
+
+  "homeShopByCategoryTitle": "تسوق حسب الفئة",
+  "homeShopByCategorySubtitle": "روابط سريعة",
+
+  "homeBadgeNew": "جديد",
+  "homeUpdatedToday": "تم التحديث اليوم",
+
+  "homeCategoryItemsCount": "{count} عنصر",
+  "@homeCategoryItemsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+
+  "homeWeekendSaleTitle": "تخفيضات نهاية الأسبوع",
+  "homeWeekendSaleSubtitle": "خصم إضافي 15% على منتجات محددة",
+  "homeWeekendSaleCta": "تسوق الآن",
+
+  "homeDeliverToCity": "التوصيل إلى {city}",
+  "@homeDeliverToCity": {
+    "placeholders": {
+      "city": {
+        "type": "String"
+      }
+    }
+  },
+
+  "homeCityBeirut": "بيروت",
+  "homeCityTripoli": "طرابلس",
+  "homeCitySidon": "صيدا",
+  "homeCityTyre": "صور",
+  "homeCityJounieh": "جونية",
+  "homeCityByblos": "جبيل",
+  "homeCityZahle": "زحلة",
+  "homeCityBaalbek": "بعلبك",
+  "homeCityNabatieh": "النبطية",
+  "homeCityBatroun": "البترون",
+  "homeCityBsharri": "بشري",
+  "homeCityAley": "عاليه",
+
+  "homeCategoryGroceries": "بقالة",
+  "homeCategoryRestaurants": "مطاعم",
+  "homeCategoryPharmacy": "صيدلية",
+  "homeCategoryCoffee": "قهوة",
+  "homeCategoryBakery": "مخبوزات",
+  "homeCategoryElectronics": "إلكترونيات",
+  "homeCategoryFlowers": "زهور",
+  "homeCategoryPetSupplies": "مستلزمات الحيوانات الأليفة",
+  "homeCategoryCosmetics": "مستحضرات تجميل",
+  "homeCategorySnacks": "سناكات",
+  "homeCategoryDrinks": "مشروبات",
+  "homeCategoryBaby": "أطفال",
+
+  "homeCuratedTrendsLoadErrorTitle": "تعذر تحميل الترندات المختارة",
+  "homeCuratedTrendsEmptyTitle": "لا توجد اختيارات مُنسّقة بعد.",
+  "homeCuratedTrendsIntroTitle": "اختيارات هذا الأسبوع",
+  "homeCuratedTrendsIntroSubtitle": "مجموعة مُنسّقة من كتالوجنا — مختارة للأناقة وسهولة التنسيق. ليست قائمة بالأكثر شعبية.",
+  "homeCuratedTrendsEditorsFavoritesTitle": "مفضلات المحرر",
+  "homeCuratedTrendsEditorsFavoritesSubtitle": "اختيارات قوية للبدء بها.",
+  "homeCuratedTrendsWorthALookTitle": "يستحق الإلقاء نظرة",
+  "homeCuratedTrendsWorthALookSubtitle": "بعض الاختيارات الإضافية للتنوع.",
+  "homeCuratedTrendsMorePicksTitle": "المزيد من الاختيارات",
+  "homeCuratedTrendsMorePicksSubtitle": "لمن يريد الاستكشاف أكثر.",
+  "homeCuratedTrendsEditorsPickBadge": "اختيار المحرر",
+  "homeCuratedTrendsHeroPickLabel": "اختيار البطل لهذا الأسبوع",
+
+  "commonBack": "رجوع",
+
+  "collectionTitle": "مجموعة",
+  "collectionNotFound": "لم يتم العثور على المجموعة.",
+  "collectionLoadProductsErrorTitle": "تعذر تحميل المنتجات",
+  "collectionLoadProductsErrorSubtitle": "يرجى التحقق من الاتصال والمحاولة مرة أخرى.",
+  "collectionNoResultsTitle": "لا توجد نتائج",
+  "collectionNoResultsSubtitle": "جرّب كلمة أخرى أو استخدم عوامل التصفية.",
+
+  "searchNoResultsSubtitle": "جرّب كلمة أخرى.",
+  "searchFeaturedTitle": "مميز",
+  "searchCollectionsTitle": "مجموعات",
+  "searchCollectionsSubtitle": "اختيارات تحريرية لإلهام سلتك القادمة.",
+  "searchBackToShopTooltip": "العودة إلى التسوق",
+  "searchHintSearchForProducts": "ابحث عن منتجات",
+  "searchHintSearchInCollection": "ابحث داخل هذه المجموعة",
+  "searchTooltipSearch": "بحث",
+  "searchTooltipFilters": "عوامل التصفية",
+  "searchFiltersTitle": "عوامل التصفية",
+  "searchFiltersClearAll": "مسح الكل",
+  "searchFiltersApply": "تطبيق",
+  "searchFiltersSortByTitle": "الترتيب حسب",
+  "searchFiltersSortRecommended": "مقترح",
+  "searchFiltersSortPopular": "الأكثر شعبية",
+  "searchFiltersSortRating": "التقييم",
+  "searchFiltersPriceTierTitle": "فئة السعر",
+  "searchFiltersPriceTierLowest": "الأقل سعراً",
+  "searchFiltersPriceTierMid": "متوسط",
+  "searchFiltersPriceTierHigh": "مرتفع",
+  "searchFiltersCategoriesTitle": "الفئات",
+  "searchRecentSearchesTitle": "عمليات البحث الأخيرة",
+  "searchRecentSearchesEmptyHint": "ابحث عن منتجات لتظهر هنا.",
+  "searchCollectionsExplore": "استكشف",
+  "searchCollectionEditorial1Title": "اختيار المحرر",
+  "searchCollectionEditorial1Subtitle": "اختيارات مُنسّقة بجودة عالية",
+  "searchCollectionEditorial2Title": "أساسيات عطلة نهاية الأسبوع",
+  "searchCollectionEditorial2Subtitle": "بسيطة وسريعة بتأثير كبير",
+  "searchCollectionEditorial3Title": "تقنية نظيفة",
+  "searchCollectionEditorial3Subtitle": "اختيارات بسيطة وعصرية",
+  "searchCollectionEditorial4Title": "ركن القهوة",
+  "searchCollectionEditorial4Subtitle": "ترقيات صغيرة بإحساس فاخر",
+  "searchCollectionEditorial5Title": "حلويات يومية",
+  "searchCollectionEditorial5Subtitle": "سناكات مفضلة",
+  "searchCollectionEditorial6Title": "الطفل والعائلة",
+  "searchCollectionEditorial6Subtitle": "اختيارات لطيفة وناعمة",
+
+  "commonClear": "مسح",
+  "commonCancel": "إلغاء",
+  "commonSave": "حفظ",
+  "commonSaving": "جارٍ الحفظ…",
+  "commonEdit": "تعديل",
+  "commonRefresh": "تحديث",
+  "commonSignIn": "تسجيل الدخول",
+  "commonSignOut": "تسجيل الخروج",
+  "commonEnabled": "مفعّل",
+  "commonDisabled": "معطّل",
+  "commonVerified": "موثّق",
+  "commonNotVerified": "غير موثّق",
+  "commonSeeAll": "عرض الكل",
+
+  "languageNameEnglish": "English",
+  "languageNameArabic": "العربية",
+  "languageNameFrench": "Français",
+  "languageNameSpanish": "Español",
+
+  "profileThemeTitle": "المظهر",
+  "profileThemeSystem": "النظام",
+  "profileThemeLight": "فاتح",
+  "profileThemeDark": "داكن",
+
+  "profileSignOutDialogTitle": "تسجيل الخروج؟",
+  "profileSignOutDialogBody": "يمكنك تسجيل الدخول مرة أخرى في أي وقت.",
+
+  "profileSnackbarSignInToAccess": "سجّل الدخول للوصول إلى {feature}.",
+  "@profileSnackbarSignInToAccess": {
+    "placeholders": {
+      "feature": {
+        "type": "String"
+      }
+    }
+  },
+  "profileNotAvailableYet": "{feature} غير متاح بعد.",
+  "@profileNotAvailableYet": {
+    "placeholders": {
+      "feature": {
+        "type": "String"
+      }
+    }
+  },
+
+  "profileSectionAccount": "الحساب",
+  "profileSectionMyShopping": "تسوّقي",
+  "profileSectionSupport": "الدعم",
+  "profileSectionApp": "التطبيق",
+  "profileSectionAuth": "المصادقة",
+
+  "profileAccountDetailsTitle": "تفاصيل الحساب",
+  "profileAccountDetailsTileSubtitle": "معلومات الملف والتوثيق",
+  "profileAccountDetailsSubtitle": "إدارة ملفك الشخصي والتوثيق",
+
+  "profileAddressesTitle": "العناوين",
+  "profileAddressesSubtitle": "عناوين التوصيل",
+  "profilePaymentMethodsTitle": "طرق الدفع",
+  "profilePaymentMethodsSubtitle": "البطاقات والمحافظ",
+
+  "profileOrdersTitle": "الطلبات",
+  "profileOrdersSubtitle": "تتبع الشراء والتوصيل",
+  "profileWishlistTitle": "قائمة الرغبات",
+  "profileWishlistSubtitle": "عناصر محفوظة",
+  "profileCartTitle": "السلة",
+  "profileCartSubtitle": "عناصر جاهزة للدفع",
+  "profileMessagesTitle": "الرسائل",
+
+  "profileHelpCenterTitle": "مركز المساعدة",
+  "profileHelpCenterSubtitle": "إجابات عن الأسئلة الشائعة",
+  "profileContactSupportTitle": "تواصل مع الدعم",
+  "profileContactSupportSubtitle": "نحن هنا للمساعدة",
+
+  "profileBuildStatusTelemetryTitle": "القياس",
+  "profileBuildStatusPersonalizationTitle": "التخصيص",
+  "profileBuildStatusSubtitle": "يُحدد حسب إعدادات البناء",
+
+  "profileSignInSubtitle": "افتح مزامنة الطلبات والرسائل",
+  "profileSignOutSubtitle": "يمكنك تسجيل الدخول مرة أخرى في أي وقت",
+
+  "profileFeatureOrders": "الطلبات",
+  "profileFeatureMessages": "الرسائل",
+
+  "profileGuestLabel": "ضيف",
+  "profileMemberLabel": "عضو",
+  "profileGuestInitial": "ض",
+  "profileAccountConnected": "الحساب متصل",
+  "profileSignInToUnlockBenefits": "سجّل الدخول لفتح المزايا",
+  "profileSignInBannerBody": "سجّل الدخول لمزامنة الطلبات والوصول إلى الرسائل عبر الأجهزة.",
+  "profileGoldPoints": "{value} ذهب",
+  "@profileGoldPoints": {
+    "placeholders": {
+      "value": {
+        "type": "int"
+      }
+    }
+  },
+
+  "goldTitle": "ذهبي",
+  "goldInfoTooltip": "معلومات",
+  "goldTierRulesPlaceholder": "قواعد المستوى غير متاحة بعد.",
+  "goldRetentionMonthPlaceholder": "هذا الشهر",
+  "goldRetentionMessage": "أكمل {remaining} طلبًا إضافيًا هذا الشهر للحفاظ على المستوى الذهبي في {month}.",
+  "@goldRetentionMessage": {
+    "placeholders": {
+      "remaining": {
+        "type": "int"
+      },
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "goldPointsLabel": "النقاط",
+  "goldPointsHistoryCta": "سجل النقاط",
+  "goldOrdersCompletedLabel": "{count} طلب",
+  "@goldOrdersCompletedLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "goldOrdersOutOfLabel": "من أصل {count}",
+  "@goldOrdersOutOfLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "goldNoticeSimplifiedPoints": "قمنا بتبسيط طريقة كسب واستبدال نقاط الولاء… القيمة بقيت كما هي.",
+  "goldDiscountsAndOffersTitle": "خصومات وعروض",
+  "goldRewardsUnavailableBody": "المكافآت غير متاحة بعد.",
+  "goldPointsHistoryTitle": "سجل النقاط",
+  "goldPointsHistoryUnavailableBody": "سجل النقاط غير متاح بعد.",
+  "goldRewardDetailsTitle": "تفاصيل المكافأة",
+  "goldClose": "إغلاق",
+  "goldRewardDetailsPlaceholderTitle": "مكافأة",
+  "goldRewardDetailsPlaceholderSubtitle": "هذه المكافأة غير متاحة بعد.",
+  "goldRewardPointsChip": "أو {points} نقطة",
+  "@goldRewardPointsChip": {
+    "placeholders": {
+      "points": {
+        "type": "int"
+      }
+    }
+  },
+  "goldRewardTermsPlaceholder": "الشروط والأهلية غير متاحة بعد.",
+  "goldClaimRewardCta": "استرداد المكافأة",
+
+  "profileSignInRequiredTitle": "تسجيل الدخول مطلوب",
+  "profileSignInRequiredSubtitle": "سجّل الدخول لعرض وتحديث تفاصيل حسابك.",
+
+  "profileSectionDisplayName": "الاسم المعروض",
+  "profileSectionEmail": "البريد الإلكتروني",
+  "profileSectionPhoneNumber": "رقم الهاتف",
+  "profileFieldNameLabel": "الاسم",
+  "profileFieldNameHint": "اسمك",
+  "profileAnonymousEditBlocked": "سجّل الدخول لتعديل ملفك الشخصي.",
+  "profileNoEmail": "لا يوجد بريد",
+  "profileVerifyEmailCta": "توثيق البريد",
+  "profileAnonymousEmailBlocked": "سجّل الدخول لتوثيق بريدك.",
+  "profileAnonymousPhoneBlocked": "سجّل الدخول لتوثيق هاتفك.",
+  "profileNoPhoneLinked": "لا يوجد هاتف مرتبط",
+  "profileFieldPhoneLabel": "رقم الهاتف",
+  "profileFieldPhoneHint": "+12025550123",
+  "profileSendCodeCta": "إرسال الرمز",
+  "profileFieldSmsCodeLabel": "رمز SMS",
+  "profileVerifyPhoneCta": "توثيق الهاتف",
+  "profileSnackbarNameUpdated": "تم تحديث الاسم",
+  "profileSnackbarVerificationEmailSent": "تم إرسال رسالة التوثيق",
+  "profileSnackbarSmsCodeSent": "تم إرسال رمز SMS",
+  "profileSnackbarPhoneVerified": "تم توثيق الهاتف",
+  "profileSnackbarPleaseSignInToEditName": "يرجى تسجيل الدخول لتعديل اسمك.",
+  "profileSnackbarNoEmailAttached": "لا يوجد بريد مرتبط بهذا الحساب.",
+  "profileSnackbarPleaseSignInToVerifyPhone": "يرجى تسجيل الدخول لتوثيق رقم هاتف.",
+  "profileSnackbarEnterPhone": "أدخل رقم الهاتف",
+  "profileSnackbarStartPhoneVerificationFirst": "ابدأ توثيق الهاتف أولاً.",
+  "profileSnackbarEnterSmsCode": "أدخل رمز SMS",
+
+  "profileVerifiedCountLabel": "تم التوثيق {count}/2",
+  "@profileVerifiedCountLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "profileSectionProfileTitle": "الملف الشخصي",
+  "profileSectionProfileSubtitle": "حدّث معلومات حسابك.",
+  "profileSectionEmailTitle": "البريد",
+  "profileSectionEmailSubtitle": "وثّق لفتح مزامنة الطلبات.",
+  "profileSectionPhoneTitle": "الهاتف",
+  "profileSectionPhoneSubtitle": "وثّق لاستعادة الحساب وتحديثات التوصيل.",
+  "profileResendAvailableInSeconds": "إعادة الإرسال بعد {seconds}ث",
+  "@profileResendAvailableInSeconds": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "profileGuestSessionTitle": "جلسة ضيف",
+  "profileYourAccountTitle": "حسابك",
+  "profileAnonymousSyncHint": "سجّل الدخول للمزامنة عبر الأجهزة.",
+  "profileSignedInLabel": "تم تسجيل الدخول",
+  "profileAnonymousSyncAndVerifyHint": "سجّل الدخول للمزامنة وتوثيق حسابك.",
+  "profileDemoBadgeLabel": "تجريبي",
+
+  "offersTitle": "العروض",
+  "offersSubtitle": "صفقات حصرية مختارة لك",
+  "offersTooltipFilters": "عوامل التصفية",
+  "offersSearchHint": "ابحث عن عروض",
+  "offersLoadErrorTitle": "تعذر تحميل العروض",
+  "offersEmptyTitle": "لا توجد عروض",
+  "offersEmptySubtitle": "جرّب عامل تصفية مختلف أو بحثًا آخر.",
+
+  "offersQuickAll": "الكل",
+  "offersQuickNew": "جديد",
+  "offersQuickPopular": "الأكثر شعبية",
+  "offersQuickExpiring": "قارب على الانتهاء",
+  "offersQuickOnline": "أونلاين",
+  "offersQuickInStore": "داخل المتجر",
+
+  "offersFeaturedDealBadge": "صفقة مميزة",
+  "offersFeaturedShopDeal": "تسوق الصفقة",
+
+  "offersFiltersTitle": "عوامل التصفية",
+  "offersFiltersClearAll": "مسح الكل",
+  "offersFiltersSortBy": "ترتيب حسب",
+  "offersFiltersPriceTier": "فئة السعر",
+  "offersFiltersChannel": "القناة",
+  "offersFiltersCategories": "الفئات",
+  "offersFiltersApply": "تطبيق",
+
+  "offersSortRecommended": "مقترح",
+  "offersSortEndingSoon": "ينتهي قريبًا",
+  "offersSortHighestDiscount": "أعلى خصم",
+  "offersSortNewest": "الأحدث",
+
+  "offersPriceUnder25": "أقل من 25$",
+  "offersPriceUnder50": "أقل من 50$",
+  "offersPriceHighValue": "قيمة عالية",
+
+  "offersChannelAll": "الكل",
+  "offersChannelOnline": "أونلاين",
+  "offersChannelInStore": "داخل المتجر",
+
+  "offersCategoryFashion": "الأزياء",
+  "offersCategoryShoes": "الأحذية",
+  "offersCategoryBeauty": "الجمال",
+  "offersCategoryElectronics": "الإلكترونيات",
+  "offersCategoryHome": "المنزل",
+  "offersCategoryGrocery": "البقالة",
+  "offersCategoryFitness": "اللياقة",
+
+  "offersBadgePercentOff": "خصم {value}%",
+  "@offersBadgePercentOff": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "offersBadgeAmountOff": "خصم \u0024{value}",
+  "@offersBadgeAmountOff": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "offersBadgeBogo": "اشترِ واحدة واحصل على واحدة",
+  "offersBadgeDeal": "صفقة",
+  "offersPillCode": "رمز",
+  "offersPillFeatured": "مميز",
+  "offersViewDealCta": "عرض الصفقة",
+
+  "offerDetailsTitle": "تفاصيل العرض",
+  "offerLoadErrorTitle": "تعذر تحميل العرض",
+  "offerNotFoundTitle": "لم يتم العثور على العرض",
+  "offerExpiresExpired": "منتهي",
+  "offerExpiresEndsSoon": "ينتهي قريبًا",
+  "offerExpiresEndsInDays": "ينتهي خلال {days} يوم",
+  "@offerExpiresEndsInDays": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "offerExpiresEndsInHours": "ينتهي خلال {hours} ساعة",
+  "@offerExpiresEndsInHours": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "offerPromoCodeCopied": "تم نسخ رمز العرض",
+  "offerRedeemTitle": "الاسترداد",
+  "offerTerms": "الشروط",
+  "offerCopyCodeTooltip": "نسخ الرمز",
+  "offerUseCodeAtCheckout": "استخدم هذا الرمز عند الدفع.",
+  "offerNoPromoCodeRequired": "لا يلزم رمز ترويجي.",
+  "offerShopProductsInThisOffer": "تسوق منتجات هذا العرض",
+
+  "productItemTitle": "عنصر",
+  "productClearSelectionTooltip": "مسح الاختيار",
+  "productRemoveFromWishlistTooltip": "إزالة من المفضلة",
+  "productSaveToWishlistTooltip": "حفظ في المفضلة",
+
+  "commonRetry": "إعادة المحاولة",
+  "commonRequired": "مطلوب",
+  "commonSomethingWentWrongTryAgain": "حدث خطأ ما. يرجى المحاولة مرة أخرى.",
+
+  "authWelcomeBackSubtitle": "مرحبًا بعودتك — سجّل الدخول للمتابعة",
+  "authSignInTitle": "تسجيل الدخول",
+  "authSignInBody": "استخدم بريدك الإلكتروني وكلمة المرور للوصول إلى حسابك.",
+  "authEmailLabel": "البريد الإلكتروني",
+  "authEmailHint": "you@example.com",
+  "authPasswordLabel": "كلمة المرور",
+  "authPasswordHint": "••••••••",
+  "authEmailRequired": "البريد الإلكتروني مطلوب",
+  "authPasswordRequired": "كلمة المرور مطلوبة",
+  "authInvalidEmail": "أدخل بريدًا إلكترونيًا صالحًا",
+  "authForgotPassword": "هل نسيت كلمة المرور؟",
+  "authPasswordResetUnavailable": "إعادة تعيين كلمة المرور غير متاحة بعد.",
+  "authCreateAccount": "إنشاء حساب",
+  "authContinueWithGoogle": "المتابعة باستخدام Google",
+  "authContinueAsGuest": "المتابعة كضيف",
+
+  "trustSecure": "آمن",
+  "trustFastDelivery": "توصيل سريع",
+  "trustSupport": "الدعم",
+
+  "wishlistTitle": "المفضلة",
+  "wishlistLoadErrorTitle": "تعذر تحميل المفضلة",
+  "wishlistEmptyTitle": "لا توجد عناصر محفوظة بعد",
+  "wishlistEmptySubtitle": "اضغط على القلب في المنتج لحفظه هنا.",
+
+  "cartTitle": "السلة",
+  "cartSelectAll": "تحديد الكل",
+  "cartDeselectAll": "إلغاء تحديد الكل",
+  "cartLoadErrorTitle": "تعذر تحميل سلتك",
+  "cartSyncNotice": "سجّل الدخول لمزامنة هذه السلة عبر الأجهزة. وحتى ذلك الحين ستبقى على هذا الجهاز.",
+  "cartYouMightLikeTitle": "قد يعجبك",
+  "cartYouMightLikeSubtitle": "إضافات اختيارية. اضغط لعرض التفاصيل.",
+  "cartFilterAll": "الكل",
+  "cartFilterHotDeals": "عروض ساخنة",
+  "cartFilterFrequentFavorites": "الأكثر تكرارًا",
+
+  "cartSelectionAllSelectedMessage": "تم تحديد جميع العناصر لإتمام الشراء. ألغِ تحديد العناصر للاحتفاظ بها في الحقيبة.",
+  "cartSelectionSomeSelectedMessage": "سيشمل الدفع العناصر المحددة فقط. تبقى العناصر غير المحددة في الحقيبة.",
+  "cartSelectionNoneSelectedMessage": "حدد عناصر للمتابعة إلى الدفع.",
+
+  "cartSubtotalLabel": "المجموع الفرعي",
+  "cartSelectedSubtotalLabel": "المجموع الفرعي المحدد",
+  "cartTaxesAndShippingNote": "يتم احتساب الضرائب والشحن عند الدفع.",
+  "cartSelectItemsToContinue": "حدد عناصر للمتابعة",
+  "cartProceedToCheckout": "المتابعة إلى الدفع",
+
+  "cartEmptyTitle": "سلتك فارغة",
+  "cartEmptySubtitle1": "أضف العناصر التي تريد شراءها ثم راجعها هنا قبل الدفع.",
+  "cartEmptySubtitle2": "أضف عناصر من أي صفحة منتج ثم عد هنا لمراجعتها وإتمام الشراء.",
+  "cartContinueShopping": "متابعة التسوق",
+
+  "checkoutTitle": "الدفع",
+  "checkoutShippingTitle": "الشحن",
+  "checkoutShippingSubtitle": "أدخل تفاصيل التوصيل لإتمام طلبك.",
+  "checkoutHintSelectItems": "حدد عناصر من السلة للمتابعة",
+  "checkoutHintSignIn": "سجّل الدخول لإتمام الطلب",
+  "checkoutPlaceOrder": "إتمام الطلب",
+  "checkoutPlacingOrder": "جاري إتمام الطلب…",
+  "checkoutDeliveryTitle": "التوصيل",
+  "checkoutFullNameLabel": "الاسم الكامل",
+  "checkoutPhoneLabel": "الهاتف",
+  "checkoutAddressLabel": "العنوان",
+  "checkoutCityLabel": "المدينة",
+  "checkoutStateLabel": "الولاية/المنطقة",
+  "checkoutPostalCodeLabel": "الرمز البريدي",
+  "checkoutCountryLabel": "الدولة",
+
+  "checkoutSubtotalLabel": "المجموع الفرعي",
+  "checkoutShippingFeeLabel": "الشحن",
+  "checkoutFreeShipping": "شحن مجاني",
+  "checkoutTotalLabel": "الإجمالي",
+
+  "paymentsTitle": "الدفع",
+  "paymentsChooseMethod": "اختر طريقة الدفع",
+  "paymentsContinueCta": "متابعة",
+
+  "paymentsConfirmTitle": "تأكيد الدفع",
+  "paymentsSelectedMethod": "لقد اخترت: {method}",
+  "@paymentsSelectedMethod": {
+    "placeholders": {
+      "method": {
+        "type": "String"
+      }
+    }
+  },
+  "paymentsPayCta": "ادفع",
+
+  "paymentsSuccessTitle": "تم الدفع",
+  "paymentsSuccessHeadline": "اكتملت عملية الدفع",
+  "paymentsOrderIdLabel": "رقم الطلب: {orderId}",
+  "@paymentsOrderIdLabel": {
+    "placeholders": {
+      "orderId": {
+        "type": "String"
+      }
+    }
+  },
+  "paymentsViewOrderCta": "عرض الطلب",
+  "paymentsViewOrdersCta": "عرض الطلبات",
+  "paymentsContinueShoppingCta": "متابعة التسوق",
+
+  "paymentsFailureTitle": "فشل الدفع",
+  "paymentsFailureBody": "تعذر إكمال عملية الدفع. يرجى المحاولة مرة أخرى.",
+
+  "paymentsSummaryTitle": "ملخص الطلب",
+  "paymentsSummaryItems": "العناصر",
+  "paymentsSummarySubtotal": "المجموع الفرعي",
+  "paymentsSummaryShipping": "الشحن",
+  "paymentsSummaryFree": "مجاني",
+  "paymentsSummaryTotal": "الإجمالي",
+
+  "paymentsMethodStripe": "Stripe",
+  "paymentsMethodStripeSubtitle": "بطاقة",
+  "paymentsMethodPaypal": "PayPal",
+  "paymentsMethodPaypalSubtitle": "دفع PayPal",
+
+  "checkoutCartEmpty": "سلتك فارغة.",
+  "checkoutSignInRequired": "يرجى تسجيل الدخول للمتابعة.",
+  "checkoutInvalidPhone": "رقم هاتف غير صالح",
+
+  "checkoutAddressSearching": "جاري البحث…",
+  "checkoutAddressSuggestionsUnavailable": "اقتراحات العنوان غير متاحة — يمكنك الإدخال يدويًا.",
+  "checkoutUseManualEntry": "استخدام الإدخال اليدوي"
+}

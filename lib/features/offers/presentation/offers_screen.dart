@@ -1,18 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
+import 'package:nova_commerce/gen_l10n/app_localizations.dart';
 
-import '../../../core/config/app_routes.dart';
-import '../../../core/theme/app_shadows.dart';
-import '../../../core/theme/app_tokens.dart';
+import '../../../app/config/low_end_device_mode.dart';
+import '../../../app/perf/performance_engine.dart';
+import '../../../app/router/app_routes.dart';
+import '../../../app/theme/app_shadows.dart';
+import '../../../app/theme/app_tokens.dart';
 import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/app_cached_network_image.dart';
 import '../../../core/widgets/empty_state.dart';
 import '../../../core/widgets/error_state.dart';
 import '../../../core/widgets/nova_skeleton.dart';
-import '../../../domain/entities/offer.dart';
-import '../../../domain/repositories/offers_repository.dart';
+import 'package:nova_commerce/features/offers/domain/entities/offer.dart';
+import 'package:nova_commerce/features/offers/domain/repositories/offers_repository.dart';
+import 'offer_image_fallback.dart';
 import 'offers_viewmodel.dart';
 import 'widgets/offer_card.dart';
 
@@ -65,199 +70,95 @@ class _OffersScreenState extends ConsumerState<OffersScreen> {
   }
 
   Future<void> _openFilters() async {
+    final lowEndMode = ref.read(lowEndDeviceModeProvider);
+    final perfReduced = ref.read(
+      performanceEngineProvider.select((s) => !s.allowDecorativeMotion),
+    );
+    final reduceEffects = lowEndMode || perfReduced;
     await showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (ctx) => const _OffersFilterSheet(),
+      builder: (ctx) => _OffersFilterSheet(reduceEffects: reduceEffects),
     );
+  }
+
+  List<Widget> _buildFeedSlivers({
+    required BuildContext context,
+    required AppLocalizations t,
+    required OffersFeedState feedState,
+    required bool reduceEffects,
+  }) {
+    if (feedState.isInitialLoading) {
+      return const <Widget>[SliverToBoxAdapter(child: _OffersSkeleton())];
+    }
+
+    if (feedState.error != null && feedState.items.isEmpty) {
+      return <Widget>[
+        SliverFillRemaining(
+          hasScrollBody: false,
+          child: AppErrorState(
+            title: t.offersLoadErrorTitle,
+            subtitle: feedState.error.toString(),
+            actionText: t.commonRetry,
+            onAction: () => ref
+                .read(offersViewModelProvider.notifier)
+                .refresh(showLoading: true),
+          ),
+        ),
+      ];
+    }
+
+    if (feedState.items.isEmpty) {
+      return <Widget>[
+        SliverFillRemaining(
+          hasScrollBody: false,
+          child: AppEmptyState(
+            title: t.offersEmptyTitle,
+            subtitle: t.offersEmptySubtitle,
+            icon: Icons.local_offer_outlined,
+          ),
+        ),
+      ];
+    }
+
+    return <Widget>[
+      if (feedState.heroItems.isNotEmpty)
+        SliverPadding(
+          padding: EdgeInsets.fromLTRB(0, 8.h, 0, 0),
+          sliver: SliverToBoxAdapter(
+            child: _FeaturedOffersCarousel(
+              offers: feedState.heroItems,
+              controller: _featuredController,
+              indexListenable: _featuredIndex,
+              onOpenFilters: _openFilters,
+              onTapOffer: (offer) =>
+                  context.push('${AppRoutes.offers}/${offer.id}'),
+              reduceEffects: reduceEffects,
+            ),
+          ),
+        ),
+      SliverPadding(
+        padding: EdgeInsets.fromLTRB(12.w, 12.h, 12.w, 16.h),
+        sliver: _OffersResultsSliver(
+          items: feedState.items,
+          isLoadingMore: feedState.isLoadingMore,
+          reduceEffects: reduceEffects,
+        ),
+      ),
+    ];
   }
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
     final cs = Theme.of(context).colorScheme;
-    final state = ref.watch(offersViewModelProvider);
-
-    if (_search.text != (state.query.searchText ?? '')) {
-      final q = state.query.searchText ?? '';
-      _search
-        ..text = q
-        ..selection = TextSelection.collapsed(offset: q.length);
-    }
-
-    final featuredList = state.items
-        .where((o) => o.isFeatured)
-        .take(6)
-        .toList(growable: false);
-    final heroList = featuredList.isNotEmpty
-        ? featuredList
-        : state.items.take(6).toList(growable: false);
-
-    Widget buildSkeleton() {
-      return Padding(
-        padding: AppInsets.screen,
-        child: Column(
-          children: [
-            NovaSkeleton(
-              child: NovaSkeletonBox(height: 46.h, radius: AppRadii.lg),
-            ),
-            SizedBox(height: AppSpace.md),
-            NovaSkeleton(
-              child: NovaSkeletonBox(height: 44.h, radius: AppRadii.pill),
-            ),
-            SizedBox(height: AppSpace.md),
-            NovaSkeleton(
-              child: NovaSkeletonBox(height: 164.h, radius: AppRadii.lg),
-            ),
-            SizedBox(height: AppSpace.md),
-            NovaSkeleton(
-              child: NovaSkeletonBox(height: 440.h, radius: AppRadii.lg),
-            ),
-          ],
-        ),
-      );
-    }
-
-    Widget buildSearchPill() {
-      return SizedBox(
-        height: 46.h,
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: cs.surfaceContainerLow,
-            borderRadius: BorderRadius.circular(20.r),
-            border: Border.all(
-              color: cs.outlineVariant.withValues(alpha: 0.28),
-            ),
-            boxShadow: AppShadows.sm(),
-          ),
-          child: TextField(
-            controller: _search,
-            onChanged: (v) => ref
-                .read(offersViewModelProvider.notifier)
-                .setSearchTextDebounced(v),
-            textInputAction: TextInputAction.search,
-            decoration: InputDecoration(
-              hintText: 'Search offers',
-              border: InputBorder.none,
-              isDense: true,
-              contentPadding: EdgeInsets.fromLTRB(14.w, 12.h, 10.w, 12.h),
-              prefixIcon: Icon(
-                Icons.search_rounded,
-                size: 24.r,
-                color: cs.onSurface.withValues(alpha: 0.72),
-              ),
-              suffixIcon: (state.query.searchText ?? '').trim().isEmpty
-                  ? null
-                  : IconButton(
-                      tooltip: 'Clear',
-                      onPressed: () {
-                        _search.clear();
-                        ref
-                            .read(offersViewModelProvider.notifier)
-                            .setSearchTextDebounced('');
-                      },
-                      icon: Icon(
-                        Icons.close_rounded,
-                        size: 22.r,
-                        color: cs.onSurface.withValues(alpha: 0.72),
-                      ),
-                    ),
-            ),
-          ),
-        ),
-      );
-    }
-
-    Widget buildQuickTabs() {
-      return _PremiumQuickTabs(
-        value: state.quickFilter,
-        onChanged: (next) =>
-            ref.read(offersViewModelProvider.notifier).setQuickFilter(next),
-      );
-    }
-
-    Widget buildHero() {
-      if (heroList.isEmpty) return const SizedBox.shrink();
-      return _FeaturedOffersCarousel(
-        offers: heroList,
-        controller: _featuredController,
-        indexListenable: _featuredIndex,
-        onOpenFilters: _openFilters,
-        onTapOffer: (offer) => context.push('${AppRoutes.offers}/${offer.id}'),
-      );
-    }
-
-    Widget buildResultsSliver() {
-      return SliverLayoutBuilder(
-        builder: (context, constraints) {
-          final width = constraints.crossAxisExtent;
-
-          final isPhoneList = width < 520;
-          final itemCount = state.items.length + (state.isLoadingMore ? 1 : 0);
-
-          if (isPhoneList) {
-            return SliverList(
-              delegate: SliverChildBuilderDelegate((context, index) {
-                if (index >= state.items.length) {
-                  return Padding(
-                    padding: EdgeInsets.symmetric(vertical: 14.h),
-                    child: const Center(
-                      child: SizedBox(
-                        width: 22,
-                        height: 22,
-                        child: CircularProgressIndicator(strokeWidth: 2.5),
-                      ),
-                    ),
-                  );
-                }
-
-                final offer = state.items[index];
-                return Padding(
-                  padding: EdgeInsets.only(bottom: 10.h),
-                  child: OfferCard(
-                    key: ValueKey('offer_${offer.id}'),
-                    offer: offer,
-                    variant: OfferCardVariant.row,
-                    onTap: () =>
-                        context.push('${AppRoutes.offers}/${offer.id}'),
-                  ),
-                );
-              }, childCount: itemCount),
-            );
-          }
-
-          final crossAxisCount = width < 720 ? 2 : 3;
-
-          return SliverGrid(
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: crossAxisCount,
-              mainAxisSpacing: 10.h,
-              crossAxisSpacing: 10.w,
-              childAspectRatio: 1.35,
-            ),
-            delegate: SliverChildBuilderDelegate((context, index) {
-              if (index >= state.items.length) {
-                return const Center(
-                  child: SizedBox(
-                    width: 22,
-                    height: 22,
-                    child: CircularProgressIndicator(strokeWidth: 2.5),
-                  ),
-                );
-              }
-
-              final offer = state.items[index];
-              return OfferCard(
-                key: ValueKey('offer_${offer.id}'),
-                offer: offer,
-                variant: OfferCardVariant.grid,
-                onTap: () => context.push('${AppRoutes.offers}/${offer.id}'),
-              );
-            }, childCount: itemCount),
-          );
-        },
-      );
-    }
+    final lowEndMode = ref.watch(lowEndDeviceModeProvider);
+    final perfReduced = ref.watch(
+      performanceEngineProvider.select((s) => !s.allowDecorativeMotion),
+    );
+    final reduceEffects = lowEndMode || perfReduced;
+    final feedState = ref.watch(offersFeedProvider);
 
     return Scaffold(
       body: RefreshIndicator(
@@ -277,7 +178,7 @@ class _OffersScreenState extends ConsumerState<OffersScreen> {
                 padding: EdgeInsets.fromLTRB(12.w, 10.h, 12.w, 10.h),
                 child: Row(
                   children: [
-                    _NovaOffersBadge(size: 40.r),
+                    _NovaOffersBadge(size: 52.r),
                     SizedBox(width: 10.w),
                     Expanded(
                       child: Column(
@@ -285,7 +186,7 @@ class _OffersScreenState extends ConsumerState<OffersScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Offers',
+                            t.offersTitle,
                             style: Theme.of(context).textTheme.titleLarge
                                 ?.copyWith(
                                   fontWeight: FontWeight.w900,
@@ -294,7 +195,7 @@ class _OffersScreenState extends ConsumerState<OffersScreen> {
                           ),
                           SizedBox(height: 2.h),
                           Text(
-                            'Exclusive deals curated for you',
+                            t.offersSubtitle,
                             style: Theme.of(context).textTheme.bodySmall
                                 ?.copyWith(
                                   color: cs.onSurface.withValues(alpha: 0.65),
@@ -305,7 +206,7 @@ class _OffersScreenState extends ConsumerState<OffersScreen> {
                       ),
                     ),
                     IconButton(
-                      tooltip: 'Filters',
+                      tooltip: t.offersTooltipFilters,
                       onPressed: _openFilters,
                       icon: const Icon(Icons.tune_rounded),
                     ),
@@ -313,57 +214,247 @@ class _OffersScreenState extends ConsumerState<OffersScreen> {
                 ),
               ),
             ),
-            if (state.isLoading && state.items.isEmpty) ...[
-              SliverToBoxAdapter(child: buildSkeleton()),
-            ] else ...[
-              SliverPadding(
-                padding: AppInsets.screenTight,
-                sliver: SliverToBoxAdapter(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      SizedBox(height: 6.h),
-                      buildSearchPill(),
-                      SizedBox(height: 10.h),
-                      buildQuickTabs(),
-                    ],
-                  ),
-                ),
-              ),
-              SliverPadding(
-                padding: EdgeInsets.fromLTRB(0, 8.h, 0, 0),
-                sliver: SliverToBoxAdapter(child: buildHero()),
-              ),
-              if (state.error != null && state.items.isEmpty) ...[
-                SliverFillRemaining(
-                  hasScrollBody: false,
-                  child: AppErrorState(
-                    title: 'Could not load offers',
-                    subtitle: state.error.toString(),
-                    actionText: 'Retry',
-                    onAction: () => ref
-                        .read(offersViewModelProvider.notifier)
-                        .refresh(showLoading: true),
-                  ),
-                ),
-              ] else if (state.items.isEmpty) ...[
-                const SliverFillRemaining(
-                  hasScrollBody: false,
-                  child: AppEmptyState(
-                    title: 'No offers found',
-                    subtitle: 'Try a different filter or search.',
-                    icon: Icons.local_offer_outlined,
-                  ),
-                ),
-              ] else ...[
-                SliverPadding(
-                  padding: EdgeInsets.fromLTRB(12.w, 12.h, 12.w, 16.h),
-                  sliver: buildResultsSliver(),
-                ),
-              ],
-            ],
+            _OffersSearchControlsSliver(
+              searchController: _search,
+              reduceEffects: reduceEffects,
+            ),
+            ..._buildFeedSlivers(
+              context: context,
+              t: t,
+              feedState: feedState,
+              reduceEffects: reduceEffects,
+            ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _OffersSearchControlsSliver extends ConsumerWidget {
+  const _OffersSearchControlsSliver({
+    required this.searchController,
+    required this.reduceEffects,
+  });
+
+  final TextEditingController searchController;
+  final bool reduceEffects;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isInitialLoading = ref.watch(
+      offersFeedProvider.select((state) => state.isInitialLoading),
+    );
+    if (isInitialLoading) {
+      return const SliverToBoxAdapter(child: SizedBox.shrink());
+    }
+
+    final t = AppLocalizations.of(context)!;
+    final cs = Theme.of(context).colorScheme;
+    final searchInput = ref.watch(
+      offersViewModelProvider.select((state) => state.searchInput),
+    );
+    final quickFilter = ref.watch(
+      offersViewModelProvider.select((state) => state.quickFilter),
+    );
+
+    if (searchController.text != searchInput) {
+      searchController
+        ..text = searchInput
+        ..selection = TextSelection.collapsed(offset: searchInput.length);
+    }
+
+    return SliverPadding(
+      padding: AppInsets.screenTight,
+      sliver: SliverToBoxAdapter(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(height: 6.h),
+            SizedBox(
+              height: 46.h,
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: cs.surfaceContainerLow,
+                  borderRadius: BorderRadius.circular(20.r),
+                  border: Border.all(
+                    color: cs.outlineVariant.withValues(alpha: 0.28),
+                  ),
+                  boxShadow: reduceEffects
+                      ? const <BoxShadow>[]
+                      : AppShadows.sm(),
+                ),
+                child: TextField(
+                  controller: searchController,
+                  onChanged: (value) => ref
+                      .read(offersViewModelProvider.notifier)
+                      .setSearchTextDebounced(value),
+                  textInputAction: TextInputAction.search,
+                  decoration: InputDecoration(
+                    hintText: t.offersSearchHint,
+                    border: InputBorder.none,
+                    isDense: true,
+                    contentPadding: EdgeInsets.fromLTRB(14.w, 12.h, 10.w, 12.h),
+                    prefixIcon: Icon(
+                      Icons.search_rounded,
+                      size: 24.r,
+                      color: cs.onSurface.withValues(alpha: 0.72),
+                    ),
+                    suffixIcon: searchInput.trim().isEmpty
+                        ? null
+                        : IconButton(
+                            tooltip: t.commonClear,
+                            onPressed: () {
+                              searchController.clear();
+                              ref
+                                  .read(offersViewModelProvider.notifier)
+                                  .setSearchTextDebounced('');
+                            },
+                            icon: Icon(
+                              Icons.close_rounded,
+                              size: 22.r,
+                              color: cs.onSurface.withValues(alpha: 0.72),
+                            ),
+                          ),
+                  ),
+                ),
+              ),
+            ),
+            SizedBox(height: 10.h),
+            _PremiumQuickTabs(
+              value: quickFilter,
+              reduceEffects: reduceEffects,
+              onChanged: (next) => ref
+                  .read(offersViewModelProvider.notifier)
+                  .setQuickFilter(next),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _OffersResultsSliver extends StatelessWidget {
+  const _OffersResultsSliver({
+    required this.items,
+    required this.isLoadingMore,
+    required this.reduceEffects,
+  });
+
+  final List<Offer> items;
+  final bool isLoadingMore;
+  final bool reduceEffects;
+
+  @override
+  Widget build(BuildContext context) {
+    return SliverLayoutBuilder(
+      builder: (context, constraints) {
+        final width = constraints.crossAxisExtent;
+        final isPhoneList = width < 520;
+        final itemCount = items.length + (isLoadingMore ? 1 : 0);
+
+        if (isPhoneList) {
+          return SliverList(
+            delegate: SliverChildBuilderDelegate(
+              (context, index) {
+                if (index >= items.length) {
+                  return Padding(
+                    padding: EdgeInsets.symmetric(vertical: 14.h),
+                    child: Center(
+                      child: SizedBox(
+                        width: 22.r,
+                        height: 22.r,
+                        child: CircularProgressIndicator(strokeWidth: 2.5),
+                      ),
+                    ),
+                  );
+                }
+
+                final offer = items[index];
+                return Padding(
+                  padding: EdgeInsets.only(bottom: 10.h),
+                  child: OfferCard(
+                    key: ValueKey('offer_${offer.id}'),
+                    offer: offer,
+                    variant: OfferCardVariant.row,
+                    reduceEffects: reduceEffects,
+                    onTap: () =>
+                        context.push('${AppRoutes.offers}/${offer.id}'),
+                  ),
+                );
+              },
+              childCount: itemCount,
+              addAutomaticKeepAlives: false,
+              addRepaintBoundaries: false,
+            ),
+          );
+        }
+
+        final crossAxisCount = width < 720 ? 2 : 3;
+        return SliverGrid(
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: crossAxisCount,
+            mainAxisSpacing: 10.h,
+            crossAxisSpacing: 10.w,
+            childAspectRatio: 1.35,
+          ),
+          delegate: SliverChildBuilderDelegate(
+            (context, index) {
+              if (index >= items.length) {
+                return Center(
+                  child: SizedBox(
+                    width: 22.r,
+                    height: 22.r,
+                    child: CircularProgressIndicator(strokeWidth: 2.5),
+                  ),
+                );
+              }
+
+              final offer = items[index];
+              return OfferCard(
+                key: ValueKey('offer_${offer.id}'),
+                offer: offer,
+                variant: OfferCardVariant.grid,
+                reduceEffects: reduceEffects,
+                onTap: () => context.push('${AppRoutes.offers}/${offer.id}'),
+              );
+            },
+            childCount: itemCount,
+            addAutomaticKeepAlives: false,
+            addRepaintBoundaries: false,
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _OffersSkeleton extends StatelessWidget {
+  const _OffersSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: AppInsets.screen,
+      child: Column(
+        children: [
+          NovaSkeleton(
+            child: NovaSkeletonBox(height: 46.h, radius: AppRadii.lg),
+          ),
+          SizedBox(height: AppSpace.md),
+          NovaSkeleton(
+            child: NovaSkeletonBox(height: 44.h, radius: AppRadii.pill),
+          ),
+          SizedBox(height: AppSpace.md),
+          NovaSkeleton(
+            child: NovaSkeletonBox(height: 164.h, radius: AppRadii.lg),
+          ),
+          SizedBox(height: AppSpace.md),
+          NovaSkeleton(
+            child: NovaSkeletonBox(height: 440.h, radius: AppRadii.lg),
+          ),
+        ],
       ),
     );
   }
@@ -376,89 +467,92 @@ class _NovaOffersBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [cs.primary, cs.primaryContainer],
-        ),
-        boxShadow: AppShadows.sm(),
-      ),
-      child: SizedBox(
-        width: size,
-        height: size,
-        child: Icon(
-          Icons.local_offer_rounded,
-          color: Colors.white,
-          size: (size * 0.52),
-        ),
-      ),
+    return SizedBox(
+      width: size,
+      height: size,
+      child: SvgPicture.asset('assets/icons/offers.svg', fit: BoxFit.contain),
     );
   }
 }
 
 class _PremiumQuickTabs extends StatelessWidget {
-  const _PremiumQuickTabs({required this.value, required this.onChanged});
+  const _PremiumQuickTabs({
+    required this.value,
+    required this.onChanged,
+    required this.reduceEffects,
+  });
 
   final OffersQuickFilter value;
   final ValueChanged<OffersQuickFilter> onChanged;
+  final bool reduceEffects;
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
     final cs = Theme.of(context).colorScheme;
+    final vPad = AppSpace.xs;
 
-    const items = <({String label, OffersQuickFilter value})>[
-      (label: 'All', value: OffersQuickFilter.all),
-      (label: 'New', value: OffersQuickFilter.newOffers),
-      (label: 'Popular', value: OffersQuickFilter.popular),
-      (label: 'Expiring', value: OffersQuickFilter.expiring),
-      (label: 'Online', value: OffersQuickFilter.online),
-      (label: 'In-store', value: OffersQuickFilter.inStore),
+    final resolvedItems = <({String label, OffersQuickFilter value})>[
+      (label: t.offersQuickAll, value: OffersQuickFilter.all),
+      (label: t.offersQuickNew, value: OffersQuickFilter.newOffers),
+      (label: t.offersQuickPopular, value: OffersQuickFilter.popular),
+      (label: t.offersQuickExpiring, value: OffersQuickFilter.expiring),
+      (label: t.offersQuickOnline, value: OffersQuickFilter.online),
+      (label: t.offersQuickInStore, value: OffersQuickFilter.inStore),
     ];
 
     return SizedBox(
-      height: 42.h,
+      height: 42.h + (vPad * 2),
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
+        clipBehavior: Clip.none,
+        padding: EdgeInsets.symmetric(vertical: vPad),
         itemBuilder: (context, index) {
-          final item = items[index];
+          final item = resolvedItems[index];
           final selected = item.value == value;
 
-          return InkWell(
-            borderRadius: BorderRadius.circular(AppRadii.pill),
-            onTap: () => onChanged(item.value),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 180),
-              padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
-              decoration: BoxDecoration(
-                color: selected
-                    ? cs.surfaceContainerLow
-                    : cs.surfaceContainerLow,
-                borderRadius: BorderRadius.circular(AppRadii.pill),
-                border: Border.all(
+          return RepaintBoundary(
+            child: InkWell(
+              borderRadius: BorderRadius.circular(AppRadii.pill),
+              onTap: () => onChanged(item.value),
+              child: AnimatedContainer(
+                duration: reduceEffects
+                    ? Duration.zero
+                    : const Duration(milliseconds: 180),
+                padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
+                decoration: BoxDecoration(
                   color: selected
-                      ? cs.primary.withValues(alpha: 0.75)
-                      : cs.outlineVariant.withValues(alpha: 0.25),
-                  width: selected ? 1.4 : 1,
-                ),
-                boxShadow: selected
-                    ? AppShadows.sm(color: cs.primary.withValues(alpha: 0.22))
-                    : AppShadows.sm(
-                        color: AppShadows.shadowColor.withValues(alpha: 0.10),
-                      ),
-              ),
-              child: Center(
-                child: Text(
-                  item.label,
-                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: -0.1,
+                      ? cs.surfaceContainerLow
+                      : cs.surfaceContainerLow,
+                  borderRadius: BorderRadius.circular(AppRadii.pill),
+                  border: Border.all(
                     color: selected
-                        ? cs.primary
-                        : cs.onSurface.withValues(alpha: 0.78),
+                        ? cs.primary.withValues(alpha: 0.75)
+                        : cs.outlineVariant.withValues(alpha: 0.25),
+                    width: selected ? 1.4 : 1,
+                  ),
+                  boxShadow: reduceEffects
+                      ? const <BoxShadow>[]
+                      : (selected
+                            ? AppShadows.sm(
+                                color: cs.primary.withValues(alpha: 0.22),
+                              )
+                            : AppShadows.sm(
+                                color: AppShadows.shadowColor.withValues(
+                                  alpha: 0.10,
+                                ),
+                              )),
+                ),
+                child: Center(
+                  child: Text(
+                    item.label,
+                    style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: -0.1,
+                      color: selected
+                          ? cs.primary
+                          : cs.onSurface.withValues(alpha: 0.78),
+                    ),
                   ),
                 ),
               ),
@@ -466,7 +560,7 @@ class _PremiumQuickTabs extends StatelessWidget {
           );
         },
         separatorBuilder: (_, __) => SizedBox(width: 12.w),
-        itemCount: items.length,
+        itemCount: resolvedItems.length,
       ),
     );
   }
@@ -479,6 +573,7 @@ class _FeaturedOffersCarousel extends StatelessWidget {
     required this.indexListenable,
     required this.onOpenFilters,
     required this.onTapOffer,
+    required this.reduceEffects,
   });
 
   final List<Offer> offers;
@@ -486,6 +581,7 @@ class _FeaturedOffersCarousel extends StatelessWidget {
   final ValueNotifier<int> indexListenable;
   final VoidCallback onOpenFilters;
   final ValueChanged<Offer> onTapOffer;
+  final bool reduceEffects;
 
   @override
   Widget build(BuildContext context) {
@@ -517,6 +613,7 @@ class _FeaturedOffersCarousel extends StatelessWidget {
                     offer: offer,
                     onTap: () => onTapOffer(offer),
                     onOpenFilters: onOpenFilters,
+                    reduceEffects: reduceEffects,
                   ),
                 );
               },
@@ -532,7 +629,9 @@ class _FeaturedOffersCarousel extends StatelessWidget {
               children: [
                 for (var i = 0; i < offers.length; i++)
                   AnimatedContainer(
-                    duration: const Duration(milliseconds: 160),
+                    duration: reduceEffects
+                        ? Duration.zero
+                        : const Duration(milliseconds: 160),
                     margin: EdgeInsets.symmetric(horizontal: 3.w),
                     width: i == index ? 18.w : 6.w,
                     height: 6.w,
@@ -540,7 +639,7 @@ class _FeaturedOffersCarousel extends StatelessWidget {
                       color: i == index
                           ? cs.primary.withValues(alpha: 0.92)
                           : cs.outlineVariant.withValues(alpha: 0.55),
-                      borderRadius: BorderRadius.circular(999),
+                      borderRadius: BorderRadius.circular(999.r),
                     ),
                   ),
               ],
@@ -557,14 +656,17 @@ class _FeaturedHeroCard extends StatelessWidget {
     required this.offer,
     required this.onTap,
     required this.onOpenFilters,
+    required this.reduceEffects,
   });
 
   final Offer offer;
   final VoidCallback onTap;
   final VoidCallback onOpenFilters;
+  final bool reduceEffects;
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
     final cs = Theme.of(context).colorScheme;
     final radius = BorderRadius.circular(AppRadii.xl);
 
@@ -572,15 +674,16 @@ class _FeaturedHeroCard extends StatelessWidget {
       borderRadius: radius,
       onTap: onTap,
       child: Card(
-        elevation: AppElevation.card,
-        shadowColor: AppShadows.shadowColor.withValues(alpha: 0.14),
-        clipBehavior: Clip.antiAlias,
+        elevation: reduceEffects ? 0 : AppElevation.card,
+        shadowColor: AppShadows.shadowColor.withValues(alpha: 0.10),
+        clipBehavior: Clip.hardEdge,
         shape: RoundedRectangleBorder(borderRadius: radius),
         child: Stack(
           children: [
             Positioned.fill(
               child: AppCachedNetworkImage(
                 url: offer.imageUrl,
+                fallbackUrl: offerFallbackImagePath(offer),
                 fit: BoxFit.cover,
                 backgroundColor: cs.surfaceContainerHigh,
               ),
@@ -619,7 +722,7 @@ class _FeaturedHeroCard extends StatelessWidget {
                         vertical: 6.h,
                       ),
                       child: Text(
-                        'Featured Deal',
+                        t.offersFeaturedDealBadge,
                         style: Theme.of(context).textTheme.labelSmall?.copyWith(
                           color: Colors.white,
                           fontWeight: FontWeight.w900,
@@ -630,7 +733,7 @@ class _FeaturedHeroCard extends StatelessWidget {
                   ),
                   const Spacer(),
                   IconButton(
-                    tooltip: 'Filters',
+                    tooltip: t.offersTooltipFilters,
                     onPressed: onOpenFilters,
                     icon: Icon(
                       Icons.tune_rounded,
@@ -670,7 +773,7 @@ class _FeaturedHeroCard extends StatelessWidget {
                   ),
                   SizedBox(height: 10.h),
                   AppButton.primary(
-                    label: 'Shop deal',
+                    label: t.offersFeaturedShopDeal,
                     onPressed: onTap,
                     icon: Icons.arrow_forward_rounded,
                   ),
@@ -687,7 +790,9 @@ class _FeaturedHeroCard extends StatelessWidget {
 enum _OfferPriceTier { under25, under50, highValue }
 
 class _OffersFilterSheet extends ConsumerStatefulWidget {
-  const _OffersFilterSheet();
+  const _OffersFilterSheet({required this.reduceEffects});
+
+  final bool reduceEffects;
 
   @override
   ConsumerState<_OffersFilterSheet> createState() => _OffersFilterSheetState();
@@ -711,6 +816,7 @@ class _OffersFilterSheetState extends ConsumerState<_OffersFilterSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
     final cs = Theme.of(context).colorScheme;
     final radius = BorderRadius.vertical(top: Radius.circular(22.r));
     final primary = cs.primary;
@@ -727,7 +833,9 @@ class _OffersFilterSheetState extends ConsumerState<_OffersFilterSheet> {
           child: DecoratedBox(
             decoration: BoxDecoration(
               borderRadius: radius,
-              boxShadow: AppShadows.lg(),
+              boxShadow: widget.reduceEffects
+                  ? const <BoxShadow>[]
+                  : AppShadows.lg(),
             ),
             child: Column(
               children: [
@@ -737,7 +845,7 @@ class _OffersFilterSheetState extends ConsumerState<_OffersFilterSheet> {
                   height: 4.h,
                   decoration: BoxDecoration(
                     color: cs.outlineVariant.withValues(alpha: 0.55),
-                    borderRadius: BorderRadius.circular(999),
+                    borderRadius: BorderRadius.circular(999.r),
                   ),
                 ),
                 SizedBox(height: 10.h),
@@ -746,7 +854,7 @@ class _OffersFilterSheetState extends ConsumerState<_OffersFilterSheet> {
                   child: Row(
                     children: [
                       Text(
-                        'Filters',
+                        t.offersFiltersTitle,
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.w900,
                           letterSpacing: -0.3,
@@ -761,7 +869,7 @@ class _OffersFilterSheetState extends ConsumerState<_OffersFilterSheet> {
                           Navigator.of(context).pop();
                         },
                         child: Text(
-                          'Clear all',
+                          t.offersFiltersClearAll,
                           style: Theme.of(context).textTheme.titleSmall
                               ?.copyWith(
                                 color: primary,
@@ -778,28 +886,28 @@ class _OffersFilterSheetState extends ConsumerState<_OffersFilterSheet> {
                     controller: scrollController,
                     padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 12.h),
                     children: [
-                      _SheetSectionTitle(title: 'Sort by'),
+                      _SheetSectionTitle(title: t.offersFiltersSortBy),
                       SizedBox(height: 8.h),
                       _SortChips(
                         value: _sort,
                         onChanged: (v) => setState(() => _sort = v),
                       ),
                       SizedBox(height: 16.h),
-                      _SheetSectionTitle(title: 'Price tier'),
+                      _SheetSectionTitle(title: t.offersFiltersPriceTier),
                       SizedBox(height: 8.h),
                       _PriceTierChips(
                         value: _priceTier,
                         onChanged: (v) => setState(() => _priceTier = v),
                       ),
                       SizedBox(height: 16.h),
-                      _SheetSectionTitle(title: 'Channel'),
+                      _SheetSectionTitle(title: t.offersFiltersChannel),
                       SizedBox(height: 8.h),
                       _ChannelChips(
                         value: _channel,
                         onChanged: (v) => setState(() => _channel = v),
                       ),
                       SizedBox(height: 16.h),
-                      _SheetSectionTitle(title: 'Categories'),
+                      _SheetSectionTitle(title: t.offersFiltersCategories),
                       SizedBox(height: 8.h),
                       _CategoryChips(
                         selected: _categories,
@@ -824,7 +932,7 @@ class _OffersFilterSheetState extends ConsumerState<_OffersFilterSheet> {
                     child: SizedBox(
                       width: double.infinity,
                       child: AppButton.primary(
-                        label: 'Apply',
+                        label: t.offersFiltersApply,
                         onPressed: () {
                           final tags = <String>{..._categories};
                           final tier = _priceTier;
@@ -885,27 +993,28 @@ class _SortChips extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
     return Wrap(
       spacing: 10.w,
       runSpacing: 10.h,
       children: [
         _FilterChip(
-          label: 'Recommended',
+          label: t.offersSortRecommended,
           selected: value == OfferSort.recommended,
           onTap: () => onChanged(OfferSort.recommended),
         ),
         _FilterChip(
-          label: 'Ending soon',
+          label: t.offersSortEndingSoon,
           selected: value == OfferSort.endingSoon,
           onTap: () => onChanged(OfferSort.endingSoon),
         ),
         _FilterChip(
-          label: 'Highest discount',
+          label: t.offersSortHighestDiscount,
           selected: value == OfferSort.highestDiscount,
           onTap: () => onChanged(OfferSort.highestDiscount),
         ),
         _FilterChip(
-          label: 'Newest',
+          label: t.offersSortNewest,
           selected: value == OfferSort.newest,
           onTap: () => onChanged(OfferSort.newest),
         ),
@@ -922,26 +1031,27 @@ class _PriceTierChips extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
     return Wrap(
       spacing: 10.w,
       runSpacing: 10.h,
       children: [
         _FilterChip(
-          label: 'Under \$25',
+          label: t.offersPriceUnder25,
           selected: value == _OfferPriceTier.under25,
           onTap: () => onChanged(
             value == _OfferPriceTier.under25 ? null : _OfferPriceTier.under25,
           ),
         ),
         _FilterChip(
-          label: 'Under \$50',
+          label: t.offersPriceUnder50,
           selected: value == _OfferPriceTier.under50,
           onTap: () => onChanged(
             value == _OfferPriceTier.under50 ? null : _OfferPriceTier.under50,
           ),
         ),
         _FilterChip(
-          label: 'High value',
+          label: t.offersPriceHighValue,
           selected: value == _OfferPriceTier.highValue,
           onTap: () => onChanged(
             value == _OfferPriceTier.highValue
@@ -962,22 +1072,23 @@ class _ChannelChips extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
     return Wrap(
       spacing: 10.w,
       runSpacing: 10.h,
       children: [
         _FilterChip(
-          label: 'All',
+          label: t.offersChannelAll,
           selected: value == null,
           onTap: () => onChanged(null),
         ),
         _FilterChip(
-          label: 'Online',
+          label: t.offersChannelOnline,
           selected: value == OfferChannel.online,
           onTap: () => onChanged(OfferChannel.online),
         ),
         _FilterChip(
-          label: 'In-store',
+          label: t.offersChannelInStore,
           selected: value == OfferChannel.inStore,
           onTap: () => onChanged(OfferChannel.inStore),
         ),
@@ -994,6 +1105,7 @@ class _CategoryChips extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
     const categories = <String>[
       'fashion',
       'shoes',
@@ -1010,7 +1122,7 @@ class _CategoryChips extends StatelessWidget {
       children: [
         for (final c in categories)
           _FilterChip(
-            label: _capitalize(c),
+            label: _labelForCategory(t, c),
             selected: selected.contains(c),
             onTap: () => onToggle(c),
           ),
@@ -1018,9 +1130,17 @@ class _CategoryChips extends StatelessWidget {
     );
   }
 
-  static String _capitalize(String s) {
-    if (s.isEmpty) return s;
-    return s.substring(0, 1).toUpperCase() + s.substring(1);
+  static String _labelForCategory(AppLocalizations t, String id) {
+    return switch (id) {
+      'fashion' => t.offersCategoryFashion,
+      'shoes' => t.offersCategoryShoes,
+      'beauty' => t.offersCategoryBeauty,
+      'electronics' => t.offersCategoryElectronics,
+      'home' => t.offersCategoryHome,
+      'grocery' => t.offersCategoryGrocery,
+      'fitness' => t.offersCategoryFitness,
+      _ => id,
+    };
   }
 }
 

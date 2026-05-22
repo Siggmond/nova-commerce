@@ -1,10 +1,10 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:nova_commerce/core/config/providers.dart';
-import 'package:nova_commerce/domain/entities/product.dart';
-import 'package:nova_commerce/domain/entities/variant.dart';
-import 'package:nova_commerce/domain/repositories/product_repository.dart';
+import 'package:nova_commerce/app/di/app_providers.dart';
+import 'package:nova_commerce/core/domain/entities/product.dart';
+import 'package:nova_commerce/core/domain/entities/variant.dart';
+import 'package:nova_commerce/core/domain/repositories/product_repository.dart';
 import 'package:nova_commerce/features/home/presentation/home_viewmodel.dart';
 
 class _OverlappingPageRepo implements ProductRepository {

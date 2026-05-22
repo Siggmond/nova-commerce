@@ -1,16 +1,12 @@
-import 'dart:async';
+﻿import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:nova_commerce/core/config/auth_providers.dart';
-import 'package:nova_commerce/core/config/providers.dart';
-import 'package:nova_commerce/data/datasources/device_id_datasource.dart';
-import 'package:nova_commerce/domain/entities/order.dart';
-import 'package:nova_commerce/domain/entities/order_item.dart';
-import 'package:nova_commerce/domain/entities/order_status.dart';
-import 'package:nova_commerce/domain/repositories/orders_repository.dart';
-import 'package:nova_commerce/features/orders/presentation/orders_controller.dart';
+import 'package:nova_commerce/app/di/app_providers.dart';
+import 'package:nova_commerce/core/device/device_id_datasource.dart';
+import 'package:nova_commerce/features/orders/orders.dart';
+import 'package:nova_commerce/features/orders/presentation/state/orders_controller.dart';
 
 class _TestDeviceIdDataSource extends DeviceIdDataSource {
   @override

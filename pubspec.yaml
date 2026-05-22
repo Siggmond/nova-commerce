@@ -62,13 +62,13 @@ dependencies:
 
     sdk: flutter
 
+  flutter_localizations:
+
+    sdk: flutter
+
+  intl: ^0.20.2
 
 
-  # The following adds the Cupertino Icons font to your application.
-
-  # Use with the CupertinoIcons class for iOS style icons.
-
-  cupertino_icons: ^1.0.8
 
   flutter_riverpod: ^2.6.1
 
@@ -82,11 +82,15 @@ dependencies:
 
   firebase_auth: ^5.6.0
 
+  cloud_functions: ^5.6.0
+
   google_sign_in: ^6.2.2
 
   cached_network_image: ^3.3.1
 
   flutter_screenutil: ^5.9.3
+
+  flutter_svg: ^2.1.0
 
   uuid: ^4.5.1
 
@@ -102,6 +106,8 @@ dependencies:
 
   url_launcher: ^6.3.0
 
+  flutter_stripe: ^11.5.0
+
   hive: ^2.2.3
 
   hive_flutter: ^1.1.0
@@ -113,6 +119,10 @@ dependencies:
 dev_dependencies:
 
   flutter_test:
+
+    sdk: flutter
+
+  integration_test:
 
     sdk: flutter
 
@@ -156,6 +166,8 @@ flutter_icons:
 
 flutter:
 
+  generate: true
+
 
 
   # The following line ensures that the Material Icons font is
@@ -175,6 +187,8 @@ flutter:
     - assets/screenshots/
 
     - assets/images/
+
+    - assets/icons/
 
     - assets/models/ai_nav_model_quant.tflite
 

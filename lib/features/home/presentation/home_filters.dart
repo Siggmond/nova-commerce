@@ -3,7 +3,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../domain/entities/product.dart';
+import '../../../core/domain/entities/product.dart';
+import '../../products/domain/usecases/filter_products_use_case.dart';
 import 'home_viewmodel.dart';
 
 enum HomeSort { recommended, newest, priceAsc, priceDesc }
@@ -53,47 +54,62 @@ class HomeBrowseFiltersController extends StateNotifier<HomeBrowseFilters> {
   HomeBrowseFiltersController() : super(const HomeBrowseFilters());
 
   Timer? _debounce;
+  bool _isDisposed = false;
 
   @override
   void dispose() {
+    _isDisposed = true;
     _debounce?.cancel();
     super.dispose();
   }
 
   void setQueryDebounced(
     String q, {
-    Duration delay = const Duration(milliseconds: 260),
+    Duration delay = const Duration(milliseconds: 200),
   }) {
+    if (_isDisposed) return;
     _debounce?.cancel();
     _debounce = Timer(delay, () {
-      state = state.copyWith(query: q);
+      if (_isDisposed) return;
+      _publish(state.copyWith(query: q));
     });
   }
 
   void setQueryImmediate(String q) {
+    if (_isDisposed) return;
     _debounce?.cancel();
-    state = state.copyWith(query: q);
+    _publish(state.copyWith(query: q));
   }
 
   void setBrand(String? brand) {
-    state = state.copyWith(brand: brand);
+    if (_isDisposed) return;
+    _publish(state.copyWith(brand: brand));
   }
 
   void setInStockOnly(bool v) {
-    state = state.copyWith(inStockOnly: v);
+    if (_isDisposed) return;
+    _publish(state.copyWith(inStockOnly: v));
   }
 
   void setPriceRange(RangeValues? range) {
-    state = state.copyWith(priceRange: range);
+    if (_isDisposed) return;
+    _publish(state.copyWith(priceRange: range));
   }
 
   void setSort(HomeSort sort) {
-    state = state.copyWith(sort: sort);
+    if (_isDisposed) return;
+    _publish(state.copyWith(sort: sort));
   }
 
   void reset() {
+    if (_isDisposed) return;
     _debounce?.cancel();
-    state = const HomeBrowseFilters();
+    _publish(const HomeBrowseFilters());
+  }
+
+  void _publish(HomeBrowseFilters next) {
+    if (_isDisposed) return;
+    state = next;
   }
 }
 
@@ -109,14 +125,18 @@ class HomeCatalogMeta {
   final double maxPrice;
 }
 
-final homeCatalogMetaProvider = Provider<HomeCatalogMeta>((ref) {
-  final items = ref
+final homeItemsProvider = Provider<List<Product>>((ref) {
+  return ref
       .watch(homeViewModelProvider)
       .when(
         loading: () => const <Product>[],
         error: (_) => const <Product>[],
         data: (items, __, ___, ____) => items,
       );
+});
+
+final homeCatalogMetaProvider = Provider<HomeCatalogMeta>((ref) {
+  final items = ref.watch(homeItemsProvider);
 
   final brands =
       items
@@ -141,69 +161,168 @@ final homeCatalogMetaProvider = Provider<HomeCatalogMeta>((ref) {
 });
 
 final homeActiveCategoryProvider = StateProvider<String>((ref) {
-  return 'All';
+  return 'all';
 });
+
+final filterProductsUseCaseProvider = Provider<FilterProductsUseCase>((ref) {
+  return FilterProductsUseCase();
+});
+
+final homeFilteredProductsControllerProvider =
+    StateNotifierProvider<HomeFilteredProductsController, List<Product>>((ref) {
+      return HomeFilteredProductsController(
+        ref,
+        ref.watch(filterProductsUseCaseProvider),
+      );
+    });
 
 final homeFilteredProductsProvider = Provider<List<Product>>((ref) {
-  final items = ref
-      .watch(homeViewModelProvider)
-      .when(
-        loading: () => const <Product>[],
-        error: (_) => const <Product>[],
-        data: (items, __, ___, ____) => items,
-      );
+  return ref.watch(homeFilteredProductsControllerProvider);
+});
 
-  final filters = ref.watch(homeBrowseFiltersProvider);
-  final activeCategory = ref
-      .watch(homeActiveCategoryProvider)
-      .trim()
-      .toLowerCase();
-  final meta = ref.watch(homeCatalogMetaProvider);
+class HomeFilteredProductsController extends StateNotifier<List<Product>> {
+  HomeFilteredProductsController(this._ref, this._filterProductsUseCase)
+    : _items = _ref.read(homeItemsProvider),
+      _filters = _ref.read(homeBrowseFiltersProvider),
+      _activeCategory = _ref.read(homeActiveCategoryProvider),
+      super(const <Product>[]) {
+    _scheduleRecompute(queryChanged: false);
 
-  final safeMaxPrice = meta.maxPrice <= meta.minPrice
-      ? (meta.minPrice + 1)
-      : meta.maxPrice;
-  final range = filters.priceRange ?? RangeValues(meta.minPrice, safeMaxPrice);
+    _ref.listen<List<Product>>(homeItemsProvider, (_, next) {
+      if (_isDisposed) return;
+      _items = next;
+      _scheduleRecompute(queryChanged: false);
+    });
 
-  final q = filters.query.trim().toLowerCase();
-  final brand = filters.brand?.trim();
+    _ref.listen<HomeBrowseFilters>(homeBrowseFiltersProvider, (prev, next) {
+      if (_isDisposed) return;
+      _filters = next;
+      final queryChanged = (prev?.query ?? '').trim() != next.query.trim();
+      _scheduleRecompute(queryChanged: queryChanged);
+    });
 
-  final filtered = items
-      .where((p) {
-        if (activeCategory.isNotEmpty && activeCategory != 'all') {
-          final hay = '${p.title} ${p.brand}'.toLowerCase();
-          if (!hay.contains(activeCategory)) return false;
-        }
-        if (brand != null && brand.isNotEmpty) {
-          if (p.brand.trim() != brand) return false;
-        }
-        if (filters.inStockOnly) {
-          if (!p.variants.any((v) => v.stock > 0)) return false;
-        }
-        if (p.price < range.start || p.price > range.end) return false;
-        if (q.isNotEmpty) {
-          final hay = '${p.title} ${p.brand}'.toLowerCase();
-          if (!hay.contains(q)) return false;
-        }
-        return true;
-      })
-      .toList(growable: true);
-
-  switch (filters.sort) {
-    case HomeSort.recommended:
-      break;
-    case HomeSort.newest:
-      break;
-    case HomeSort.priceAsc:
-      filtered.sort((a, b) => a.price.compareTo(b.price));
-      break;
-    case HomeSort.priceDesc:
-      filtered.sort((a, b) => b.price.compareTo(a.price));
-      break;
+    _ref.listen<String>(homeActiveCategoryProvider, (_, next) {
+      if (_isDisposed) return;
+      _activeCategory = next;
+      _scheduleRecompute(queryChanged: false);
+    });
   }
 
-  return filtered;
-});
+  static const Duration _queryDebounce = Duration(milliseconds: 200);
+
+  final Ref _ref;
+  final FilterProductsUseCase _filterProductsUseCase;
+
+  List<Product> _items;
+  HomeBrowseFilters _filters;
+  String _activeCategory;
+
+  Timer? _debounce;
+  int _requestId = 0;
+  bool _isDisposed = false;
+
+  @override
+  void dispose() {
+    _isDisposed = true;
+    _requestId += 1;
+    _debounce?.cancel();
+    super.dispose();
+  }
+
+  void _scheduleRecompute({required bool queryChanged}) {
+    if (_isDisposed) return;
+    if (_items.isEmpty) {
+      _debounce?.cancel();
+      _requestId += 1;
+      _setStateIfChanged(const <Product>[]);
+      return;
+    }
+
+    final params = _toFilterParams();
+    if (params.isDefault) {
+      _debounce?.cancel();
+      _requestId += 1;
+      _setStateIfChanged(_items);
+      return;
+    }
+
+    Future<void> run() async {
+      if (_isDisposed) return;
+      final requestId = ++_requestId;
+      final filtered = await _filterProductsUseCase(
+        products: _items,
+        params: params,
+      );
+      if (_isDisposed || !mounted || requestId != _requestId) return;
+      _setStateIfChanged(filtered);
+    }
+
+    if (queryChanged) {
+      _debounce?.cancel();
+      _debounce = Timer(_queryDebounce, () {
+        if (_isDisposed) return;
+        unawaited(run());
+      });
+      return;
+    }
+
+    _debounce?.cancel();
+    unawaited(run());
+  }
+
+  ProductFilterParams _toFilterParams() {
+    final prices = _minMaxPrice(_items);
+    final min = prices.$1;
+    final max = prices.$2;
+    final safeMax = max <= min ? (min + 1) : max;
+    final range = _filters.priceRange ?? RangeValues(min, safeMax);
+
+    return ProductFilterParams(
+      query: _filters.query,
+      brand: _filters.brand?.trim(),
+      category: _activeCategory,
+      inStockOnly: _filters.inStockOnly,
+      minPrice: range.start,
+      maxPrice: range.end,
+      sort: switch (_filters.sort) {
+        HomeSort.recommended => ProductFilterSort.recommended,
+        HomeSort.newest => ProductFilterSort.newest,
+        HomeSort.priceAsc => ProductFilterSort.priceAsc,
+        HomeSort.priceDesc => ProductFilterSort.priceDesc,
+      },
+    );
+  }
+
+  (double, double) _minMaxPrice(List<Product> items) {
+    if (items.isEmpty) return (0.0, 0.0);
+    var min = items.first.price;
+    var max = items.first.price;
+    for (final product in items.skip(1)) {
+      if (product.price < min) min = product.price;
+      if (product.price > max) max = product.price;
+    }
+    return (min, max);
+  }
+
+  void _setStateIfChanged(List<Product> next) {
+    if (_isDisposed || !mounted) return;
+    if (_sameProductList(state, next)) return;
+    state = next;
+  }
+
+  bool _sameProductList(List<Product> a, List<Product> b) {
+    if (identical(a, b)) return true;
+    if (a.length != b.length) return false;
+    for (var i = 0; i < a.length; i++) {
+      final left = a[i];
+      final right = b[i];
+      if (left.id != right.id || left.price != right.price) {
+        return false;
+      }
+    }
+    return true;
+  }
+}
 
 final homePersonalizationEnabledProvider = Provider<bool>((ref) {
   return false;

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../theme/app_tokens.dart';
+import '../../app/theme/app_tokens.dart';
 
 class Shimmer extends StatefulWidget {
   const Shimmer({super.key, required this.child});

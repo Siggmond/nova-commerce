@@ -1,6 +1,6 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+﻿import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/config/providers.dart';
+import 'package:nova_commerce/app/di/app_providers.dart';
 
 const int _recentSearchesLimit = 12;
 
@@ -34,6 +34,15 @@ class RecentSearchesViewModel extends StateNotifier<List<String>> {
       current.removeRange(_recentSearchesLimit, current.length);
     }
 
+    state = current;
+    await _ref.read(recentSearchesRepositoryProvider).saveQueries(current);
+  }
+
+  Future<void> remove(String query) async {
+    final trimmed = query.trim();
+    if (trimmed.isEmpty || state.isEmpty) return;
+
+    final current = [...state]..removeWhere((q) => q == trimmed);
     state = current;
     await _ref.read(recentSearchesRepositoryProvider).saveQueries(current);
   }

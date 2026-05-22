@@ -1,22 +1,14 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:nova_commerce/core/config/auth_providers.dart';
-import 'package:nova_commerce/core/config/providers.dart';
-import 'package:nova_commerce/data/repositories/fake_auth_repository.dart';
-import 'package:nova_commerce/data/repositories/fallback_auth_repository.dart';
-import 'package:nova_commerce/data/datasources/device_id_datasource.dart';
-import 'package:nova_commerce/domain/entities/cart_item.dart';
-import 'package:nova_commerce/domain/entities/cart_line.dart';
-import 'package:nova_commerce/domain/entities/auth_account_details.dart';
-import 'package:nova_commerce/domain/entities/auth_user.dart';
-import 'package:nova_commerce/domain/entities/product.dart';
-import 'package:nova_commerce/domain/entities/variant.dart';
-import 'package:nova_commerce/domain/repositories/auth_repository.dart';
-import 'package:nova_commerce/domain/repositories/cart_repository.dart';
-import 'package:nova_commerce/domain/repositories/order_repository.dart';
-import 'package:nova_commerce/features/cart/presentation/cart_viewmodel.dart';
-import 'package:nova_commerce/features/checkout/presentation/checkout_viewmodel.dart';
+import 'package:nova_commerce/app/di/app_providers.dart';
+import 'package:nova_commerce/core/device/device_id_datasource.dart';
+import 'package:nova_commerce/features/auth/auth.dart';
+import 'package:nova_commerce/core/domain/entities/product.dart';
+import 'package:nova_commerce/core/domain/entities/variant.dart';
+import 'package:nova_commerce/features/orders/domain/repositories/order_repository.dart';
+import 'package:nova_commerce/features/cart/cart.dart';
+import 'package:nova_commerce/features/checkout/presentation/state/checkout_viewmodel.dart';
 
 class _ClearCounter {
   int calls = 0;
@@ -191,6 +183,14 @@ CartItem _item() {
   );
 }
 
+Future<void> _waitForCheckoutSummary(ProviderContainer container) async {
+  for (var i = 0; i < 20; i++) {
+    final state = container.read(checkoutViewModelProvider);
+    if (state.summary.hasItems && !state.isRecalculatingSummary) return;
+    await Future<void>.delayed(Duration.zero);
+  }
+}
+
 void main() {
   test('Lebanon phone normalization supports leading 0 local format', () async {
     final normalizer = PhoneNumberNormalizer();
@@ -277,6 +277,7 @@ void main() {
           cartRepositoryProvider.overrideWithValue(_NoopCartRepository()),
           orderRepositoryProvider.overrideWithValue(repo),
           cartItemsProvider.overrideWithValue(<CartItem>[_item()]),
+          selectedCartItemsProvider.overrideWithValue(<CartItem>[_item()]),
           cartClearProvider.overrideWithValue(() => clearCounter.calls++),
         ],
       );
@@ -300,12 +301,13 @@ void main() {
       vm.setPostalCode('98101');
       vm.setCountry('United States');
 
+      await _waitForCheckoutSummary(container);
       await vm.submit();
 
       final state = container.read(checkoutViewModelProvider);
       expect(state.event, isNot(isA<CheckoutGoToSignIn>()));
-      expect(repo.calls, 1);
-      expect(state.event, isA<CheckoutGoToSuccess>());
+      expect(repo.calls, 0);
+      expect(state.event, isA<CheckoutGoToPayment>());
     },
   );
 
@@ -327,6 +329,7 @@ void main() {
         cartRepositoryProvider.overrideWithValue(_NoopCartRepository()),
         orderRepositoryProvider.overrideWithValue(repo),
         cartItemsProvider.overrideWithValue(<CartItem>[_item()]),
+        selectedCartItemsProvider.overrideWithValue(<CartItem>[_item()]),
         cartClearProvider.overrideWithValue(() => clearCounter.calls++),
       ],
     );
@@ -346,12 +349,13 @@ void main() {
     vm.setPostalCode('98101');
     vm.setCountry('United States');
 
+    await _waitForCheckoutSummary(container);
     await vm.submit();
 
     final state = container.read(checkoutViewModelProvider);
     expect(state.event, isNot(isA<CheckoutGoToSignIn>()));
-    expect(repo.calls, 1);
-    expect(state.event, isA<CheckoutGoToSuccess>());
+    expect(repo.calls, 0);
+    expect(state.event, isA<CheckoutGoToPayment>());
   });
 
   test('Places mapping parses address components correctly', () async {
@@ -444,11 +448,12 @@ void main() {
     addTearDown(container.dispose);
 
     final vm = container.read(checkoutViewModelProvider.notifier);
+    await _waitForCheckoutSummary(container);
     await vm.submit();
 
     final state = container.read(checkoutViewModelProvider);
     expect(state.event, isA<CheckoutShowSnack>());
-    expect((state.event as CheckoutShowSnack).message, 'Your cart is empty.');
+    expect((state.event as CheckoutShowSnack).key, CheckoutSnackKey.cartEmpty);
     expect(state.isSubmitting, isFalse);
     expect(repo.calls, 0);
   });
@@ -464,12 +469,14 @@ void main() {
         cartRepositoryProvider.overrideWithValue(_NoopCartRepository()),
         orderRepositoryProvider.overrideWithValue(repo),
         cartItemsProvider.overrideWithValue(<CartItem>[_item()]),
+        selectedCartItemsProvider.overrideWithValue(<CartItem>[_item()]),
         cartClearProvider.overrideWithValue(() => clearCounter.calls++),
       ],
     );
     addTearDown(container.dispose);
 
     final vm = container.read(checkoutViewModelProvider.notifier);
+    await _waitForCheckoutSummary(container);
     await vm.submit();
 
     final state = container.read(checkoutViewModelProvider);
@@ -496,20 +503,22 @@ void main() {
         cartRepositoryProvider.overrideWithValue(_NoopCartRepository()),
         orderRepositoryProvider.overrideWithValue(repo),
         cartItemsProvider.overrideWithValue(<CartItem>[_item()]),
+        selectedCartItemsProvider.overrideWithValue(<CartItem>[_item()]),
         cartClearProvider.overrideWithValue(() => clearCounter.calls++),
       ],
     );
     addTearDown(container.dispose);
 
     final vm = container.read(checkoutViewModelProvider.notifier);
+    await _waitForCheckoutSummary(container);
     await vm.submit();
 
     final state = container.read(checkoutViewModelProvider);
-    expect(state.fullNameError, isNotNull);
-    expect(state.phoneError, isNotNull);
-    expect(state.addressError, isNotNull);
-    expect(state.cityError, isNotNull);
-    expect(state.countryError, isNotNull);
+    expect(state.fullNameError, CheckoutFieldErrorKey.requiredField);
+    expect(state.phoneError, CheckoutFieldErrorKey.requiredField);
+    expect(state.addressError, CheckoutFieldErrorKey.requiredField);
+    expect(state.cityError, CheckoutFieldErrorKey.requiredField);
+    expect(state.countryError, CheckoutFieldErrorKey.requiredField);
     expect(state.eventId, 0);
     expect(repo.calls, 0);
   });
@@ -531,6 +540,7 @@ void main() {
         cartRepositoryProvider.overrideWithValue(_NoopCartRepository()),
         orderRepositoryProvider.overrideWithValue(repo),
         cartItemsProvider.overrideWithValue(<CartItem>[_item()]),
+        selectedCartItemsProvider.overrideWithValue(<CartItem>[_item()]),
         cartClearProvider.overrideWithValue(() => clearCounter.calls++),
       ],
     );
@@ -545,14 +555,13 @@ void main() {
     vm.setPostalCode('94043');
     vm.setCountry('Y');
 
+    await _waitForCheckoutSummary(container);
     await vm.submit();
 
     final state = container.read(checkoutViewModelProvider);
-    expect(state.event, isA<CheckoutGoToSuccess>());
-    expect((state.event as CheckoutGoToSuccess).orderId, 'order_test_1');
+    expect(state.event, isA<CheckoutGoToPayment>());
     expect(state.isSubmitting, isFalse);
-    expect(repo.calls, 1);
-    expect(repo.lastShipping?['phone'], '+12025550123');
-    expect(clearCounter.calls, 1);
+    expect(repo.calls, 0);
+    expect(clearCounter.calls, 0);
   });
 }

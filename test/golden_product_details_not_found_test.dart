@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:nova_commerce/features/product/presentation/product_details_screen.dart';
+import 'package:nova_commerce/features/products/presentation/product_details_screen.dart';
 
 void main() {
   if (Platform.isWindows) {
@@ -29,3 +29,4 @@ void main() {
     );
   }, tags: ['golden']);
 }
+

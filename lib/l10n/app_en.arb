@@ -1,0 +1,647 @@
+{
+  "@@locale": "en",
+  "appTitle": "NovaCommerce",
+  "@appTitle": {
+    "description": "Application title"
+  },
+
+  "brandName": "Nova",
+
+  "navShop": "Shop",
+  "navSearch": "Search",
+  "navAi": "Concierge",
+  "navOffers": "Offers",
+  "navCart": "Cart",
+  "navAccount": "Account",
+
+  "aiChatTitle": "Nova Concierge",
+  "aiChatSubtitle": "Find, compare, and buy faster",
+  "aiChatPrivacyNote": "Nova AI replies are generated and may be inaccurate. This demo does not provide citations. Your conversations are saved locally on this device and can be cleared anytime.",
+  "aiChatTooltipSessions": "Sessions",
+  "aiChatTooltipInfo": "Info",
+  "aiChatTooltipClearChat": "Clear chat",
+  "aiChatTooltipAdd": "Add",
+  "aiChatTooltipSend": "Send",
+  "aiChatHint": "Budget, vibe, use-case…",
+  "aiChatSnackbarChatCleared": "Chat cleared",
+  "aiChatSessionsTitle": "Sessions",
+  "aiChatNewSessionCta": "New",
+  "aiChatSearchSessionsHint": "Search sessions",
+  "aiChatNewChatTitle": "New chat",
+  "aiChatSeedAssistantMessage": "I can help you narrow down fast. Tell me your budget + style + use-case, and I’ll suggest a short set of options.\n\nExample: “black hoodie under $50, oversized”.",
+  "aiChatSnackbarCopied": "Copied",
+  "aiChatCopyCta": "Copy",
+  "aiChatRegenerateCta": "Regenerate",
+  "aiChatPickedForYouTitle": "Picked for you",
+  "aiChatInlineAddCta": "Add",
+  "aiChatSnackbarAddedToCart": "Added to cart",
+  "aiChatDefaultOption": "Default",
+  "aiChatLandingGreeting": "Hi {name}",
+  "@aiChatLandingGreeting": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "aiChatLandingPrompt": "What can I help you shop for today?",
+  "aiChatQuickActionFindDealsTitle": "Find deals today",
+  "aiChatQuickActionPickOutfitTitle": "Pick an outfit",
+  "aiChatQuickActionGiftIdeasTitle": "Gift ideas",
+  "aiChatQuickActionTrackOrderTitle": "Track my order",
+  "aiChatCartItemsCount": "{count} items",
+  "@aiChatCartItemsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "aiChatWishlistSavedCount": "{count} saved",
+  "@aiChatWishlistSavedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+
+  "language": "Language",
+  "languageSystem": "System default",
+
+  "commonComingSoon": "Coming soon",
+
+  "messagesTitle": "Messages",
+  "messagesTabOrder": "Order",
+  "messagesTabActivity": "Activity",
+  "messagesTabPromo": "Promo",
+  "messagesTabNews": "News",
+
+  "trendsTitle": "Trends",
+
+  "homePickedForYouTitle": "Picked for you",
+  "homePickedForYouSubtitle": "Quick matches based on your taste (demo)",
+  "homePicksLoadErrorTitle": "Could not load picks",
+  "homeNoPicksTitle": "No picks yet",
+
+  "homeTrendingNowTitle": "Trending now",
+  "homeTrendingNowSubtitle": "Ranked by what people are tapping today",
+  "homeTrendingNowLoadErrorTitle": "Could not load trending now",
+  "homeNoTrendingPicksTitle": "No trending picks yet",
+
+  "homeCuratedTrendsTitle": "Curated trends",
+  "homeCuratedTrendsSubtitle": "Editor’s picks — styled, versatile, and easy to pair.",
+
+  "homeShopByCategoryTitle": "Shop by category",
+  "homeShopByCategorySubtitle": "Quick entry points",
+
+  "homeBadgeNew": "New",
+  "homeUpdatedToday": "Updated today",
+
+  "homeCategoryItemsCount": "{count} items",
+  "@homeCategoryItemsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+
+  "homeWeekendSaleTitle": "Weekend Sale",
+  "homeWeekendSaleSubtitle": "Extra 15% off selected items",
+  "homeWeekendSaleCta": "Shop now",
+
+  "homeDeliverToCity": "Deliver to {city}",
+  "@homeDeliverToCity": {
+    "placeholders": {
+      "city": {
+        "type": "String"
+      }
+    }
+  },
+
+  "homeCityBeirut": "Beirut",
+  "homeCityTripoli": "Tripoli",
+  "homeCitySidon": "Sidon",
+  "homeCityTyre": "Tyre",
+  "homeCityJounieh": "Jounieh",
+  "homeCityByblos": "Byblos",
+  "homeCityZahle": "Zahle",
+  "homeCityBaalbek": "Baalbek",
+  "homeCityNabatieh": "Nabatieh",
+  "homeCityBatroun": "Batroun",
+  "homeCityBsharri": "Bsharri",
+  "homeCityAley": "Aley",
+
+  "homeCategoryGroceries": "Groceries",
+  "homeCategoryRestaurants": "Restaurants",
+  "homeCategoryPharmacy": "Pharmacy",
+  "homeCategoryCoffee": "Coffee",
+  "homeCategoryBakery": "Bakery",
+  "homeCategoryElectronics": "Electronics",
+  "homeCategoryFlowers": "Flowers",
+  "homeCategoryPetSupplies": "Pet Supplies",
+  "homeCategoryCosmetics": "Cosmetics",
+  "homeCategorySnacks": "Snacks",
+  "homeCategoryDrinks": "Drinks",
+  "homeCategoryBaby": "Baby",
+
+  "homeCuratedTrendsLoadErrorTitle": "Could not load curated trends",
+  "homeCuratedTrendsEmptyTitle": "No curated picks yet.",
+  "homeCuratedTrendsIntroTitle": "This week’s edit",
+  "homeCuratedTrendsIntroSubtitle": "A curated selection from our catalog — chosen for style, versatility, and easy pairing. Not a popularity leaderboard.",
+  "homeCuratedTrendsEditorsFavoritesTitle": "Editor’s favorites",
+  "homeCuratedTrendsEditorsFavoritesSubtitle": "Strong picks to start with.",
+  "homeCuratedTrendsWorthALookTitle": "Worth a look",
+  "homeCuratedTrendsWorthALookSubtitle": "A few more curated picks for variety.",
+  "homeCuratedTrendsMorePicksTitle": "More curated picks",
+  "homeCuratedTrendsMorePicksSubtitle": "If you want to explore beyond the edit.",
+  "homeCuratedTrendsEditorsPickBadge": "Editor’s pick",
+  "homeCuratedTrendsHeroPickLabel": "This week’s hero pick",
+
+  "commonBack": "Back",
+
+  "collectionTitle": "Collection",
+  "collectionNotFound": "Collection not found.",
+  "collectionLoadProductsErrorTitle": "Could not load products",
+  "collectionLoadProductsErrorSubtitle": "Please check your connection and try again.",
+  "collectionNoResultsTitle": "No results",
+  "collectionNoResultsSubtitle": "Try a different keyword or filters.",
+
+  "searchNoResultsSubtitle": "Try a different keyword.",
+  "searchFeaturedTitle": "Featured",
+  "searchCollectionsTitle": "Collections",
+  "searchCollectionsSubtitle": "Editorial picks designed to inspire your next cart.",
+  "searchBackToShopTooltip": "Back to Shop",
+  "searchHintSearchForProducts": "Search for products",
+  "searchHintSearchInCollection": "Search in this collection",
+  "searchTooltipSearch": "Search",
+  "searchTooltipFilters": "Filters",
+  "searchFiltersTitle": "Filters",
+  "searchFiltersClearAll": "Clear all",
+  "searchFiltersApply": "Apply",
+  "searchFiltersSortByTitle": "Sort by",
+  "searchFiltersSortRecommended": "Recommended",
+  "searchFiltersSortPopular": "Popular",
+  "searchFiltersSortRating": "Rating",
+  "searchFiltersPriceTierTitle": "Price tier",
+  "searchFiltersPriceTierLowest": "Lowest price",
+  "searchFiltersPriceTierMid": "Mid range",
+  "searchFiltersPriceTierHigh": "High end",
+  "searchFiltersCategoriesTitle": "Categories",
+  "searchRecentSearchesTitle": "Recent searches",
+  "searchRecentSearchesEmptyHint": "Search for products to see them here.",
+  "searchCollectionsExplore": "Explore",
+  "searchCollectionEditorial1Title": "Editor’s selection",
+  "searchCollectionEditorial1Subtitle": "Curated finds with premium finishes",
+  "searchCollectionEditorial2Title": "Weekend essentials",
+  "searchCollectionEditorial2Subtitle": "Low effort, high impact staples",
+  "searchCollectionEditorial3Title": "Clean tech",
+  "searchCollectionEditorial3Subtitle": "Minimal + modern picks",
+  "searchCollectionEditorial4Title": "Coffee corner",
+  "searchCollectionEditorial4Subtitle": "Small upgrades that feel expensive",
+  "searchCollectionEditorial5Title": "Everyday treats",
+  "searchCollectionEditorial5Subtitle": "Snackable favorites",
+  "searchCollectionEditorial6Title": "Baby & family",
+  "searchCollectionEditorial6Subtitle": "Soft picks, gentle choices",
+
+  "commonClear": "Clear",
+  "commonCancel": "Cancel",
+  "commonSave": "Save",
+  "commonSaving": "Saving…",
+  "commonEdit": "Edit",
+  "commonRefresh": "Refresh",
+  "commonSignIn": "Sign in",
+  "commonSignOut": "Sign out",
+  "commonEnabled": "Enabled",
+  "commonDisabled": "Disabled",
+  "commonVerified": "Verified",
+  "commonNotVerified": "Not verified",
+  "commonSeeAll": "See all",
+
+  "languageNameEnglish": "English",
+  "languageNameArabic": "العربية",
+  "languageNameFrench": "Français",
+  "languageNameSpanish": "Español",
+
+  "profileThemeTitle": "Theme",
+  "profileThemeSystem": "System",
+  "profileThemeLight": "Light",
+  "profileThemeDark": "Dark",
+
+  "profileSignOutDialogTitle": "Sign out?",
+  "profileSignOutDialogBody": "You can sign back in anytime.",
+
+  "profileSnackbarSignInToAccess": "Sign in to access {feature}.",
+  "@profileSnackbarSignInToAccess": {
+    "placeholders": {
+      "feature": {
+        "type": "String"
+      }
+    }
+  },
+  "profileNotAvailableYet": "{feature} is not available yet.",
+  "@profileNotAvailableYet": {
+    "placeholders": {
+      "feature": {
+        "type": "String"
+      }
+    }
+  },
+
+  "profileSectionAccount": "Account",
+  "profileSectionMyShopping": "My Shopping",
+  "profileSectionSupport": "Support",
+  "profileSectionApp": "App",
+  "profileSectionAuth": "Auth",
+
+  "profileAccountDetailsTitle": "Account details",
+  "profileAccountDetailsTileSubtitle": "Profile info and verification",
+  "profileAccountDetailsSubtitle": "Manage your profile & verification",
+
+  "profileAddressesTitle": "Addresses",
+  "profileAddressesSubtitle": "Delivery addresses",
+  "profilePaymentMethodsTitle": "Payment methods",
+  "profilePaymentMethodsSubtitle": "Cards and wallets",
+
+  "profileOrdersTitle": "Orders",
+  "profileOrdersSubtitle": "Track purchases and delivery",
+  "profileWishlistTitle": "Wishlist",
+  "profileWishlistSubtitle": "Saved items",
+  "profileCartTitle": "Cart",
+  "profileCartSubtitle": "Items ready for checkout",
+  "profileMessagesTitle": "Messages",
+
+  "profileHelpCenterTitle": "Help Center",
+  "profileHelpCenterSubtitle": "Answers to common questions",
+  "profileContactSupportTitle": "Contact support",
+  "profileContactSupportSubtitle": "We’re here to help",
+
+  "profileBuildStatusTelemetryTitle": "Telemetry",
+  "profileBuildStatusPersonalizationTitle": "Personalization",
+  "profileBuildStatusSubtitle": "Set by build configuration",
+
+  "profileSignInSubtitle": "Unlock orders sync and messages",
+  "profileSignOutSubtitle": "You can sign back in anytime",
+
+  "profileFeatureOrders": "Orders",
+  "profileFeatureMessages": "Messages",
+
+  "profileGuestLabel": "Guest",
+  "profileMemberLabel": "Member",
+  "profileGuestInitial": "G",
+  "profileAccountConnected": "Account connected",
+  "profileSignInToUnlockBenefits": "Sign in to unlock benefits",
+  "profileSignInBannerBody": "Sign in to sync orders and access messages across devices.",
+  "profileGoldPoints": "{value} Gold",
+  "@profileGoldPoints": {
+    "placeholders": {
+      "value": {
+        "type": "int"
+      }
+    }
+  },
+
+  "goldTitle": "Gold",
+  "goldInfoTooltip": "Info",
+  "goldTierRulesPlaceholder": "Tier rules are not available yet.",
+  "goldRetentionMonthPlaceholder": "this month",
+  "goldRetentionMessage": "Complete {remaining} more orders this month to maintain Gold in {month}.",
+  "@goldRetentionMessage": {
+    "placeholders": {
+      "remaining": {
+        "type": "int"
+      },
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "goldPointsLabel": "Points",
+  "goldPointsHistoryCta": "Points History",
+  "goldOrdersCompletedLabel": "{count} order(s)",
+  "@goldOrdersCompletedLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "goldOrdersOutOfLabel": "out of {count}",
+  "@goldOrdersOutOfLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "goldNoticeSimplifiedPoints": "We’ve simplified the way loyalty points are earned and redeemed. The value stays the same.",
+  "goldDiscountsAndOffersTitle": "Discounts and offers",
+  "goldRewardsUnavailableBody": "Rewards are not available yet.",
+  "goldPointsHistoryTitle": "Points history",
+  "goldPointsHistoryUnavailableBody": "Points history is not available yet.",
+  "goldRewardDetailsTitle": "Reward details",
+  "goldClose": "Close",
+  "goldRewardDetailsPlaceholderTitle": "Reward",
+  "goldRewardDetailsPlaceholderSubtitle": "This reward is not available yet.",
+  "goldRewardPointsChip": "Or {points} Pts",
+  "@goldRewardPointsChip": {
+    "placeholders": {
+      "points": {
+        "type": "int"
+      }
+    }
+  },
+  "goldRewardTermsPlaceholder": "Terms and eligibility are not available yet.",
+  "goldClaimRewardCta": "Claim reward",
+
+  "profileSignInRequiredTitle": "Sign in required",
+  "profileSignInRequiredSubtitle": "Sign in to view and update your account details.",
+
+  "profileSectionDisplayName": "Display name",
+  "profileSectionEmail": "Email",
+  "profileSectionPhoneNumber": "Phone number",
+  "profileFieldNameLabel": "Name",
+  "profileFieldNameHint": "Your name",
+  "profileAnonymousEditBlocked": "Sign in to edit your profile.",
+  "profileNoEmail": "No email",
+  "profileVerifyEmailCta": "Verify email",
+  "profileAnonymousEmailBlocked": "Sign in to verify your email.",
+  "profileAnonymousPhoneBlocked": "Sign in to verify your phone.",
+  "profileNoPhoneLinked": "No phone linked",
+  "profileFieldPhoneLabel": "Phone number",
+  "profileFieldPhoneHint": "+12025550123",
+  "profileSendCodeCta": "Send code",
+  "profileFieldSmsCodeLabel": "SMS code",
+  "profileVerifyPhoneCta": "Verify phone",
+  "profileSnackbarNameUpdated": "Name updated",
+  "profileSnackbarVerificationEmailSent": "Verification email sent",
+  "profileSnackbarSmsCodeSent": "SMS code sent",
+  "profileSnackbarPhoneVerified": "Phone verified",
+  "profileSnackbarPleaseSignInToEditName": "Please sign in to edit your name.",
+  "profileSnackbarNoEmailAttached": "No email attached to this account.",
+  "profileSnackbarPleaseSignInToVerifyPhone": "Please sign in to verify a phone number.",
+  "profileSnackbarEnterPhone": "Enter a phone number",
+  "profileSnackbarStartPhoneVerificationFirst": "Start phone verification first.",
+  "profileSnackbarEnterSmsCode": "Enter the SMS code",
+
+  "profileVerifiedCountLabel": "{count}/2 verified",
+  "@profileVerifiedCountLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "profileSectionProfileTitle": "Profile",
+  "profileSectionProfileSubtitle": "Keep your account info up to date.",
+  "profileSectionEmailTitle": "Email",
+  "profileSectionEmailSubtitle": "Verify to unlock order syncing.",
+  "profileSectionPhoneTitle": "Phone",
+  "profileSectionPhoneSubtitle": "Verify for account recovery and delivery updates.",
+  "profileResendAvailableInSeconds": "Resend available in {seconds}s",
+  "@profileResendAvailableInSeconds": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "profileGuestSessionTitle": "Guest session",
+  "profileYourAccountTitle": "Your account",
+  "profileAnonymousSyncHint": "Sign in to sync across devices.",
+  "profileSignedInLabel": "Signed in",
+  "profileAnonymousSyncAndVerifyHint": "Sign in to sync and verify your account.",
+  "profileDemoBadgeLabel": "DEMO",
+
+  "offersTitle": "Offers",
+  "offersSubtitle": "Exclusive deals curated for you",
+  "offersTooltipFilters": "Filters",
+  "offersSearchHint": "Search offers",
+  "offersLoadErrorTitle": "Could not load offers",
+  "offersEmptyTitle": "No offers found",
+  "offersEmptySubtitle": "Try a different filter or search.",
+
+  "offersQuickAll": "All",
+  "offersQuickNew": "New",
+  "offersQuickPopular": "Popular",
+  "offersQuickExpiring": "Expiring",
+  "offersQuickOnline": "Online",
+  "offersQuickInStore": "In-store",
+
+  "offersFeaturedDealBadge": "Featured Deal",
+  "offersFeaturedShopDeal": "Shop deal",
+
+  "offersFiltersTitle": "Filters",
+  "offersFiltersClearAll": "Clear all",
+  "offersFiltersSortBy": "Sort by",
+  "offersFiltersPriceTier": "Price tier",
+  "offersFiltersChannel": "Channel",
+  "offersFiltersCategories": "Categories",
+  "offersFiltersApply": "Apply",
+
+  "offersSortRecommended": "Recommended",
+  "offersSortEndingSoon": "Ending soon",
+  "offersSortHighestDiscount": "Highest discount",
+  "offersSortNewest": "Newest",
+
+  "offersPriceUnder25": "Under $25",
+  "offersPriceUnder50": "Under $50",
+  "offersPriceHighValue": "High value",
+
+  "offersChannelAll": "All",
+  "offersChannelOnline": "Online",
+  "offersChannelInStore": "In-store",
+
+  "offersCategoryFashion": "Fashion",
+  "offersCategoryShoes": "Shoes",
+  "offersCategoryBeauty": "Beauty",
+  "offersCategoryElectronics": "Electronics",
+  "offersCategoryHome": "Home",
+  "offersCategoryGrocery": "Grocery",
+  "offersCategoryFitness": "Fitness",
+
+  "offersBadgePercentOff": "{value}% OFF",
+  "@offersBadgePercentOff": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "offersBadgeAmountOff": "\u0024{value} OFF",
+  "@offersBadgeAmountOff": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "offersBadgeBogo": "BOGO",
+  "offersBadgeDeal": "DEAL",
+  "offersPillCode": "Code",
+  "offersPillFeatured": "Featured",
+  "offersViewDealCta": "View deal",
+
+  "offerDetailsTitle": "Offer details",
+  "offerLoadErrorTitle": "Could not load offer",
+  "offerNotFoundTitle": "Offer not found",
+  "offerExpiresExpired": "Expired",
+  "offerExpiresEndsSoon": "Ends soon",
+  "offerExpiresEndsInDays": "Ends in {days}d",
+  "@offerExpiresEndsInDays": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "offerExpiresEndsInHours": "Ends in {hours}h",
+  "@offerExpiresEndsInHours": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "offerPromoCodeCopied": "Promo code copied",
+  "offerRedeemTitle": "Redeem",
+  "offerTerms": "Terms",
+  "offerCopyCodeTooltip": "Copy code",
+  "offerUseCodeAtCheckout": "Use this code at checkout.",
+  "offerNoPromoCodeRequired": "No promo code required.",
+  "offerShopProductsInThisOffer": "Shop products in this offer",
+
+  "productItemTitle": "Item",
+  "productClearSelectionTooltip": "Clear selection",
+  "productRemoveFromWishlistTooltip": "Remove from wishlist",
+  "productSaveToWishlistTooltip": "Save to wishlist",
+
+  "commonRetry": "Retry",
+  "commonRequired": "Required",
+  "commonSomethingWentWrongTryAgain": "Something went wrong. Please try again.",
+
+  "authWelcomeBackSubtitle": "Welcome back — sign in to continue",
+  "authSignInTitle": "Sign in",
+  "authSignInBody": "Use your email and password to access your account.",
+  "authEmailLabel": "Email",
+  "authEmailHint": "you@example.com",
+  "authPasswordLabel": "Password",
+  "authPasswordHint": "••••••••",
+  "authEmailRequired": "Email is required",
+  "authPasswordRequired": "Password is required",
+  "authInvalidEmail": "Enter a valid email address",
+  "authForgotPassword": "Forgot password?",
+  "authPasswordResetUnavailable": "Password reset is not available yet.",
+  "authCreateAccount": "Create account",
+  "authContinueWithGoogle": "Continue with Google",
+  "authContinueAsGuest": "Continue as guest",
+
+  "trustSecure": "Secure",
+  "trustFastDelivery": "Fast delivery",
+  "trustSupport": "Support",
+
+  "wishlistTitle": "Wishlist",
+  "wishlistLoadErrorTitle": "Could not load wishlist",
+  "wishlistEmptyTitle": "No saved items yet",
+  "wishlistEmptySubtitle": "Tap the heart on a product to save it here.",
+
+  "cartTitle": "Cart",
+  "cartSelectAll": "Select all",
+  "cartDeselectAll": "Deselect all",
+  "cartLoadErrorTitle": "Could not load your cart",
+  "cartSyncNotice": "Sign in to sync this cart across devices. Until then, it stays on this device.",
+  "cartYouMightLikeTitle": "You might like",
+  "cartYouMightLikeSubtitle": "Optional add-ons. Tap to view details.",
+  "cartFilterAll": "All",
+  "cartFilterHotDeals": "Hot Deals",
+  "cartFilterFrequentFavorites": "Frequent Favorites",
+
+  "cartSelectionAllSelectedMessage": "All items are selected for checkout. Uncheck items to keep them in your bag.",
+  "cartSelectionSomeSelectedMessage": "Checkout will include selected items only. Unselected items stay in your bag.",
+  "cartSelectionNoneSelectedMessage": "Select items to continue to checkout.",
+
+  "cartSubtotalLabel": "Subtotal",
+  "cartSelectedSubtotalLabel": "Selected subtotal",
+  "cartTaxesAndShippingNote": "Taxes and shipping are calculated at checkout.",
+  "cartSelectItemsToContinue": "Select items to continue",
+  "cartProceedToCheckout": "Proceed to checkout",
+
+  "cartEmptyTitle": "Your cart is empty",
+  "cartEmptySubtitle1": "Add items you want to buy, then review them here before checkout.",
+  "cartEmptySubtitle2": "Add items from any product page, then come back here to review and checkout.",
+  "cartContinueShopping": "Continue shopping",
+
+  "checkoutTitle": "Checkout",
+  "checkoutShippingTitle": "Shipping",
+  "checkoutShippingSubtitle": "Enter delivery details to place your order.",
+  "checkoutHintSelectItems": "Select items in cart to continue",
+  "checkoutHintSignIn": "Sign in to place your order",
+  "checkoutPlaceOrder": "Place order",
+  "checkoutPlacingOrder": "Placing order…",
+  "checkoutDeliveryTitle": "Delivery",
+  "checkoutFullNameLabel": "Full name",
+  "checkoutPhoneLabel": "Phone",
+  "checkoutAddressLabel": "Address",
+  "checkoutCityLabel": "City",
+  "checkoutStateLabel": "State/Region",
+  "checkoutPostalCodeLabel": "Postal code",
+  "checkoutCountryLabel": "Country",
+
+  "checkoutSubtotalLabel": "Subtotal",
+  "checkoutShippingFeeLabel": "Shipping",
+  "checkoutFreeShipping": "Free shipping",
+  "checkoutTotalLabel": "Total",
+
+  "paymentsTitle": "Payment",
+  "paymentsChooseMethod": "Choose a payment method",
+  "paymentsContinueCta": "Continue",
+
+  "paymentsConfirmTitle": "Confirm payment",
+  "paymentsSelectedMethod": "You selected: {method}",
+  "@paymentsSelectedMethod": {
+    "placeholders": {
+      "method": {
+        "type": "String"
+      }
+    }
+  },
+  "paymentsPayCta": "Pay",
+
+  "paymentsSuccessTitle": "Payment success",
+  "paymentsSuccessHeadline": "Payment completed",
+  "paymentsOrderIdLabel": "Order ID: {orderId}",
+  "@paymentsOrderIdLabel": {
+    "placeholders": {
+      "orderId": {
+        "type": "String"
+      }
+    }
+  },
+  "paymentsViewOrderCta": "View order",
+  "paymentsViewOrdersCta": "View orders",
+  "paymentsContinueShoppingCta": "Continue shopping",
+
+  "paymentsFailureTitle": "Payment failed",
+  "paymentsFailureBody": "We couldn’t complete your payment. Please try again.",
+
+  "paymentsSummaryTitle": "Order summary",
+  "paymentsSummaryItems": "Items",
+  "paymentsSummarySubtotal": "Subtotal",
+  "paymentsSummaryShipping": "Shipping",
+  "paymentsSummaryFree": "Free",
+  "paymentsSummaryTotal": "Total",
+
+  "paymentsMethodStripe": "Stripe",
+  "paymentsMethodStripeSubtitle": "Card",
+  "paymentsMethodPaypal": "PayPal",
+  "paymentsMethodPaypalSubtitle": "PayPal checkout",
+
+  "checkoutCartEmpty": "Your cart is empty.",
+  "checkoutSignInRequired": "Please sign in to continue.",
+  "checkoutInvalidPhone": "Invalid phone number",
+
+  "checkoutAddressSearching": "Searching…",
+  "checkoutAddressSuggestionsUnavailable": "Address suggestions unavailable — you can enter manually.",
+  "checkoutUseManualEntry": "Use manual entry"
+}

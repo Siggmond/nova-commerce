@@ -2,10 +2,12 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import 'package:nova_commerce/gen_l10n/app_localizations.dart';
 
-import '../../../core/config/app_routes.dart';
-import '../../../core/theme/app_tokens.dart';
+import '../../../app/router/app_routes.dart';
+import '../../../app/theme/app_tokens.dart';
 import '../../../core/widgets/nova_app_bar.dart';
 import '../../../core/widgets/nova_button.dart';
 import '../../../core/widgets/nova_section_header.dart';
@@ -43,13 +45,16 @@ class _SignInRequiredCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final t = AppLocalizations.of(context)!;
     return NovaSurface(
+      elevation: 0,
+      clipBehavior: Clip.none,
       padding: AppInsets.card,
       child: Row(
         children: [
           Container(
-            width: 44,
-            height: 44,
+            width: 44.r,
+            height: 44.r,
             decoration: BoxDecoration(
               color: cs.primary.withValues(alpha: 0.10),
               borderRadius: BorderRadius.circular(AppRadii.lg),
@@ -62,14 +67,14 @@ class _SignInRequiredCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Sign in required',
+                  t.profileSignInRequiredTitle,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w800,
                   ),
                 ),
                 SizedBox(height: AppSpace.xxs),
                 Text(
-                  'Sign in to view and update your account details.',
+                  t.profileSignInRequiredSubtitle,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: cs.onSurface.withValues(alpha: 0.70),
                   ),
@@ -79,8 +84,11 @@ class _SignInRequiredCard extends StatelessWidget {
           ),
           SizedBox(width: AppSpace.sm),
           SizedBox(
-            height: 36,
-            child: NovaButton.primary(label: 'Sign in', onPressed: onSignIn),
+            height: 36.h,
+            child: NovaButton.primary(
+              label: t.commonSignIn,
+              onPressed: onSignIn,
+            ),
           ),
         ],
       ),
@@ -153,14 +161,40 @@ class _ProfileAccountDetailsScreenState
     final textTheme = Theme.of(context).textTheme;
     final state = ref.watch(profileDetailsViewModelProvider);
     final vm = ref.read(profileDetailsViewModelProvider.notifier);
+    final t = AppLocalizations.of(context)!;
 
     ref.listen<ProfileDetailsState>(profileDetailsViewModelProvider, (
       prev,
       next,
     ) {
       if (prev?.eventId == next.eventId) return;
-      final msg = next.event;
-      if (msg == null || msg.trim().isEmpty) return;
+
+      final err = next.eventError;
+      if (err != null && err.trim().isNotEmpty) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(err)));
+        return;
+      }
+
+      final event = next.event;
+      if (event == null) return;
+      final msg = switch (event) {
+        ProfileDetailsEvent.nameUpdated => t.profileSnackbarNameUpdated,
+        ProfileDetailsEvent.verificationEmailSent =>
+          t.profileSnackbarVerificationEmailSent,
+        ProfileDetailsEvent.smsCodeSent => t.profileSnackbarSmsCodeSent,
+        ProfileDetailsEvent.phoneVerified => t.profileSnackbarPhoneVerified,
+        ProfileDetailsEvent.pleaseSignInToEditName =>
+          t.profileSnackbarPleaseSignInToEditName,
+        ProfileDetailsEvent.noEmailAttached => t.profileSnackbarNoEmailAttached,
+        ProfileDetailsEvent.pleaseSignInToVerifyPhone =>
+          t.profileSnackbarPleaseSignInToVerifyPhone,
+        ProfileDetailsEvent.enterPhoneNumber => t.profileSnackbarEnterPhone,
+        ProfileDetailsEvent.startPhoneVerificationFirst =>
+          t.profileSnackbarStartPhoneVerificationFirst,
+        ProfileDetailsEvent.enterSmsCode => t.profileSnackbarEnterSmsCode,
+      };
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
     });
 
@@ -183,16 +217,16 @@ class _ProfileAccountDetailsScreenState
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Account details',
+              t.profileAccountDetailsTitle,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.w800,
               ),
             ),
-            SizedBox(height: 2),
+            SizedBox(height: 2.h),
             Text(
-              'Manage your profile & verification',
+              t.profileAccountDetailsSubtitle,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: textTheme.labelSmall?.copyWith(
@@ -203,14 +237,14 @@ class _ProfileAccountDetailsScreenState
         ),
         actions: [
           Padding(
-            padding: const EdgeInsets.only(right: 8),
-            child: NovaSurface(
+            padding: EdgeInsets.only(right: 8.w),
+            child: _flatSurface(
               borderRadius: AppRadii.pill,
               padding: EdgeInsets.zero,
               child: IconButton(
                 onPressed: state.isLoading ? null : () => vm.reload(),
                 icon: const Icon(Icons.refresh),
-                tooltip: 'Refresh',
+                tooltip: t.commonRefresh,
               ),
             ),
           ),
@@ -229,7 +263,7 @@ class _ProfileAccountDetailsScreenState
                   Align(
                     alignment: Alignment.centerLeft,
                     child: StatusPill(
-                      label: '$verifiedCount/2 verified',
+                      label: t.profileVerifiedCountLabel(verifiedCount),
                       variant: verifiedCount == 2
                           ? StatusPillVariant.success
                           : StatusPillVariant.neutral,
@@ -239,21 +273,20 @@ class _ProfileAccountDetailsScreenState
                   _heroCard(context, details, cs),
                   SizedBox(height: AppSpace.xl),
                   _sectionCard(
-                    title: 'Profile',
-                    subtitle: 'Keep your account info up to date.',
+                    title: t.profileSectionProfileTitle,
+                    subtitle: t.profileSectionProfileSubtitle,
                     child: _nameCard(details: details, state: state, vm: vm),
                   ),
                   SizedBox(height: AppSpace.xl),
                   _sectionCard(
-                    title: 'Email',
-                    subtitle: 'Verify to unlock order syncing.',
+                    title: t.profileSectionEmailTitle,
+                    subtitle: t.profileSectionEmailSubtitle,
                     child: _emailCard(details: details, state: state, vm: vm),
                   ),
                   SizedBox(height: AppSpace.xl),
                   _sectionCard(
-                    title: 'Phone',
-                    subtitle:
-                        'Verify for account recovery and delivery updates.',
+                    title: t.profileSectionPhoneTitle,
+                    subtitle: t.profileSectionPhoneSubtitle,
                     child: _phoneCard(details: details, state: state, vm: vm),
                   ),
                 ],
@@ -262,12 +295,28 @@ class _ProfileAccountDetailsScreenState
     );
   }
 
+  Widget _flatSurface({
+    required Widget child,
+    EdgeInsets? padding,
+    Color? color,
+    double? borderRadius,
+  }) {
+    return NovaSurface(
+      padding: padding,
+      color: color,
+      borderRadius: borderRadius,
+      elevation: 0,
+      clipBehavior: Clip.none,
+      child: child,
+    );
+  }
+
   Widget _sectionCard({
     required String title,
     required String subtitle,
     required Widget child,
   }) {
-    return NovaSurface(
+    return _flatSurface(
       padding: AppInsets.card,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -319,9 +368,10 @@ class _ProfileAccountDetailsScreenState
   }
 
   Widget _heroCard(BuildContext context, dynamic details, ColorScheme cs) {
+    final t = AppLocalizations.of(context)!;
     final avatar = Container(
-      width: 56,
-      height: 56,
+      width: 56.r,
+      height: 56.r,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         gradient: LinearGradient(
@@ -334,13 +384,15 @@ class _ProfileAccountDetailsScreenState
         ),
         border: Border.all(color: cs.onSurface.withValues(alpha: 0.12)),
       ),
-      child: Icon(Icons.person, color: cs.primary, size: 28),
+      child: Icon(Icons.person, color: cs.primary, size: 28.r),
     );
 
     final title = Text(
       details.displayName.trim().isNotEmpty
           ? details.displayName
-          : (details.isAnonymous ? 'Guest session' : 'Your account'),
+          : (details.isAnonymous
+                ? t.profileGuestSessionTitle
+                : t.profileYourAccountTitle),
       style: Theme.of(
         context,
       ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
@@ -350,10 +402,10 @@ class _ProfileAccountDetailsScreenState
 
     final subtitle = Text(
       details.isAnonymous
-          ? 'Sign in to sync across devices.'
+          ? t.profileAnonymousSyncHint
           : (details.email?.trim().isNotEmpty == true
                 ? details.email!
-                : 'Signed in'),
+                : t.profileSignedInLabel),
       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
         color: cs.onSurface.withValues(alpha: 0.70),
       ),
@@ -361,7 +413,7 @@ class _ProfileAccountDetailsScreenState
       overflow: TextOverflow.ellipsis,
     );
 
-    return NovaSurface(
+    return _flatSurface(
       padding: AppInsets.card,
       child: Row(
         children: [
@@ -374,30 +426,31 @@ class _ProfileAccountDetailsScreenState
                 Row(
                   children: [
                     Expanded(child: title),
-                    if (details.isDemo) const StatusPill(label: 'DEMO'),
+                    if (details.isDemo)
+                      StatusPill(label: t.profileDemoBadgeLabel),
                   ],
                 ),
                 SizedBox(height: AppSpace.xxs),
                 subtitle,
                 if (details.isAnonymous) ...[
                   SizedBox(height: AppSpace.sm),
-                  NovaSurface(
+                  _flatSurface(
                     borderRadius: AppRadii.lg,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 10,
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 12.w,
+                      vertical: 10.h,
                     ),
                     child: Row(
                       children: [
                         Icon(
                           Icons.lock_outline,
-                          size: 18,
+                          size: 18.r,
                           color: cs.onSurface.withValues(alpha: 0.70),
                         ),
                         SizedBox(width: AppSpace.xs),
                         Expanded(
                           child: Text(
-                            'Sign in to sync and verify your account.',
+                            t.profileAnonymousSyncAndVerifyHint,
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                             style: Theme.of(context).textTheme.bodySmall
@@ -423,17 +476,18 @@ class _ProfileAccountDetailsScreenState
     required ProfileDetailsState state,
     required ProfileDetailsViewModel vm,
   }) {
+    final t = AppLocalizations.of(context)!;
     final cs = Theme.of(context).colorScheme;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        NovaSurface(
+        _flatSurface(
           padding: AppInsets.card,
           child: NovaTextField(
             controller: _nameController,
             density: NovaFieldDensity.comfortable,
-            labelText: 'Name',
-            hintText: 'Your name',
+            labelText: t.profileFieldNameLabel,
+            hintText: t.profileFieldNameHint,
             enabled: _editingName && !state.isSavingName,
           ),
         ),
@@ -442,7 +496,7 @@ class _ProfileAccountDetailsScreenState
           children: [
             _editingName
                 ? NovaButton.primary(
-                    label: state.isSavingName ? 'Saving...' : 'Save',
+                    label: state.isSavingName ? t.commonSaving : t.commonSave,
                     isLoading: state.isSavingName,
                     onPressed: state.isSavingName
                         ? null
@@ -454,14 +508,14 @@ class _ProfileAccountDetailsScreenState
                           },
                   )
                 : NovaButton.tonal(
-                    label: 'Edit',
+                    label: t.commonEdit,
                     onPressed: details.isAnonymous
                         ? null
                         : () => setState(() => _editingName = true),
                   ),
             if (_editingName)
               NovaButton.outlined(
-                label: 'Cancel',
+                label: t.commonCancel,
                 onPressed: () => setState(() => _editingName = false),
               ),
           ],
@@ -469,7 +523,7 @@ class _ProfileAccountDetailsScreenState
         if (details.isAnonymous) ...[
           SizedBox(height: AppSpace.xs),
           Text(
-            'Sign in to edit your profile.',
+            t.profileAnonymousEditBlocked,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
               color: cs.onSurface.withValues(alpha: 0.70),
             ),
@@ -484,9 +538,10 @@ class _ProfileAccountDetailsScreenState
     required ProfileDetailsState state,
     required ProfileDetailsViewModel vm,
   }) {
+    final t = AppLocalizations.of(context)!;
     final emailText = details.email?.isNotEmpty == true
         ? details.email!
-        : 'No email';
+        : t.profileNoEmail;
 
     final cooldownSeconds = _cooldownRemainingSeconds(_emailCooldownUntil);
     final canSend =
@@ -509,7 +564,9 @@ class _ProfileAccountDetailsScreenState
             ),
             SizedBox(width: AppSpace.sm),
             StatusPill(
-              label: details.isEmailVerified ? 'Verified' : 'Not verified',
+              label: details.isEmailVerified
+                  ? t.commonVerified
+                  : t.commonNotVerified,
               variant: details.isEmailVerified
                   ? StatusPillVariant.success
                   : StatusPillVariant.neutral,
@@ -521,7 +578,7 @@ class _ProfileAccountDetailsScreenState
           SizedBox(
             width: double.infinity,
             child: NovaButton.primary(
-              label: 'Verify email',
+              label: t.profileVerifyEmailCta,
               isLoading: state.isSendingEmail,
               onPressed: canSend
                   ? () async {
@@ -538,12 +595,12 @@ class _ProfileAccountDetailsScreenState
           ),
           if (cooldownSeconds > 0) ...[
             SizedBox(height: AppSpace.xs),
-            _captionMuted('Resend available in ${cooldownSeconds}s'),
+            _captionMuted(t.profileResendAvailableInSeconds(cooldownSeconds)),
           ],
         ],
         if (details.isAnonymous) ...[
           SizedBox(height: AppSpace.xs),
-          _captionMuted('Sign in to verify your email.'),
+          _captionMuted(t.profileAnonymousEmailBlocked),
         ],
       ],
     );
@@ -554,6 +611,7 @@ class _ProfileAccountDetailsScreenState
     required ProfileDetailsState state,
     required ProfileDetailsViewModel vm,
   }) {
+    final t = AppLocalizations.of(context)!;
     final cooldownSeconds = _cooldownRemainingSeconds(_phoneCooldownUntil);
     final canSend =
         !details.isAnonymous &&
@@ -570,7 +628,7 @@ class _ProfileAccountDetailsScreenState
               child: Text(
                 details.phoneNumber?.isNotEmpty == true
                     ? details.phoneNumber!
-                    : 'No phone linked',
+                    : t.profileNoPhoneLinked,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: Theme.of(
@@ -580,7 +638,9 @@ class _ProfileAccountDetailsScreenState
             ),
             SizedBox(width: AppSpace.sm),
             StatusPill(
-              label: details.isPhoneVerified ? 'Verified' : 'Not verified',
+              label: details.isPhoneVerified
+                  ? t.commonVerified
+                  : t.commonNotVerified,
               variant: details.isPhoneVerified
                   ? StatusPillVariant.success
                   : StatusPillVariant.neutral,
@@ -589,7 +649,7 @@ class _ProfileAccountDetailsScreenState
         ),
         if (!details.isPhoneVerified) ...[
           SizedBox(height: AppSpace.sm),
-          NovaSurface(
+          _flatSurface(
             padding: AppInsets.card,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -597,8 +657,8 @@ class _ProfileAccountDetailsScreenState
                 NovaTextField(
                   controller: _phoneController,
                   density: NovaFieldDensity.comfortable,
-                  labelText: 'Phone number',
-                  hintText: '+12025550123',
+                  labelText: t.profileFieldPhoneLabel,
+                  hintText: t.profileFieldPhoneHint,
                   enabled:
                       !details.isAnonymous &&
                       !state.isSendingPhoneCode &&
@@ -609,7 +669,7 @@ class _ProfileAccountDetailsScreenState
                 SizedBox(
                   width: double.infinity,
                   child: NovaButton.primary(
-                    label: 'Send code',
+                    label: t.profileSendCodeCta,
                     isLoading: state.isSendingPhoneCode,
                     onPressed: canSend
                         ? () async {
@@ -627,14 +687,16 @@ class _ProfileAccountDetailsScreenState
                 ),
                 if (cooldownSeconds > 0) ...[
                   SizedBox(height: AppSpace.xs),
-                  _captionMuted('Resend available in ${cooldownSeconds}s'),
+                  _captionMuted(
+                    t.profileResendAvailableInSeconds(cooldownSeconds),
+                  ),
                 ],
               ],
             ),
           ),
           if (state.phoneVerificationId != null) ...[
             SizedBox(height: AppSpace.sm),
-            NovaSurface(
+            _flatSurface(
               padding: AppInsets.card,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -642,7 +704,7 @@ class _ProfileAccountDetailsScreenState
                   NovaTextField(
                     controller: _smsController,
                     density: NovaFieldDensity.comfortable,
-                    labelText: 'SMS code',
+                    labelText: t.profileFieldSmsCodeLabel,
                     enabled: !details.isAnonymous && !state.isLinkingPhone,
                     keyboardType: TextInputType.number,
                   ),
@@ -650,7 +712,7 @@ class _ProfileAccountDetailsScreenState
                   SizedBox(
                     width: double.infinity,
                     child: NovaButton.primary(
-                      label: 'Verify phone',
+                      label: t.profileVerifyPhoneCta,
                       isLoading: state.isLinkingPhone,
                       onPressed: state.isLinkingPhone || details.isAnonymous
                           ? null
@@ -664,7 +726,7 @@ class _ProfileAccountDetailsScreenState
         ],
         if (details.isAnonymous) ...[
           SizedBox(height: AppSpace.xs),
-          _captionMuted('Sign in to verify your phone.'),
+          _captionMuted(t.profileAnonymousPhoneBlocked),
         ],
       ],
     );

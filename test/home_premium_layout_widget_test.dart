@@ -3,14 +3,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:nova_commerce/domain/entities/home_config.dart';
-import 'package:nova_commerce/domain/entities/product.dart';
-import 'package:nova_commerce/domain/entities/variant.dart';
-import 'package:nova_commerce/features/home/presentation/home_premium_providers.dart';
+import 'package:nova_commerce/features/home/domain/entities/home_config.dart';
+import 'package:nova_commerce/core/domain/entities/product.dart';
+import 'package:nova_commerce/core/domain/entities/variant.dart';
+import 'package:nova_commerce/features/home/presentation/state/home_premium_providers.dart';
 import 'package:nova_commerce/features/home/presentation/home_screen.dart';
 import 'package:nova_commerce/features/home/presentation/home_viewmodel.dart';
-import 'package:nova_commerce/features/wishlist/presentation/wishlist_viewmodel.dart';
+import 'package:nova_commerce/features/wishlist/wishlist.dart';
 import 'package:nova_commerce/features/trends/presentation/trends_screen.dart';
+import 'package:nova_commerce/gen_l10n/app_localizations.dart';
 
 class TestHomeViewModel extends HomeViewModel {
   TestHomeViewModel(super.ref) {
@@ -67,7 +68,11 @@ void main() {
           minTextAdapt: true,
           splitScreenMode: true,
           builder: (context, child) {
-            return const MaterialApp(home: HomeScreen());
+            return const MaterialApp(
+              localizationsDelegates: AppLocalizations.localizationsDelegates,
+              supportedLocales: AppLocalizations.supportedLocales,
+              home: HomeScreen(),
+            );
           },
         ),
       ),

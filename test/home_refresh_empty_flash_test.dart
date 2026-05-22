@@ -1,13 +1,13 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:nova_commerce/domain/entities/product.dart';
-import 'package:nova_commerce/domain/entities/variant.dart';
+import 'package:nova_commerce/core/domain/entities/product.dart';
+import 'package:nova_commerce/core/domain/entities/variant.dart';
 import 'package:nova_commerce/features/home/presentation/home_feed_controller.dart';
 import 'package:nova_commerce/features/home/presentation/home_feed_registry.dart';
 import 'package:nova_commerce/features/home/presentation/home_filters.dart';
 import 'package:nova_commerce/features/home/presentation/home_viewmodel.dart';
-import 'package:nova_commerce/features/wishlist/presentation/wishlist_viewmodel.dart';
+import 'package:nova_commerce/features/wishlist/wishlist.dart';
 
 class TestHomeViewModel extends HomeViewModel {
   TestHomeViewModel(super.ref) {

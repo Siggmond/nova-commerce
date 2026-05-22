@@ -4,14 +4,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:nova_commerce/gen_l10n/app_localizations.dart';
 
-import '../../../core/config/app_routes.dart';
-import '../../../core/theme/app_shadows.dart';
-import '../../../core/theme/app_tokens.dart';
+import '../../../app/router/app_routes.dart';
+import '../../../app/theme/app_shadows.dart';
+import '../../../app/theme/app_tokens.dart';
 import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/app_cached_network_image.dart';
 import '../../../core/widgets/empty_state.dart';
 import '../../../core/widgets/error_state.dart';
+import 'offer_image_fallback.dart';
 import 'offers_viewmodel.dart';
 
 class OfferDetailsScreen extends ConsumerWidget {
@@ -21,22 +23,23 @@ class OfferDetailsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final t = AppLocalizations.of(context)!;
     final offerAsync = ref.watch(offerByIdProvider(offerId));
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Offer details')),
+      appBar: AppBar(title: Text(t.offerDetailsTitle)),
       body: offerAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => AppErrorState(
-          title: 'Could not load offer',
+          title: t.offerLoadErrorTitle,
           subtitle: e.toString(),
-          actionText: 'Retry',
+          actionText: t.commonRetry,
           onAction: () => ref.invalidate(offerByIdProvider(offerId)),
         ),
         data: (offer) {
           if (offer == null) {
-            return const AppEmptyState(
-              title: 'Offer not found',
+            return AppEmptyState(
+              title: t.offerNotFoundTitle,
               subtitle: '',
               icon: Icons.local_offer_outlined,
             );
@@ -46,12 +49,12 @@ class OfferDetailsScreen extends ConsumerWidget {
 
           final expiresIn = offer.endAt.difference(DateTime.now());
           final expiresText = expiresIn.isNegative
-              ? 'Expired'
+              ? t.offerExpiresExpired
               : (expiresIn.inDays >= 1
-                    ? 'Ends in ${expiresIn.inDays}d'
+                    ? t.offerExpiresEndsInDays(expiresIn.inDays)
                     : (expiresIn.inHours >= 1
-                          ? 'Ends in ${expiresIn.inHours}h'
-                          : 'Ends soon'));
+                          ? t.offerExpiresEndsInHours(expiresIn.inHours)
+                          : t.offerExpiresEndsSoon));
 
           Future<void> openTerms() async {
             final url = offer.termsUrl;
@@ -70,7 +73,7 @@ class OfferDetailsScreen extends ConsumerWidget {
               ..clearSnackBars()
               ..showSnackBar(
                 SnackBar(
-                  content: const Text('Promo code copied'),
+                  content: Text(t.offerPromoCodeCopied),
                   behavior: SnackBarBehavior.floating,
                   duration: const Duration(milliseconds: 1200),
                 ),
@@ -87,12 +90,16 @@ class OfferDetailsScreen extends ConsumerWidget {
           return ListView(
             padding: AppInsets.screen,
             children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(AppRadii.xl),
+              Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(AppRadii.xl),
+                ),
+                clipBehavior: Clip.hardEdge,
                 child: AspectRatio(
                   aspectRatio: 16 / 9,
                   child: AppCachedNetworkImage(
                     url: offer.imageUrl,
+                    fallbackUrl: offerFallbackImagePath(offer),
                     fit: BoxFit.cover,
                     backgroundColor: cs.surfaceContainerHigh,
                   ),
@@ -159,7 +166,7 @@ class OfferDetailsScreen extends ConsumerWidget {
                       Row(
                         children: [
                           Text(
-                            'Redeem',
+                            t.offerRedeemTitle,
                             style: Theme.of(context).textTheme.titleMedium
                                 ?.copyWith(fontWeight: FontWeight.w900),
                           ),
@@ -168,7 +175,7 @@ class OfferDetailsScreen extends ConsumerWidget {
                             TextButton(
                               onPressed: openTerms,
                               child: Text(
-                                'Terms',
+                                t.offerTerms,
                                 style: Theme.of(context).textTheme.labelLarge
                                     ?.copyWith(
                                       color: cs.primary,
@@ -202,7 +209,7 @@ class OfferDetailsScreen extends ConsumerWidget {
                                   ),
                                 ),
                                 IconButton(
-                                  tooltip: 'Copy code',
+                                  tooltip: t.offerCopyCodeTooltip,
                                   onPressed: copyCode,
                                   icon: const Icon(Icons.copy_rounded),
                                 ),
@@ -212,7 +219,7 @@ class OfferDetailsScreen extends ConsumerWidget {
                         ),
                         SizedBox(height: 6.h),
                         Text(
-                          'Use this code at checkout.',
+                          t.offerUseCodeAtCheckout,
                           style: Theme.of(context).textTheme.bodySmall
                               ?.copyWith(
                                 color: cs.onSurface.withValues(alpha: 0.7),
@@ -221,7 +228,7 @@ class OfferDetailsScreen extends ConsumerWidget {
                         ),
                       ] else ...[
                         Text(
-                          'No promo code required.',
+                          t.offerNoPromoCodeRequired,
                           style: Theme.of(context).textTheme.bodyMedium
                               ?.copyWith(
                                 color: cs.onSurface.withValues(alpha: 0.75),
@@ -233,7 +240,7 @@ class OfferDetailsScreen extends ConsumerWidget {
                       SizedBox(
                         width: double.infinity,
                         child: AppButton.primary(
-                          label: 'Shop products in this offer',
+                          label: t.offerShopProductsInThisOffer,
                           onPressed: shopProducts,
                           icon: Icons.search_rounded,
                         ),

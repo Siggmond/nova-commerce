@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/app_colors.dart';
-import '../../../../core/theme/app_shadows.dart';
+import '../../../../app/theme/app_colors.dart';
+import '../../../../app/theme/app_shadows.dart';
 
 class HomeFilterChipStyle {
   static Color baseColor({required int index}) {
@@ -43,7 +43,9 @@ class HomeFilterChipStyle {
     required ColorScheme cs,
     required int index,
     required bool selected,
+    bool enabled = true,
   }) {
+    if (!enabled) return const <BoxShadow>[];
     final base = baseColor(index: index);
     final tint = base.withValues(alpha: selected ? 0.18 : 0.10);
     return selected ? AppShadows.md(color: tint) : AppShadows.sm(color: tint);

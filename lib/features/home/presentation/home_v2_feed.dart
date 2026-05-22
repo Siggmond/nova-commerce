@@ -1,25 +1,32 @@
 import 'dart:async';
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../core/config/app_routes.dart';
-import '../../../core/config/app_tabs.dart';
+import 'package:nova_commerce/gen_l10n/app_localizations.dart';
+
+import '../../../app/router/app_routes.dart';
+import '../../../app/router/app_tabs.dart';
+import '../../../app/config/low_end_device_mode.dart';
+import '../../../app/perf/performance_engine.dart';
 import '../../../core/errors/app_error_mapper.dart';
-import '../../../core/theme/app_shadows.dart';
-import '../../../core/theme/app_tokens.dart';
+import '../../../core/images/image_policy.dart';
+import '../../../core/images/nova_image.dart';
+import '../../../core/perf/perf_markers.dart';
+import '../../../app/theme/app_shadows.dart';
+import '../../../app/theme/app_tokens.dart';
 import '../../../core/widgets/app_button.dart';
-import '../../../core/widgets/app_cached_network_image.dart';
 import '../../../core/widgets/error_state.dart';
 import '../../../core/widgets/nova_section_header.dart';
 import '../../../core/widgets/nova_skeleton.dart';
 import '../../../core/widgets/responsive_grid_delegate.dart';
-import '../../../domain/entities/product.dart';
-import '../../wishlist/presentation/wishlist_viewmodel.dart';
+import '../../../core/domain/entities/product.dart';
+import 'package:nova_commerce/features/wishlist/wishlist.dart';
 import '../../trends/presentation/trends_screen.dart';
 import 'delivery_location_controller.dart';
 import 'home_feed_controller.dart';
@@ -45,45 +52,16 @@ class _GoldGiftButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    const red = Color(0xFFFF3B30);
-
-    final bg1 = red.withValues(
-      alpha: cs.brightness == Brightness.dark ? 0.28 : 0.16,
-    );
-    final bg2 = red.withValues(
-      alpha: cs.brightness == Brightness.dark ? 0.18 : 0.10,
-    );
-    final border = red.withValues(
-      alpha: cs.brightness == Brightness.dark ? 0.48 : 0.38,
-    );
-
     return Material(
       color: Colors.transparent,
       shape: const CircleBorder(),
-      child: Ink(
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [bg1, bg2],
-          ),
-          border: Border.all(color: border),
-          boxShadow: AppShadows.sm(color: red.withValues(alpha: 0.22)),
-        ),
-        child: InkWell(
-          onTap: onTap,
-          customBorder: const CircleBorder(),
-          child: SizedBox(
-            width: 34.r,
-            height: 34.r,
-            child: Icon(
-              Icons.card_giftcard_rounded,
-              size: 18.r,
-              color: red.withValues(alpha: 0.95),
-            ),
-          ),
+      child: InkWell(
+        onTap: onTap,
+        customBorder: const CircleBorder(),
+        child: SizedBox(
+          width: 48.r,
+          height: 48.r,
+          child: SvgPicture.asset('assets/icons/gold.svg', fit: BoxFit.contain),
         ),
       ),
     );
@@ -94,8 +72,20 @@ IconData _iconForCategory(String name) {
   switch (name.toLowerCase()) {
     case 'groceries':
       return Icons.local_grocery_store_outlined;
+    case 'restaurants':
+      return Icons.restaurant_menu_outlined;
+    case 'pharmacy':
+      return Icons.local_pharmacy_outlined;
+    case 'coffee':
+      return Icons.local_cafe_outlined;
     case 'electronics':
       return Icons.devices_other_outlined;
+    case 'flowers':
+      return Icons.local_florist_outlined;
+    case 'pet':
+      return Icons.pets_outlined;
+    case 'cosmetics':
+      return Icons.brush_outlined;
     case 'beauty':
       return Icons.face_retouching_natural_outlined;
     case 'fashion':
@@ -127,47 +117,44 @@ IconData _iconForCategory(String name) {
 
 class _HomeV2FeedState extends ConsumerState<HomeV2Feed> {
   late final ScrollController _scrollController = ScrollController();
+  late final HomeViewModel _homeViewModelNotifier;
 
   static const bool _enableFrameTimings = bool.fromEnvironment(
     'ENABLE_FRAME_TIMINGS',
     defaultValue: false,
   );
+  static const int _frameJankLogCooldownMs = 950;
+  int _lastJankLogMs = 0;
 
   TimingsCallback? _timingsCallback;
-
-  static const _lebanonCities = <String>[
-    'Beirut',
-    'Tripoli',
-    'Sidon',
-    'Tyre',
-    'Jounieh',
-    'Byblos',
-    'Zahle',
-    'Baalbek',
-    'Nabatieh',
-    'Batroun',
-    'Bsharri',
-    'Aley',
-  ];
 
   static const double _searchDockThreshold = 84.0;
   late final ValueNotifier<double> _searchDockTNotifier = ValueNotifier(0);
 
   static const double _dockedSearchHeight = 44.0;
+  static const double _dockedSearchTopPadding = 6.0;
   static const double _dockedSearchBottomPadding = 8.0;
   static const double _dockedSearchPreferredHeight =
-      _dockedSearchHeight + _dockedSearchBottomPadding;
+      _dockedSearchTopPadding +
+      _dockedSearchHeight +
+      _dockedSearchBottomPadding;
 
-  static const int _loadMoreThrottleMs = 520;
   int _lastLoadMoreAttemptMs = 0;
 
   bool _didPrecache = false;
+  bool _firstProductsFrameMarked = false;
+  bool _productsScrollActive = false;
   Timer? _hintTimer;
   bool _hintShown = false;
+  static const bool _enableStartupHintScroll = bool.fromEnvironment(
+    'ENABLE_HOME_HINT_SCROLL',
+    defaultValue: false,
+  );
 
   @override
   void initState() {
     super.initState();
+    _homeViewModelNotifier = ref.read(homeViewModelProvider.notifier);
     _scrollController.addListener(_onScroll);
 
     if (_enableFrameTimings) {
@@ -175,9 +162,12 @@ class _HomeV2FeedState extends ConsumerState<HomeV2Feed> {
         for (final t in timings) {
           final buildMs = t.buildDuration.inMicroseconds / 1000.0;
           final rasterMs = t.rasterDuration.inMicroseconds / 1000.0;
-          if (buildMs > 16 || rasterMs > 16) {
+          final totalMs = buildMs + rasterMs;
+          final now = DateTime.now().millisecondsSinceEpoch;
+          if (totalMs > 24 && now - _lastJankLogMs >= _frameJankLogCooldownMs) {
+            _lastJankLogMs = now;
             debugPrint(
-              'FRAME_JANK build=${buildMs.toStringAsFixed(1)}ms raster=${rasterMs.toStringAsFixed(1)}ms total=${(buildMs + rasterMs).toStringAsFixed(1)}ms',
+              'FRAME_JANK build=${buildMs.toStringAsFixed(1)}ms raster=${rasterMs.toStringAsFixed(1)}ms total=${totalMs.toStringAsFixed(1)}ms',
             );
           }
         }
@@ -187,35 +177,49 @@ class _HomeV2FeedState extends ConsumerState<HomeV2Feed> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (!mounted) return;
-      _maybePrecacheFirstImages();
+      await SchedulerBinding.instance.endOfFrame;
+      if (!mounted) return;
+      await _maybePrecacheFirstImages();
+      if (!mounted) return;
 
-      _hintTimer?.cancel();
-      _hintTimer = Timer(const Duration(milliseconds: 420), () async {
-        if (!mounted) return;
-        if (_hintShown) return;
-        if (!_scrollController.hasClients) return;
+      final allowHintMotion = ref
+          .read(performanceEngineProvider)
+          .allowDecorativeMotion;
 
-        _hintShown = true;
-        final start = _scrollController.offset;
-        await _scrollController.animateTo(
-          (start + 36).clamp(0, _scrollController.position.maxScrollExtent),
-          duration: const Duration(milliseconds: 420),
-          curve: Curves.easeOutCubic,
-        );
-        if (!mounted) return;
-        if (!_scrollController.hasClients) return;
-        await _scrollController.animateTo(
-          start,
-          duration: const Duration(milliseconds: 520),
-          curve: Curves.easeOutCubic,
-        );
-      });
+      if (_enableStartupHintScroll && allowHintMotion) {
+        _hintTimer?.cancel();
+        _hintTimer = Timer(const Duration(milliseconds: 420), () async {
+          if (!mounted) return;
+          if (_hintShown) return;
+          if (!_scrollController.hasClients) return;
+
+          _hintShown = true;
+          final start = _scrollController.offset;
+          await _scrollController.animateTo(
+            (start + 36).clamp(0, _scrollController.position.maxScrollExtent),
+            duration: const Duration(milliseconds: 420),
+            curve: Curves.easeOutCubic,
+          );
+          if (!mounted) return;
+          if (!_scrollController.hasClients) return;
+          await _scrollController.animateTo(
+            start,
+            duration: const Duration(milliseconds: 520),
+            curve: Curves.easeOutCubic,
+          );
+        });
+      }
     });
   }
 
   @override
   void dispose() {
     _hintTimer?.cancel();
+    if (_productsScrollActive) {
+      _productsScrollActive = false;
+      PerfMarkers.productsScrollEnd();
+    }
+    _homeViewModelNotifier.cancelInFlightPageFetches();
     final cb = _timingsCallback;
     if (cb != null) {
       SchedulerBinding.instance.removeTimingsCallback(cb);
@@ -228,53 +232,65 @@ class _HomeV2FeedState extends ConsumerState<HomeV2Feed> {
     super.dispose();
   }
 
-  void _maybePrecacheFirstImages() {
+  Future<void> _maybePrecacheFirstImages() async {
+    if (!mounted) return;
     if (_didPrecache) return;
-
-    final items = ref
-        .read(homeViewModelProvider)
-        .when(
-          loading: () => const <Product>[],
-          error: (_) => const <Product>[],
-          data: (items, __, ___, ____) => items,
-        );
-
+    final state = ref.read(homeViewModelProvider);
+    final items = switch (state) {
+      HomeData(:final items) => items,
+      _ => const <Product>[],
+    };
     if (items.isEmpty) return;
 
+    final urls = items
+        .map((item) => item.imageUrl)
+        .where((url) => url.trim().isNotEmpty)
+        .skip(1)
+        .take(8)
+        .toList(growable: false);
+    if (urls.isEmpty) return;
+
     _didPrecache = true;
-    final targets = items.take(4);
+    final logicalWidth = (MediaQuery.sizeOf(context).width / 2).clamp(
+      140.0,
+      220.0,
+    );
+    final logicalHeight = (logicalWidth * 1.1).clamp(150.0, 260.0);
 
-    final dpr = MediaQuery.devicePixelRatioOf(context);
-    final screenW = MediaQuery.sizeOf(context).width;
-    // Keep precache decode bounded to avoid decoding full-res images.
-    // This does not change UI; it reduces initial-frame and early-scroll jank.
-    final targetWidth = (screenW * dpr).round().clamp(360, 900);
-
-    for (final p in targets) {
-      final url = p.imageUrl.trim();
-      if (url.isEmpty) continue;
-      precacheImage(
-        ResizeImage(CachedNetworkImageProvider(url), width: targetWidth),
-        context,
-      );
-    }
+    await NovaImagePolicy.prefetchRouteImages(
+      context: context,
+      urls: urls,
+      route: NovaImageRoute.productsGrid,
+      logicalWidth: logicalWidth,
+      logicalHeight: logicalHeight,
+      maxItems: 8,
+    );
   }
 
   void _onScroll() {
+    if (!mounted) return;
     if (!_scrollController.hasClients) return;
     final position = _scrollController.position;
 
-    final nextT = (position.pixels / _searchDockThreshold)
-        .clamp(0.0, 1.0)
-        .toDouble();
+    final perfState = ref.read(performanceEngineProvider);
+    final rawDockT = perfState.highPressure
+        ? (position.pixels >= _searchDockThreshold ? 1.0 : 0.0)
+        : (position.pixels / _searchDockThreshold).clamp(0.0, 1.0).toDouble();
+    final nextT = perfState.highPressure
+        ? rawDockT
+        : ((rawDockT * 8).round() / 8).clamp(0.0, 1.0).toDouble();
     final prevT = _searchDockTNotifier.value;
-    if ((nextT - prevT).abs() > 0.02) {
+    final dockDelta = perfState.highPressure ? 1.0 : 0.12;
+    if ((nextT - prevT).abs() >= dockDelta) {
       _searchDockTNotifier.value = nextT;
     }
 
-    if (position.extentAfter < 900) {
+    final loadMoreTriggerExtent = perfState.homeLoadMoreTriggerExtent;
+
+    if (position.extentAfter < loadMoreTriggerExtent) {
       final now = DateTime.now().millisecondsSinceEpoch;
-      if (now - _lastLoadMoreAttemptMs < _loadMoreThrottleMs) return;
+      final throttleMs = perfState.homeLoadMoreThrottleMs;
+      if (now - _lastLoadMoreAttemptMs < throttleMs) return;
       _lastLoadMoreAttemptMs = now;
 
       final state = ref.read(homeViewModelProvider);
@@ -290,17 +306,68 @@ class _HomeV2FeedState extends ConsumerState<HomeV2Feed> {
     }
   }
 
+  bool _onScrollNotification(ScrollNotification notification) {
+    if (!mounted) return false;
+    if (notification.metrics.axis != Axis.vertical) {
+      return false;
+    }
+
+    if (notification is ScrollStartNotification ||
+        notification is ScrollUpdateNotification) {
+      _startProductsScrollWindow();
+      return false;
+    }
+
+    if (notification is ScrollEndNotification) {
+      _endProductsScrollWindow();
+      return false;
+    }
+
+    if (notification is UserScrollNotification &&
+        notification.direction == ScrollDirection.idle) {
+      _endProductsScrollWindow();
+    }
+    return false;
+  }
+
+  void _startProductsScrollWindow() {
+    if (_productsScrollActive) return;
+    _productsScrollActive = true;
+    PerfMarkers.productsScrollStart();
+  }
+
+  void _endProductsScrollWindow() {
+    if (!_productsScrollActive) return;
+    _productsScrollActive = false;
+    PerfMarkers.productsScrollEnd();
+  }
+
   Future<void> _openCityPicker() async {
+    final t = AppLocalizations.of(context)!;
+    final resolvedCities = <String>[
+      t.homeCityBeirut,
+      t.homeCityTripoli,
+      t.homeCitySidon,
+      t.homeCityTyre,
+      t.homeCityJounieh,
+      t.homeCityByblos,
+      t.homeCityZahle,
+      t.homeCityBaalbek,
+      t.homeCityNabatieh,
+      t.homeCityBatroun,
+      t.homeCityBsharri,
+      t.homeCityAley,
+    ];
     final selected = await showModalBottomSheet<String>(
       context: context,
       showDragHandle: true,
       builder: (ctx) {
         return SafeArea(
           child: ListView.separated(
-            itemCount: _lebanonCities.length,
+            itemCount: resolvedCities.length,
             separatorBuilder: (_, __) => const Divider(height: 1),
             itemBuilder: (ctx, i) {
-              final city = _lebanonCities[i];
+              final city = resolvedCities[i];
               return ListTile(
                 title: Text(city),
                 onTap: () => Navigator.of(ctx).pop(city),
@@ -312,17 +379,30 @@ class _HomeV2FeedState extends ConsumerState<HomeV2Feed> {
     );
 
     if (selected == null) return;
+    if (!mounted) return;
     await ref.read(deliveryLocationProvider.notifier).setCity(selected);
   }
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
+    final homeCacheExtent = ref.watch(
+      performanceEngineProvider.select((s) => s.homeScrollCacheExtent),
+    );
+    final lowEndMode = ref.watch(lowEndDeviceModeProvider);
+    final perfReduceMotion = ref.watch(
+      performanceEngineProvider.select((s) => !s.allowDecorativeMotion),
+    );
+    final reduceMotion = lowEndMode || perfReduceMotion;
+    final disableExpensiveEffects = lowEndMode || reduceMotion;
     final phase = ref.watch(
-      homeViewModelProvider.select((s) => switch (s) {
-            HomeLoading() => 0,
-            HomeError() => 1,
-            HomeData() => 2,
-          }),
+      homeViewModelProvider.select(
+        (s) => switch (s) {
+          HomeLoading() => 0,
+          HomeError() => 1,
+          HomeData() => 2,
+        },
+      ),
     );
 
     if (phase == 0) return const _HomeV2Skeleton();
@@ -341,13 +421,20 @@ class _HomeV2FeedState extends ConsumerState<HomeV2Feed> {
             titleSpacing: 12,
             title: Row(
               children: [
-                const Text('Nova'),
+                Text(t.brandName),
                 const Spacer(),
                 IconButton(
                   key: const Key('home_messages_button'),
-                  tooltip: 'Messages',
+                  tooltip: t.messagesTitle,
                   onPressed: () => context.push(AppRoutes.messages),
-                  icon: const Icon(Icons.chat_bubble_outline_rounded),
+                  icon: SizedBox(
+                    width: 30.r,
+                    height: 30.r,
+                    child: SvgPicture.asset(
+                      'assets/icons/chat.svg',
+                      fit: BoxFit.contain,
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -357,239 +444,249 @@ class _HomeV2FeedState extends ConsumerState<HomeV2Feed> {
             child: AppErrorState(
               title: msg.title,
               subtitle: msg.subtitle,
-              actionText: 'Retry',
-              onAction: () => ref.read(homeViewModelProvider.notifier).refresh(),
+              actionText: t.commonRetry,
+              onAction: () =>
+                  ref.read(homeViewModelProvider.notifier).refresh(),
             ),
           ),
         ],
       );
     }
 
-    final items = ref.watch(
-      homeViewModelProvider.select((s) => s is HomeData ? s.items : const <Product>[]),
-    );
-    final isRefreshing = ref.watch(
-      homeViewModelProvider.select((s) => s is HomeData ? s.isRefreshing : false),
+    final shouldPrecache = ref.watch(
+      homeViewModelProvider.select(
+        (s) => s is HomeData ? s.items.isNotEmpty : false,
+      ),
     );
 
-    if (!_didPrecache && items.isNotEmpty) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
+    if (!_didPrecache && shouldPrecache) {
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
         if (!mounted) return;
-        _maybePrecacheFirstImages();
+        await _maybePrecacheFirstImages();
       });
     }
+
+    final snapshot = ref.watch(
+      homeViewModelProvider.select(
+        (s) => switch (s) {
+          HomeData(
+            :final items,
+            :final isRefreshing,
+            :final isLoadingMore,
+            :final hasMore,
+          ) =>
+            (
+              items: items,
+              isRefreshing: isRefreshing,
+              isLoadingMore: isLoadingMore,
+              hasMore: hasMore,
+            ),
+          _ => (
+            items: const <Product>[],
+            isRefreshing: false,
+            isLoadingMore: false,
+            hasMore: false,
+          ),
+        },
+      ),
+    );
+    if (!_firstProductsFrameMarked && snapshot.items.isNotEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted || _firstProductsFrameMarked) return;
+        _firstProductsFrameMarked = true;
+        PerfMarkers.firstProductsFrame();
+      });
+    }
+    final sectionStates = ref.watch(homeFeedControllerProvider);
+    final sectionSlivers = HomeV2SectionRenderer(
+      items: snapshot.items,
+      isRefreshing: snapshot.isRefreshing,
+      isLoadingMore: snapshot.isLoadingMore,
+      hasMore: snapshot.hasMore,
+      reduceMotion: reduceMotion,
+      disableExpensiveEffects: disableExpensiveEffects,
+    ).buildSlivers(context: context, ref: ref, sectionStates: sectionStates);
 
     return RepaintBoundary(
       child: RefreshIndicator(
         onRefresh: () => ref
             .read(homeViewModelProvider.notifier)
             .refresh(showLoading: false),
-        child: CustomScrollView(
-          controller: _scrollController,
-          slivers: [
-            ValueListenableBuilder<double>(
-              valueListenable: _searchDockTNotifier,
-              builder: (context, t, _) {
-                return _RebuildTracker(
-                  label: 'home.header.appbar',
-                  child: SliverAppBar(
-                    pinned: true,
-                    automaticallyImplyLeading: false,
-                    titleSpacing: 12,
-                    title: Row(
-                      children: [
-                        const Text('Nova'),
-                        SizedBox(width: 8.w),
-                        Flexible(
-                          child: ConstrainedBox(
-                            constraints: const BoxConstraints(
-                              maxWidth: 180,
-                            ),
-                            child: DeliveryLocationChip(
-                              onTap: _openCityPicker,
+        child: NotificationListener<ScrollNotification>(
+          onNotification: _onScrollNotification,
+          child: CustomScrollView(
+            key: const Key('home_scroll_view'),
+            cacheExtent: homeCacheExtent,
+            controller: _scrollController,
+            slivers: [
+              ValueListenableBuilder<double>(
+                valueListenable: _searchDockTNotifier,
+                builder: (context, dockT, _) {
+                  final showDockedSearch = dockT >= 0.85;
+                  return _RebuildTracker(
+                    label: 'home.header.appbar',
+                    child: SliverAppBar(
+                      pinned: true,
+                      automaticallyImplyLeading: false,
+                      titleSpacing: 12,
+                      title: Row(
+                        children: [
+                          Text(t.brandName),
+                          SizedBox(width: 8.w),
+                          Flexible(
+                            child: ConstrainedBox(
+                              constraints: const BoxConstraints(maxWidth: 180),
+                              child: DeliveryLocationChip(
+                                onTap: _openCityPicker,
+                              ),
                             ),
                           ),
-                        ),
-                        SizedBox(width: 8.w),
-                        _GoldGiftButton(
-                          onTap: () => context.push(AppRoutes.gold),
+                          SizedBox(width: 8.w),
+                          _GoldGiftButton(
+                            onTap: () => context.push(AppRoutes.gold),
+                          ),
+                        ],
+                      ),
+                      actions: [
+                        IconButton(
+                          key: const Key('home_messages_button'),
+                          tooltip: t.messagesTitle,
+                          onPressed: () => context.push(AppRoutes.messages),
+                          icon: SizedBox(
+                            width: 30.r,
+                            height: 30.r,
+                            child: SvgPicture.asset(
+                              'assets/icons/chat.svg',
+                              fit: BoxFit.contain,
+                            ),
+                          ),
                         ),
                       ],
-                    ),
-                    actions: [
-                      IconButton(
-                        key: const Key('home_messages_button'),
-                        tooltip: 'Messages',
-                        onPressed: () => context.push(AppRoutes.messages),
-                        icon: const Icon(Icons.chat_bubble_outline_rounded),
-                      ),
-                    ],
-                    bottom: PreferredSize(
-                      preferredSize: Size.fromHeight(
-                        _dockedSearchPreferredHeight * t,
-                      ),
-                      child: ClipRect(
-                        child: Align(
-                          alignment: Alignment.topCenter,
-                          heightFactor: t,
-                          child: Opacity(
-                            opacity: t,
-                            child: IgnorePointer(
-                              ignoring: t < 0.85,
-                              child: Padding(
-                                padding: const EdgeInsets.fromLTRB(
-                                  12,
-                                  0,
-                                  12,
-                                  _dockedSearchBottomPadding,
-                                ),
-                                child: SizedBox(
-                                  height: _dockedSearchHeight,
-                                  child: SearchBarFrame(
-                                    docked: true,
-                                    child: _SearchBar(
-                                      compact: true,
-                                      onTap: () {
-                                        ref
-                                            .read(
-                                              homeBrowseFiltersProvider
-                                                  .notifier,
-                                            )
-                                            .reset();
-                                        ref
-                                            .read(
-                                              appTabSwitchRequestProvider
-                                                  .notifier,
-                                            )
-                                            .requestIndex(
-                                              AppTabIndex.search,
-                                              initialLocation: true,
-                                            );
-                                      },
-                                      onOpenFilters: () {
-                                        ref
-                                            .read(
-                                              appTabSwitchRequestProvider
-                                                  .notifier,
-                                            )
-                                            .requestIndex(
-                                              AppTabIndex.search,
-                                              initialLocation: true,
-                                            );
-                                      },
+                      bottom: PreferredSize(
+                        preferredSize: Size.fromHeight(
+                          showDockedSearch ? _dockedSearchPreferredHeight.h : 0,
+                        ),
+                        child: IgnorePointer(
+                          ignoring: !showDockedSearch,
+                          child: showDockedSearch
+                              ? Padding(
+                                  padding: EdgeInsets.fromLTRB(
+                                    12.w,
+                                    _dockedSearchTopPadding.h,
+                                    12.w,
+                                    _dockedSearchBottomPadding.h,
+                                  ),
+                                  child: SizedBox(
+                                    height: _dockedSearchHeight.h,
+                                    child: SearchBarFrame(
+                                      docked: true,
+                                      reduceEffects: disableExpensiveEffects,
+                                      child: _SearchBar(
+                                        compact: true,
+                                        onTap: () {
+                                          ref
+                                              .read(
+                                                homeBrowseFiltersProvider
+                                                    .notifier,
+                                              )
+                                              .reset();
+                                          ref
+                                              .read(
+                                                appTabSwitchRequestProvider
+                                                    .notifier,
+                                              )
+                                              .requestIndex(
+                                                AppTabIndex.search,
+                                                initialLocation: true,
+                                              );
+                                        },
+                                        onOpenFilters: () {
+                                          ref
+                                              .read(
+                                                appTabSwitchRequestProvider
+                                                    .notifier,
+                                              )
+                                              .requestIndex(
+                                                AppTabIndex.search,
+                                                initialLocation: true,
+                                              );
+                                        },
+                                      ),
                                     ),
                                   ),
-                                ),
-                              ),
-                            ),
-                          ),
+                                )
+                              : const SizedBox.shrink(),
                         ),
                       ),
                     ),
-                  ),
-                );
-              },
-            ),
-            ValueListenableBuilder<double>(
-              valueListenable: _searchDockTNotifier,
-              builder: (context, t, _) {
-                final invT = (1 - t).clamp(0.0, 1.0).toDouble();
-                return _RebuildTracker(
-                  label: 'home.header.searchInline',
-                  child: SliverToBoxAdapter(
-                    child: Padding(
-                      padding: EdgeInsets.fromLTRB(12.w, 12.h, 12.w, 0),
-                      child: ClipRect(
-                        child: Align(
-                          alignment: Alignment.topCenter,
-                          heightFactor: invT,
-                          child: Opacity(
-                            opacity: invT,
-                            child: IgnorePointer(
-                              ignoring: t > 0.15,
-                              child: SearchBarFrame(
-                                child: _SearchBar(
-                                  onTap: () {
-                                    ref
-                                        .read(
-                                          homeBrowseFiltersProvider.notifier,
-                                        )
-                                        .reset();
-                                    ref
-                                        .read(
-                                          appTabSwitchRequestProvider.notifier,
-                                        )
-                                        .requestIndex(
-                                          AppTabIndex.search,
-                                          initialLocation: true,
-                                        );
-                                  },
-                                  onOpenFilters: () {
-                                    ref
-                                        .read(
-                                          appTabSwitchRequestProvider.notifier,
-                                        )
-                                        .requestIndex(
-                                          AppTabIndex.search,
-                                          initialLocation: true,
-                                        );
-                                  },
-                                ),
-                              ),
-                            ),
-                          ),
+                  );
+                },
+              ),
+              ValueListenableBuilder<double>(
+                valueListenable: _searchDockTNotifier,
+                builder: (context, dockT, _) {
+                  final showInlineSearch = dockT <= 0.15;
+                  return _RebuildTracker(
+                    label: 'home.header.searchInline',
+                    child: SliverToBoxAdapter(
+                      child: Padding(
+                        padding: EdgeInsets.fromLTRB(12.w, 12.h, 12.w, 0),
+                        child: IgnorePointer(
+                          ignoring: !showInlineSearch,
+                          child: showInlineSearch
+                              ? SearchBarFrame(
+                                  reduceEffects: disableExpensiveEffects,
+                                  child: _SearchBar(
+                                    onTap: () {
+                                      ref
+                                          .read(
+                                            homeBrowseFiltersProvider.notifier,
+                                          )
+                                          .reset();
+                                      ref
+                                          .read(
+                                            appTabSwitchRequestProvider
+                                                .notifier,
+                                          )
+                                          .requestIndex(
+                                            AppTabIndex.search,
+                                            initialLocation: true,
+                                          );
+                                    },
+                                    onOpenFilters: () {
+                                      ref
+                                          .read(
+                                            appTabSwitchRequestProvider
+                                                .notifier,
+                                          )
+                                          .requestIndex(
+                                            AppTabIndex.search,
+                                            initialLocation: true,
+                                          );
+                                    },
+                                  ),
+                                )
+                              : const SizedBox.shrink(),
                         ),
                       ),
                     ),
+                  );
+                },
+              ),
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(12.w, 10.h, 0, 0),
+                  child: _CategoryTabsRow(
+                    categories: HomeV2SectionRenderer.categoryTabIds,
+                    disableExpensiveEffects: disableExpensiveEffects,
                   ),
-                );
-              },
-            ),
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: EdgeInsets.fromLTRB(12.w, 10.h, 0, 0),
-                child: _CategoryTabsRow(
-                  categories: [
-                    'All',
-                    ...HomeV2SectionRenderer._categories
-                        .take(8)
-                        .map((c) => c.name),
-                  ],
                 ),
               ),
-            ),
-            SliverToBoxAdapter(child: SizedBox(height: 12.h)),
-            Consumer(
-              builder: (context, ref, _) {
-                final sectionStates = ref.watch(homeFeedControllerProvider);
-                final isLoadingMore = ref.watch(
-                  homeViewModelProvider.select(
-                    (s) => s is HomeData ? s.isLoadingMore : false,
-                  ),
-                );
-                final hasMore = ref.watch(
-                  homeViewModelProvider.select((s) => s is HomeData ? s.hasMore : false),
-                );
-
-                return _RebuildTracker(
-                  label: 'home.sections',
-                  child: SliverMainAxisGroup(
-                    slivers: HomeV2SectionRenderer(
-                      items: items,
-                      isRefreshing: isRefreshing,
-                      isLoadingMore: isLoadingMore,
-                      hasMore: hasMore,
-                    ).buildSlivers(
-                      context: context,
-                      ref: ref,
-                      sectionStates: sectionStates,
-                    ),
-                  ),
-                );
-              },
-            ),
-            SliverToBoxAdapter(child: SizedBox(height: 14.h)),
-          ],
+              SliverToBoxAdapter(child: SizedBox(height: 12.h)),
+              ...sectionSlivers,
+              SliverToBoxAdapter(child: SizedBox(height: 14.h)),
+            ],
+          ),
         ),
       ),
     );
@@ -628,85 +725,98 @@ class HomeV2SectionRenderer {
     required this.isRefreshing,
     required this.isLoadingMore,
     required this.hasMore,
+    required this.reduceMotion,
+    required this.disableExpensiveEffects,
   });
 
   final List<Product> items;
   final bool isRefreshing;
   final bool isLoadingMore;
   final bool hasMore;
+  final bool reduceMotion;
+  final bool disableExpensiveEffects;
+
+  static final List<String> categoryTabIds = <String>[
+    'all',
+    ..._categories.take(8).map((c) => c.id),
+  ];
 
   static const _categories = <_HomeCategory>[
     _HomeCategory(
-      name: 'Groceries',
-      imageUrl:
-          'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=400&q=70',
+      id: 'groceries',
+      imageUrl: '',
+      backgroundAsset: 'assets/icons/groceries.svg',
     ),
     _HomeCategory(
-      name: 'Restaurants',
-      imageUrl:
-          'https://images.unsplash.com/photo-1529692236671-f1f6cf9683ba?auto=format&fit=crop&w=400&q=70',
+      id: 'restaurants',
+      imageUrl: '',
+      backgroundAsset: 'assets/icons/restaurants.svg',
     ),
     _HomeCategory(
-      name: 'Pharmacy',
-      imageUrl:
-          'https://images.unsplash.com/photo-1580281658628-95e5b6f3c4f9?auto=format&fit=crop&w=400&q=70',
+      id: 'pharmacy',
+      imageUrl: '',
+      backgroundAsset: 'assets/icons/pharmacy.svg',
     ),
     _HomeCategory(
-      name: 'Coffee',
-      imageUrl:
-          'https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=400&q=70',
+      id: 'coffee',
+      imageUrl: '',
+      backgroundAsset: 'assets/icons/coffee.svg',
     ),
     _HomeCategory(
-      name: 'Bakery',
-      imageUrl:
-          'https://images.unsplash.com/photo-1549931319-a545dcf3bc73?auto=format&fit=crop&w=400&q=70',
+      id: 'bakery',
+      imageUrl: '',
+      backgroundAsset: 'assets/icons/bakery.svg',
     ),
-    _HomeCategory(
-      name: 'Electronics',
-      imageUrl:
-          'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=400&q=70',
-    ),
-    _HomeCategory(
-      name: 'Flowers',
-      imageUrl:
-          'https://images.unsplash.com/photo-1490750967868-88aa4486c946?auto=format&fit=crop&w=400&q=70',
-    ),
-    _HomeCategory(
-      name: 'Pet Supplies',
-      imageUrl:
-          'https://images.unsplash.com/photo-1548767797-d8c844163c4c?auto=format&fit=crop&w=400&q=70',
-    ),
-    _HomeCategory(
-      name: 'Cosmetics',
-      imageUrl:
-          'https://images.unsplash.com/photo-1526045478516-99145907023c?auto=format&fit=crop&w=400&q=70',
-    ),
-    _HomeCategory(
-      name: 'Snacks',
-      imageUrl:
-          'https://images.unsplash.com/photo-1584270354949-1d52f0d8c2d0?auto=format&fit=crop&w=400&q=70',
-    ),
-    _HomeCategory(
-      name: 'Drinks',
-      imageUrl:
-          'https://images.unsplash.com/photo-1544145945-f90425340c7e?auto=format&fit=crop&w=400&q=70',
-    ),
-    _HomeCategory(
-      name: 'Baby',
-      imageUrl:
-          'https://images.unsplash.com/photo-1588072432836-10c7f2d9c1f2?auto=format&fit=crop&w=400&q=70',
-    ),
+    _HomeCategory(id: 'electronics', imageUrl: ''),
+    _HomeCategory(id: 'flowers', imageUrl: ''),
+    _HomeCategory(id: 'pet', imageUrl: ''),
+    _HomeCategory(id: 'cosmetics', imageUrl: ''),
+    _HomeCategory(id: 'snacks', imageUrl: ''),
+    _HomeCategory(id: 'drinks', imageUrl: ''),
+    _HomeCategory(id: 'baby', imageUrl: ''),
   ];
+
+  static String categoryLabel(AppLocalizations t, String id) {
+    switch (id.toLowerCase()) {
+      case 'groceries':
+        return t.homeCategoryGroceries;
+      case 'restaurants':
+        return t.homeCategoryRestaurants;
+      case 'pharmacy':
+        return t.homeCategoryPharmacy;
+      case 'coffee':
+        return t.homeCategoryCoffee;
+      case 'bakery':
+        return t.homeCategoryBakery;
+      case 'electronics':
+        return t.homeCategoryElectronics;
+      case 'flowers':
+        return t.homeCategoryFlowers;
+      case 'pet':
+        return t.homeCategoryPetSupplies;
+      case 'cosmetics':
+        return t.homeCategoryCosmetics;
+      case 'snacks':
+        return t.homeCategorySnacks;
+      case 'drinks':
+        return t.homeCategoryDrinks;
+      case 'baby':
+        return t.homeCategoryBaby;
+      default:
+        return id;
+    }
+  }
 
   List<Widget> buildSlivers({
     required BuildContext context,
     required WidgetRef ref,
     required List<HomeSectionState> sectionStates,
   }) {
+    final t = AppLocalizations.of(context)!;
     final out = <Widget>[];
 
     for (final s in sectionStates) {
-      out.addAll(_buildSection(context: context, ref: ref, state: s));
+      out.addAll(_buildSection(context: context, ref: ref, state: s, t: t));
     }
 
     if (isLoadingMore) {
@@ -714,10 +824,10 @@ class HomeV2SectionRenderer {
         SliverToBoxAdapter(
           child: Padding(
             padding: EdgeInsets.symmetric(vertical: 18.h),
-            child: const Center(
+            child: Center(
               child: SizedBox(
-                width: 22,
-                height: 22,
+                width: 22.r,
+                height: 22.r,
                 child: CircularProgressIndicator(strokeWidth: 2.5),
               ),
             ),
@@ -725,7 +835,7 @@ class HomeV2SectionRenderer {
         ),
       );
     } else {
-      out.add(const SliverToBoxAdapter(child: SizedBox(height: 18)));
+      out.add(SliverToBoxAdapter(child: SizedBox(height: 18.h)));
     }
 
     return out;
@@ -735,10 +845,13 @@ class HomeV2SectionRenderer {
     required BuildContext context,
     required WidgetRef ref,
     required HomeSectionState state,
+    required AppLocalizations t,
   }) {
     List<Product> takeSafe(Iterable<Product> src, int n) {
-      return src.take(n).toList(growable: false);
+      final safe = n < 1 ? 1 : n;
+      return src.take(safe).toList(growable: false);
     }
+
     void openTrending() => context.push(AppRoutes.trendingNow);
     void openPicked() => context.push(AppRoutes.pickedForYou);
 
@@ -746,6 +859,7 @@ class HomeV2SectionRenderer {
       HomeSectionId.heroCarousel => _heroCarouselSlivers(
         context: context,
         items: takeSafe(items, 5),
+        reduceMotion: reduceMotion,
       ),
       HomeSectionId.categoriesGrid => _categoriesSlivers(context: context),
       HomeSectionId.editorialBanner => _editorialBannerSlivers(
@@ -755,9 +869,10 @@ class HomeV2SectionRenderer {
         context: context,
       ),
       HomeSectionId.trendingHeader => _headerSliver(
-        title: 'Trending now',
-        subtitle: 'Ranked by what people are tapping today',
+        title: t.homeTrendingNowTitle,
+        subtitle: t.homeTrendingNowSubtitle,
         onSeeAll: openTrending,
+        t: t,
       ),
       HomeSectionId.trendingFeed => _trendingSlivers(
         context: context,
@@ -765,9 +880,10 @@ class HomeV2SectionRenderer {
         items: takeSafe(items, 10),
       ),
       HomeSectionId.pickedHeader => _headerSliver(
-        title: 'Picked for you',
-        subtitle: 'Quick matches based on your taste (demo)',
+        title: t.homePickedForYouTitle,
+        subtitle: t.homePickedForYouSubtitle,
         onSeeAll: openPicked,
+        t: t,
       ),
       HomeSectionId.pickedFeed => _pickedForYouSlivers(
         context: context,
@@ -780,13 +896,14 @@ class HomeV2SectionRenderer {
   }
 
   List<Widget> _trendsEditorialSlivers({required BuildContext context}) {
-    return const [
+    final t = AppLocalizations.of(context)!;
+    return [
       SliverPadding(
-        padding: EdgeInsets.fromLTRB(12, 8, 12, 0),
+        padding: EdgeInsets.fromLTRB(12.w, 8.h, 12.w, 0),
         sliver: SliverToBoxAdapter(
           child: NovaSectionHeader(
-            title: 'Curated trends',
-            subtitle: 'Editor’s picks — styled, versatile, and easy to pair.',
+            title: t.homeCuratedTrendsTitle,
+            subtitle: t.homeCuratedTrendsSubtitle,
           ),
         ),
       ),
@@ -798,6 +915,7 @@ class HomeV2SectionRenderer {
     required String title,
     required String subtitle,
     required VoidCallback onSeeAll,
+    required AppLocalizations t,
   }) {
     return [
       SliverPadding(
@@ -807,7 +925,7 @@ class HomeV2SectionRenderer {
             title: title,
             subtitle: subtitle,
             trailing: IconButton(
-              tooltip: 'See all',
+              tooltip: t.commonSeeAll,
               onPressed: onSeeAll,
               icon: const Icon(Icons.arrow_forward_rounded),
             ),
@@ -820,15 +938,18 @@ class HomeV2SectionRenderer {
   List<Widget> _heroCarouselSlivers({
     required BuildContext context,
     required List<Product> items,
+    required bool reduceMotion,
   }) {
     if (items.isEmpty) return const <Widget>[];
 
     return [
       SliverPadding(
-        padding: EdgeInsets.fromLTRB(0, 0, 0, 0),
+        padding: EdgeInsets.zero,
         sliver: SliverToBoxAdapter(
           child: _HeroCarousel(
             items: items,
+            reduceMotion: reduceMotion,
+            disableExpensiveEffects: disableExpensiveEffects,
             onTap: (p) => context.push('${AppRoutes.product}?id=${p.id}'),
           ),
         ),
@@ -838,17 +959,18 @@ class HomeV2SectionRenderer {
   }
 
   List<Widget> _categoriesSlivers({required BuildContext context}) {
+    final t = AppLocalizations.of(context)!;
     return [
       SliverPadding(
         padding: EdgeInsets.fromLTRB(12.w, 6.h, 12.w, 0),
         sliver: SliverToBoxAdapter(
           child: NovaSectionHeader(
-            title: 'Shop by category',
-            subtitle: 'Quick entry points',
+            title: t.homeShopByCategoryTitle,
+            subtitle: t.homeShopByCategorySubtitle,
             trailing: TextButton.icon(
               onPressed: () => context.push(AppRoutes.search),
-              icon: const Icon(Icons.arrow_forward_rounded, size: 18),
-              label: const Text('See all'),
+              icon: Icon(Icons.arrow_forward_rounded, size: 18.r),
+              label: Text(t.commonSeeAll),
             ),
           ),
         ),
@@ -859,10 +981,13 @@ class HomeV2SectionRenderer {
           builder: (context, constraints) {
             final width = constraints.crossAxisExtent;
             final spacing = 10.0;
-
-            final tileHeight = width < 360
-                ? 118.0
-                : (width < 480 ? 128.0 : (width < 720 ? 132.0 : 146.0));
+            final crossAxisCount =
+                ResponsiveGridDelegate.crossAxisCountForWidth(width);
+            final tileWidth =
+                ((width - ((crossAxisCount - 1) * spacing)) / crossAxisCount)
+                    .clamp(92.0, 260.0)
+                    .toDouble();
+            final tileHeight = tileWidth;
 
             final maxVisible = ResponsiveGridDelegate.maxVisibleItems(
               width: width,
@@ -882,29 +1007,39 @@ class HomeV2SectionRenderer {
                 spacing: spacing,
                 tileHeight: tileHeight,
               ),
-              delegate: SliverChildBuilderDelegate((context, index) {
-                if (index == childCount - 1) {
+              delegate: SliverChildBuilderDelegate(
+                (context, index) {
+                  if (index == childCount - 1) {
+                    return RepaintBoundary(
+                      child: CategoryTile.seeAll(
+                        title: t.commonSeeAll,
+                        reduceEffects: disableExpensiveEffects,
+                        onTap: () => context.push(AppRoutes.search),
+                      ),
+                    );
+                  }
+
+                  final c = _categories[index];
+                  final badgeText = index == 1 ? t.homeBadgeNew : null;
+                  final subtitle = t.homeCategoryItemsCount(120 + (index * 18));
+
                   return RepaintBoundary(
-                    child: CategoryTile.seeAll(
+                    child: CategoryTile(
+                      title: HomeV2SectionRenderer.categoryLabel(t, c.id),
+                      subtitle: subtitle,
+                      badgeText: badgeText,
+                      imageUrl: c.imageUrl,
+                      backgroundAsset: c.backgroundAsset,
+                      icon: _iconForCategory(c.id),
+                      reduceEffects: disableExpensiveEffects,
                       onTap: () => context.push(AppRoutes.search),
                     ),
                   );
-                }
-
-                final c = _categories[index];
-                final badgeText = index == 1 ? 'New' : null;
-                final subtitle = '${120 + (index * 18)} items';
-
-                return RepaintBoundary(
-                  child: CategoryTile(
-                    title: c.name,
-                    subtitle: subtitle,
-                    badgeText: badgeText,
-                    icon: _iconForCategory(c.name),
-                    onTap: () => context.push(AppRoutes.search),
-                  ),
-                );
-              }, childCount: childCount),
+                },
+                childCount: childCount,
+                addAutomaticKeepAlives: false,
+                addRepaintBoundaries: false,
+              ),
             );
           },
         ),
@@ -913,16 +1048,16 @@ class HomeV2SectionRenderer {
   }
 
   List<Widget> _editorialBannerSlivers({required BuildContext context}) {
+    final t = AppLocalizations.of(context)!;
     return [
       SliverPadding(
         padding: EdgeInsets.fromLTRB(12.w, 6.h, 12.w, 6.h),
         sliver: SliverToBoxAdapter(
           child: _EditorialBanner(
-            title: 'Weekend Sale',
-            subtitle: 'Extra 15% off selected items',
-            cta: 'Shop now',
-            imageUrl:
-                'https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=1200&q=70',
+            title: t.homeWeekendSaleTitle,
+            subtitle: t.homeWeekendSaleSubtitle,
+            cta: t.homeWeekendSaleCta,
+            backgroundAsset: 'assets/images/weekend-sale.png',
             onTap: () => context.push(AppRoutes.search),
           ),
         ),
@@ -939,15 +1074,14 @@ class HomeV2SectionRenderer {
   }) {
     if (items.isEmpty) return const <Widget>[];
 
-    final wishlistIds = ref.watch(wishlistIdsProvider);
-
     return [
       SliverPadding(
         padding: EdgeInsets.fromLTRB(0, 6.h, 0, 0),
         sliver: SliverToBoxAdapter(
           child: PickedForYouCarousel(
             items: items,
-            isSaved: (p) => wishlistIds.contains(p.id),
+            reduceMotion: reduceMotion,
+            disableExpensiveEffects: disableExpensiveEffects,
             onToggleSaved: (p) =>
                 ref.read(wishlistViewModelProvider.notifier).toggle(p.id),
             onTap: (p) => context.push('${AppRoutes.product}?id=${p.id}'),
@@ -978,21 +1112,36 @@ class HomeV2SectionRenderer {
                 crossAxisSpacing: spacing,
                 childAspectRatio: 0.80,
               ),
-              delegate: SliverChildBuilderDelegate((context, index) {
-                if (index >= items.length) return const SizedBox.shrink();
-                final p = items[index];
-                final saved = wishlistIds.contains(p.id);
+              delegate: SliverChildBuilderDelegate(
+                (context, index) {
+                  if (index >= items.length) return const SizedBox.shrink();
+                  final p = items[index];
 
-                return PickedForYouCard(
-                  product: p,
-                  isSaved: saved,
-                  imageWidth: tileWidth,
-                  compact: true,
-                  onTap: () => context.push('${AppRoutes.product}?id=${p.id}'),
-                  onToggleSaved: () =>
-                      ref.read(wishlistViewModelProvider.notifier).toggle(p.id),
-                );
-              }, childCount: items.length),
+                  return Consumer(
+                    builder: (context, ref, _) {
+                      final saved = ref.watch(
+                        wishlistIdsProvider.select((ids) => ids.contains(p.id)),
+                      );
+
+                      return PickedForYouCard(
+                        product: p,
+                        isSaved: saved,
+                        imageWidth: tileWidth,
+                        compact: true,
+                        disableExpensiveEffects: disableExpensiveEffects,
+                        onTap: () =>
+                            context.push('${AppRoutes.product}?id=${p.id}'),
+                        onToggleSaved: () => ref
+                            .read(wishlistViewModelProvider.notifier)
+                            .toggle(p.id),
+                      );
+                    },
+                  );
+                },
+                childCount: items.length,
+                addAutomaticKeepAlives: false,
+                addRepaintBoundaries: false,
+              ),
             ),
           );
         },
@@ -1007,12 +1156,10 @@ class HomeV2SectionRenderer {
   }) {
     if (items.isEmpty) return const <Widget>[];
 
-    final wishlistIds = ref.watch(wishlistIdsProvider);
-
     return [
       SliverPadding(
         padding: EdgeInsets.fromLTRB(12.w, 6.h, 12.w, 10.h),
-        sliver: const SliverToBoxAdapter(child: _TrendingMetaRow()),
+        sliver: SliverToBoxAdapter(child: _TrendingMetaRow()),
       ),
       SliverPadding(
         padding: EdgeInsets.fromLTRB(12.w, 0, 12.w, 10.h),
@@ -1027,46 +1174,72 @@ class HomeV2SectionRenderer {
             if (crossAxisCount == 1) {
               final hero = items.first;
               final rest = items.skip(1).toList(growable: false);
+              final childCount = rest.isEmpty ? 1 : rest.length + 2;
 
-              final isHeroSaved = wishlistIds.contains(hero.id);
+              return SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  (context, index) {
+                    if (index == 0) {
+                      return Consumer(
+                        builder: (context, ref, _) {
+                          final isHeroSaved = ref.watch(
+                            wishlistIdsProvider.select(
+                              (ids) => ids.contains(hero.id),
+                            ),
+                          );
 
-              return SliverMainAxisGroup(
-                slivers: [
-                  SliverToBoxAdapter(
-                    child: TrendingHeroCard(
-                      rank: 1,
-                      product: hero,
-                      isSaved: isHeroSaved,
-                      onTap: () =>
-                          context.push('${AppRoutes.product}?id=${hero.id}'),
-                      onToggleSaved: () => ref
-                          .read(wishlistViewModelProvider.notifier)
-                          .toggle(hero.id),
-                    ),
-                  ),
-                  SliverToBoxAdapter(child: SizedBox(height: 12.h)),
-                  SliverList(
-                    delegate: SliverChildBuilderDelegate((context, index) {
-                      final p = rest[index];
-                      final rank = index + 2;
-                      final isSaved = wishlistIds.contains(p.id);
-
-                      return Padding(
-                        padding: EdgeInsets.only(bottom: 10.h),
-                        child: TrendingRankRow(
-                          rank: rank,
-                          product: p,
-                          isSaved: isSaved,
-                          onTap: () =>
-                              context.push('${AppRoutes.product}?id=${p.id}'),
-                          onToggleSaved: () => ref
-                              .read(wishlistViewModelProvider.notifier)
-                              .toggle(p.id),
-                        ),
+                          return TrendingHeroCard(
+                            rank: 1,
+                            product: hero,
+                            isSaved: isHeroSaved,
+                            disableExpensiveEffects: disableExpensiveEffects,
+                            onTap: () => context.push(
+                              '${AppRoutes.product}?id=${hero.id}',
+                            ),
+                            onToggleSaved: () => ref
+                                .read(wishlistViewModelProvider.notifier)
+                                .toggle(hero.id),
+                          );
+                        },
                       );
-                    }, childCount: rest.length),
-                  ),
-                ],
+                    }
+
+                    if (index == 1) {
+                      return SizedBox(height: 12.h);
+                    }
+
+                    final restIndex = index - 2;
+                    final p = rest[restIndex];
+                    final rank = restIndex + 2;
+                    return Consumer(
+                      builder: (context, ref, _) {
+                        final isSaved = ref.watch(
+                          wishlistIdsProvider.select(
+                            (ids) => ids.contains(p.id),
+                          ),
+                        );
+
+                        return Padding(
+                          padding: EdgeInsets.only(bottom: 10.h),
+                          child: TrendingRankRow(
+                            rank: rank,
+                            product: p,
+                            isSaved: isSaved,
+                            disableExpensiveEffects: disableExpensiveEffects,
+                            onTap: () =>
+                                context.push('${AppRoutes.product}?id=${p.id}'),
+                            onToggleSaved: () => ref
+                                .read(wishlistViewModelProvider.notifier)
+                                .toggle(p.id),
+                          ),
+                        );
+                      },
+                    );
+                  },
+                  childCount: childCount,
+                  addAutomaticKeepAlives: false,
+                  addRepaintBoundaries: false,
+                ),
               );
             }
 
@@ -1081,21 +1254,36 @@ class HomeV2SectionRenderer {
                 crossAxisSpacing: spacing,
                 childAspectRatio: 0.62,
               ),
-              delegate: SliverChildBuilderDelegate((context, index) {
-                final p = items[index];
-                final rank = index + 1;
-                final isSaved = wishlistIds.contains(p.id);
+              delegate: SliverChildBuilderDelegate(
+                (context, index) {
+                  final p = items[index];
+                  final rank = index + 1;
 
-                return TrendingCard(
-                  rank: rank,
-                  product: p,
-                  imageWidth: tileWidth,
-                  isSaved: isSaved,
-                  onTap: () => context.push('${AppRoutes.product}?id=${p.id}'),
-                  onToggleSaved: () =>
-                      ref.read(wishlistViewModelProvider.notifier).toggle(p.id),
-                );
-              }, childCount: items.length),
+                  return Consumer(
+                    builder: (context, ref, _) {
+                      final isSaved = ref.watch(
+                        wishlistIdsProvider.select((ids) => ids.contains(p.id)),
+                      );
+
+                      return TrendingCard(
+                        rank: rank,
+                        product: p,
+                        isSaved: isSaved,
+                        imageWidth: tileWidth,
+                        disableExpensiveEffects: disableExpensiveEffects,
+                        onTap: () =>
+                            context.push('${AppRoutes.product}?id=${p.id}'),
+                        onToggleSaved: () => ref
+                            .read(wishlistViewModelProvider.notifier)
+                            .toggle(p.id),
+                      );
+                    },
+                  );
+                },
+                childCount: items.length,
+                addAutomaticKeepAlives: false,
+                addRepaintBoundaries: false,
+              ),
             );
           },
         ),
@@ -1110,6 +1298,7 @@ class _HomeV2Skeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
     return CustomScrollView(
       slivers: [
         SliverAppBar(
@@ -1117,18 +1306,25 @@ class _HomeV2Skeleton extends StatelessWidget {
           titleSpacing: 12,
           title: Row(
             children: [
-              const Text('Nova'),
+              Text(t.brandName),
               SizedBox(width: 10.w),
-              const SizedBox(
-                width: 110,
-                child: NovaSkeleton(child: NovaSkeletonBox(height: 28)),
+              SizedBox(
+                width: 110.w,
+                child: NovaSkeleton(child: NovaSkeletonBox(height: 28.h)),
               ),
               const Spacer(),
               IconButton(
                 key: const Key('home_messages_button'),
-                tooltip: 'Messages',
+                tooltip: t.messagesTitle,
                 onPressed: () {},
-                icon: const Icon(Icons.chat_bubble_outline_rounded),
+                icon: SizedBox(
+                  width: 30.r,
+                  height: 30.r,
+                  child: SvgPicture.asset(
+                    'assets/icons/chat.svg',
+                    fit: BoxFit.contain,
+                  ),
+                ),
               ),
             ],
           ),
@@ -1137,38 +1333,38 @@ class _HomeV2Skeleton extends StatelessWidget {
           padding: AppInsets.screen,
           sliver: SliverList(
             delegate: SliverChildListDelegate([
-              const NovaSkeleton(child: NovaSkeletonBox(height: 46)),
-              const SizedBox(height: 12),
-              const NovaSkeleton(child: NovaSkeletonBox(height: 34)),
-              const SizedBox(height: 12),
-              const NovaSkeleton(child: NovaSkeletonBox(height: 220)),
-              const SizedBox(height: 14),
-              LayoutBuilder(
-                builder: (context, constraints) {
-                  final width = constraints.maxWidth;
-                  final crossAxisCount =
-                      ResponsiveGridDelegate.crossAxisCountForWidth(width);
-                  final itemCount = (crossAxisCount * 2).clamp(0, 12);
-
-                  return NovaSkeleton(
-                    child: GridView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: crossAxisCount,
-                        crossAxisSpacing: 10,
-                        mainAxisSpacing: 10,
-                        childAspectRatio: 1.15,
-                      ),
-                      itemBuilder: (context, index) {
-                        return const NovaSkeletonBox(height: 116, radius: 18);
-                      },
-                      itemCount: itemCount,
-                    ),
-                  );
-                },
-              ),
+              NovaSkeleton(child: NovaSkeletonBox(height: 46.h)),
+              SizedBox(height: 12.h),
+              NovaSkeleton(child: NovaSkeletonBox(height: 34.h)),
+              SizedBox(height: 12.h),
+              NovaSkeleton(child: NovaSkeletonBox(height: 220.h)),
+              SizedBox(height: 14.h),
             ]),
+          ),
+        ),
+        SliverPadding(
+          padding: AppInsets.screen,
+          sliver: SliverLayoutBuilder(
+            builder: (context, constraints) {
+              final width = constraints.crossAxisExtent;
+              final crossAxisCount =
+                  ResponsiveGridDelegate.crossAxisCountForWidth(width);
+              final itemCount = (crossAxisCount * 2).clamp(0, 12);
+
+              return SliverGrid(
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: crossAxisCount,
+                  crossAxisSpacing: 10.w,
+                  mainAxisSpacing: 10.h,
+                  childAspectRatio: 1.15,
+                ),
+                delegate: SliverChildBuilderDelegate((context, index) {
+                  return NovaSkeleton(
+                    child: NovaSkeletonBox(height: 116.h, radius: 18.r),
+                  );
+                }, childCount: itemCount),
+              );
+            },
           ),
         ),
       ],
@@ -1189,7 +1385,10 @@ class _SearchBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final t = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final tt = theme.textTheme;
 
     final radius = BorderRadius.circular(AppRadii.xl);
     final borderSide = BorderSide(
@@ -1214,17 +1413,17 @@ class _SearchBar extends StatelessWidget {
               SizedBox(width: 10.w),
               Expanded(
                 child: Text(
-                  'Search products',
+                  t.searchHintSearchForProducts,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  style: tt.bodyMedium?.copyWith(
                     color: cs.onSurface.withValues(alpha: 0.65),
                     fontWeight: FontWeight.w700,
                   ),
                 ),
               ),
               IconButton(
-                tooltip: 'Filters',
+                tooltip: t.searchTooltipFilters,
                 onPressed: onOpenFilters,
                 visualDensity: VisualDensity.compact,
                 padding: EdgeInsets.zero,
@@ -1243,12 +1442,17 @@ class _SearchBar extends StatelessWidget {
 }
 
 class _CategoryTabsRow extends ConsumerWidget {
-  const _CategoryTabsRow({required this.categories});
+  const _CategoryTabsRow({
+    required this.categories,
+    required this.disableExpensiveEffects,
+  });
 
   final List<String> categories;
+  final bool disableExpensiveEffects;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final t = AppLocalizations.of(context)!;
     final cs = Theme.of(context).colorScheme;
     final active = ref.watch(homeActiveCategoryProvider);
 
@@ -1261,12 +1465,15 @@ class _CategoryTabsRow extends ConsumerWidget {
           final label = categories[index];
           final selected = label == active;
           return _CategoryTabChip(
-            label: label,
+            label: label == 'all'
+                ? t.cartFilterAll
+                : HomeV2SectionRenderer.categoryLabel(t, label),
             selected: selected,
             onTap: () =>
                 ref.read(homeActiveCategoryProvider.notifier).state = label,
             cs: cs,
             index: index,
+            disableExpensiveEffects: disableExpensiveEffects,
           );
         },
         separatorBuilder: (_, __) => SizedBox(width: 8.w),
@@ -1283,6 +1490,7 @@ class _CategoryTabChip extends StatelessWidget {
     required this.onTap,
     required this.cs,
     required this.index,
+    required this.disableExpensiveEffects,
   });
 
   final String label;
@@ -1290,6 +1498,7 @@ class _CategoryTabChip extends StatelessWidget {
   final VoidCallback onTap;
   final ColorScheme cs;
   final int index;
+  final bool disableExpensiveEffects;
 
   @override
   Widget build(BuildContext context) {
@@ -1308,6 +1517,7 @@ class _CategoryTabChip extends StatelessWidget {
       cs: cs,
       index: index,
       selected: selected,
+      enabled: !disableExpensiveEffects,
     );
 
     return InkWell(
@@ -1342,10 +1552,17 @@ class _CategoryTabChip extends StatelessWidget {
 }
 
 class _HeroCarousel extends StatefulWidget {
-  const _HeroCarousel({required this.items, required this.onTap});
+  const _HeroCarousel({
+    required this.items,
+    required this.onTap,
+    required this.reduceMotion,
+    required this.disableExpensiveEffects,
+  });
 
   final List<Product> items;
   final ValueChanged<Product> onTap;
+  final bool reduceMotion;
+  final bool disableExpensiveEffects;
 
   @override
   State<_HeroCarousel> createState() => _HeroCarouselState();
@@ -1375,6 +1592,7 @@ class _HeroCarouselState extends State<_HeroCarousel> {
           child: PageView.builder(
             controller: _controller,
             padEnds: false,
+            allowImplicitScrolling: false,
             itemCount: widget.items.length,
             onPageChanged: (i) => setState(() => _index = i),
             itemBuilder: (context, i) {
@@ -1386,7 +1604,11 @@ class _HeroCarouselState extends State<_HeroCarousel> {
                   left: i == 0 ? 12.w : 0,
                   right: isLast ? 0 : 10.w,
                 ),
-                child: _HeroDealCard(product: p, onTap: () => widget.onTap(p)),
+                child: _HeroDealCard(
+                  product: p,
+                  onTap: () => widget.onTap(p),
+                  disableExpensiveEffects: widget.disableExpensiveEffects,
+                ),
               );
             },
           ),
@@ -1397,7 +1619,9 @@ class _HeroCarouselState extends State<_HeroCarousel> {
           children: [
             for (var i = 0; i < widget.items.length; i++)
               AnimatedContainer(
-                duration: const Duration(milliseconds: 220),
+                duration: widget.reduceMotion
+                    ? Duration.zero
+                    : const Duration(milliseconds: 220),
                 curve: Curves.easeOutCubic,
                 margin: EdgeInsets.symmetric(horizontal: 4.w),
                 width: i == _index ? 18.w : 7.w,
@@ -1419,39 +1643,38 @@ class _HeroCarouselState extends State<_HeroCarousel> {
 }
 
 class _HeroDealCard extends StatelessWidget {
-  const _HeroDealCard({required this.product, required this.onTap});
+  const _HeroDealCard({
+    required this.product,
+    required this.onTap,
+    required this.disableExpensiveEffects,
+  });
 
   final Product product;
   final VoidCallback onTap;
+  final bool disableExpensiveEffects;
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final tt = theme.textTheme;
     final radius = BorderRadius.circular(AppRadii.xl);
-    final dpr = MediaQuery.devicePixelRatioOf(context);
 
     return InkWell(
       borderRadius: radius,
       onTap: onTap,
       child: RepaintBoundary(
         child: Card(
-          clipBehavior: Clip.antiAlias,
+          elevation: 0,
+          clipBehavior: Clip.hardEdge,
           shape: RoundedRectangleBorder(borderRadius: radius),
           child: Stack(
             children: [
               Positioned.fill(
-                child: LayoutBuilder(
-                  builder: (context, constraints) {
-                    final memCacheWidth = (constraints.maxWidth * dpr).round();
-                    final memCacheHeight = (constraints.maxHeight * dpr)
-                        .round();
-                    return AppCachedNetworkImage(
-                      url: product.imageUrl,
-                      backgroundColor: cs.surfaceContainerHigh,
-                      memCacheWidth: memCacheWidth,
-                      memCacheHeight: memCacheHeight,
-                    );
-                  },
+                child: NovaImage(
+                  url: product.imageUrl,
+                  route: NovaImageRoute.productsGrid,
+                  backgroundColor: cs.surfaceContainerHigh,
                 ),
               ),
               Positioned.fill(
@@ -1481,7 +1704,7 @@ class _HeroDealCard extends StatelessWidget {
                       product.brand.toUpperCase(),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      style: tt.labelSmall?.copyWith(
                         color: Colors.white.withValues(alpha: 0.8),
                         fontWeight: FontWeight.w800,
                         letterSpacing: 0.8,
@@ -1492,7 +1715,7 @@ class _HeroDealCard extends StatelessWidget {
                       product.title,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      style: tt.titleLarge?.copyWith(
                         color: Colors.white,
                         fontWeight: FontWeight.w800,
                         height: 1.10,
@@ -1506,7 +1729,9 @@ class _HeroDealCard extends StatelessWidget {
                         border: Border.all(
                           color: cs.outlineVariant.withValues(alpha: 0.45),
                         ),
-                        boxShadow: AppShadows.sm(),
+                        boxShadow: disableExpensiveEffects
+                            ? const <BoxShadow>[]
+                            : AppShadows.sm(),
                       ),
                       child: Padding(
                         padding: EdgeInsets.symmetric(
@@ -1515,11 +1740,10 @@ class _HeroDealCard extends StatelessWidget {
                         ),
                         child: Text(
                           '${product.currency} ${product.price.toStringAsFixed(0)}',
-                          style: Theme.of(context).textTheme.labelLarge
-                              ?.copyWith(
-                                fontWeight: FontWeight.w800,
-                                color: cs.onSurface,
-                              ),
+                          style: tt.labelLarge?.copyWith(
+                            fontWeight: FontWeight.w800,
+                            color: cs.onSurface,
+                          ),
                         ),
                       ),
                     ),
@@ -1539,48 +1763,44 @@ class _EditorialBanner extends StatelessWidget {
     required this.title,
     required this.subtitle,
     required this.cta,
-    required this.imageUrl,
+    required this.backgroundAsset,
     required this.onTap,
   });
 
   final String title;
   final String subtitle;
   final String cta;
-  final String imageUrl;
+  final String backgroundAsset;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final tt = theme.textTheme;
     final radius = BorderRadius.circular(AppRadii.xl);
-    final dpr = MediaQuery.devicePixelRatioOf(context);
+    final hasBackgroundAsset = backgroundAsset.trim().isNotEmpty;
 
     return InkWell(
       borderRadius: radius,
       onTap: onTap,
       child: RepaintBoundary(
         child: Card(
-          clipBehavior: Clip.antiAlias,
+          elevation: 0,
+          clipBehavior: Clip.hardEdge,
           shape: RoundedRectangleBorder(borderRadius: radius),
           child: SizedBox(
             height: 170.h,
             child: Stack(
               children: [
                 Positioned.fill(
-                  child: LayoutBuilder(
-                    builder: (context, constraints) {
-                      final memCacheWidth = (constraints.maxWidth * dpr)
-                          .round();
-                      final memCacheHeight = (constraints.maxHeight * dpr)
-                          .round();
-                      return AppCachedNetworkImage(
-                        url: imageUrl,
-                        backgroundColor: cs.surfaceContainerHigh,
-                        memCacheWidth: memCacheWidth,
-                        memCacheHeight: memCacheHeight,
-                      );
-                    },
-                  ),
+                  child: hasBackgroundAsset
+                      ? Image.asset(backgroundAsset, fit: BoxFit.cover)
+                      : DecoratedBox(
+                          decoration: BoxDecoration(
+                            color: cs.surfaceContainerHigh,
+                          ),
+                        ),
                 ),
                 Positioned.fill(
                   child: DecoratedBox(
@@ -1610,7 +1830,7 @@ class _EditorialBanner extends StatelessWidget {
                         title,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        style: tt.titleLarge?.copyWith(
                           color: Colors.white,
                           fontWeight: FontWeight.w800,
                         ),
@@ -1620,7 +1840,7 @@ class _EditorialBanner extends StatelessWidget {
                         subtitle,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        style: tt.bodyMedium?.copyWith(
                           color: Colors.white.withValues(alpha: 0.9),
                           fontWeight: FontWeight.w600,
                         ),
@@ -1647,7 +1867,10 @@ class _TrendingMetaRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final t = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final tt = theme.textTheme;
 
     return Row(
       children: [
@@ -1658,8 +1881,8 @@ class _TrendingMetaRow extends StatelessWidget {
         ),
         SizedBox(width: 6.w),
         Text(
-          'Updated today',
-          style: Theme.of(context).textTheme.labelMedium?.copyWith(
+          t.homeUpdatedToday,
+          style: tt.labelMedium?.copyWith(
             fontWeight: FontWeight.w800,
             color: cs.onSurface.withValues(alpha: 0.70),
           ),
@@ -1681,6 +1904,7 @@ class TrendingHeroCard extends StatelessWidget {
     required this.rank,
     required this.product,
     required this.isSaved,
+    required this.disableExpensiveEffects,
     required this.onTap,
     required this.onToggleSaved,
     this.discountText,
@@ -1689,26 +1913,30 @@ class TrendingHeroCard extends StatelessWidget {
   final int rank;
   final Product product;
   final bool isSaved;
+  final bool disableExpensiveEffects;
   final VoidCallback onTap;
   final VoidCallback onToggleSaved;
   final String? discountText;
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final tt = theme.textTheme;
     final radius = BorderRadius.circular(AppRadii.xl);
-    final dpr = ScreenUtil().pixelRatio ?? 1.0;
 
     return DecoratedBox(
       decoration: BoxDecoration(
         borderRadius: radius,
         border: Border.all(color: cs.outlineVariant.withValues(alpha: 0.45)),
-        boxShadow: AppShadows.lg(),
+        boxShadow: disableExpensiveEffects
+            ? const <BoxShadow>[]
+            : AppShadows.md(),
       ),
       child: Material(
         color: cs.surface,
         borderRadius: radius,
-        clipBehavior: Clip.antiAlias,
+        clipBehavior: Clip.hardEdge,
         child: InkWell(
           onTap: onTap,
           child: AspectRatio(
@@ -1716,24 +1944,14 @@ class TrendingHeroCard extends StatelessWidget {
             child: Stack(
               children: [
                 Positioned.fill(
-                  child: LayoutBuilder(
-                    builder: (context, constraints) {
-                      final w = constraints.maxWidth;
-                      final h = constraints.maxHeight;
-                      final memCacheWidth = (w * dpr).round();
-                      final memCacheHeight = (h * dpr).round();
-
-                      return Hero(
-                        tag: 'product-${product.id}',
-                        child: AppCachedNetworkImage(
-                          url: product.imageUrl,
-                          fit: BoxFit.cover,
-                          memCacheWidth: memCacheWidth,
-                          memCacheHeight: memCacheHeight,
-                          backgroundColor: cs.surfaceContainerHigh,
-                        ),
-                      );
-                    },
+                  child: Hero(
+                    tag: 'product-${product.id}',
+                    child: NovaImage(
+                      url: product.imageUrl,
+                      route: NovaImageRoute.productsGrid,
+                      fit: BoxFit.cover,
+                      backgroundColor: cs.surfaceContainerHigh,
+                    ),
                   ),
                 ),
                 Positioned.fill(
@@ -1755,7 +1973,11 @@ class TrendingHeroCard extends StatelessWidget {
                 Positioned(
                   left: 12.w,
                   top: 12.h,
-                  child: _TrendingRankBadge(rank: rank, large: true),
+                  child: _TrendingRankBadge(
+                    rank: rank,
+                    large: true,
+                    disableExpensiveEffects: disableExpensiveEffects,
+                  ),
                 ),
                 Positioned(
                   right: 10.w,
@@ -1778,12 +2000,11 @@ class TrendingHeroCard extends StatelessWidget {
                           product.brand.toUpperCase(),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: Theme.of(context).textTheme.labelSmall
-                              ?.copyWith(
-                                color: Colors.white.withValues(alpha: 0.80),
-                                fontWeight: FontWeight.w800,
-                                letterSpacing: 0.7,
-                              ),
+                          style: tt.labelSmall?.copyWith(
+                            color: Colors.white.withValues(alpha: 0.80),
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: 0.7,
+                          ),
                         ),
                         SizedBox(height: 6.h),
                       ],
@@ -1791,7 +2012,7 @@ class TrendingHeroCard extends StatelessWidget {
                         product.title,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        style: tt.titleLarge?.copyWith(
                           color: Colors.white,
                           fontWeight: FontWeight.w800,
                           height: 1.10,
@@ -1829,6 +2050,7 @@ class TrendingRankRow extends StatelessWidget {
     required this.rank,
     required this.product,
     required this.isSaved,
+    required this.disableExpensiveEffects,
     required this.onTap,
     required this.onToggleSaved,
   });
@@ -1836,128 +2058,131 @@ class TrendingRankRow extends StatelessWidget {
   final int rank;
   final Product product;
   final bool isSaved;
+  final bool disableExpensiveEffects;
   final VoidCallback onTap;
   final VoidCallback onToggleSaved;
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final tt = theme.textTheme;
     final radius = BorderRadius.circular(AppRadii.lg);
-    final dpr = MediaQuery.devicePixelRatioOf(context);
 
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: cs.surface,
-        borderRadius: radius,
-        border: Border.all(color: cs.outlineVariant.withValues(alpha: 0.45)),
-        boxShadow: AppShadows.md(),
-      ),
-      child: Material(
-        type: MaterialType.transparency,
-        child: InkWell(
+    return RepaintBoundary(
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: cs.surface,
           borderRadius: radius,
-          onTap: onTap,
-          child: ConstrainedBox(
-            constraints: BoxConstraints(minHeight: 78.h),
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 10.h),
-              child: Row(
-                children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(AppRadii.md),
-                    child: SizedBox(
-                      width: 58.w,
-                      height: 58.w,
-                      child: Stack(
-                        children: [
-                          Positioned.fill(
-                            child: LayoutBuilder(
-                              builder: (context, constraints) {
-                                final memCacheWidth =
-                                    (constraints.maxWidth * dpr).round();
-                                final memCacheHeight =
-                                    (constraints.maxHeight * dpr).round();
-
-                                return AppCachedNetworkImage(
-                                  url: product.imageUrl,
-                                  fit: BoxFit.cover,
-                                  backgroundColor: cs.surfaceContainerHigh,
-                                  memCacheWidth: memCacheWidth,
-                                  memCacheHeight: memCacheHeight,
-                                );
-                              },
+          border: Border.all(color: cs.outlineVariant.withValues(alpha: 0.45)),
+          boxShadow: disableExpensiveEffects
+              ? const <BoxShadow>[]
+              : AppShadows.md(),
+        ),
+        child: Material(
+          type: MaterialType.transparency,
+          child: InkWell(
+            borderRadius: radius,
+            onTap: onTap,
+            child: ConstrainedBox(
+              constraints: BoxConstraints(minHeight: 78.h),
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 10.h),
+                child: Row(
+                  children: [
+                    Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(AppRadii.md),
+                      ),
+                      clipBehavior: Clip.hardEdge,
+                      child: SizedBox(
+                        width: 58.w,
+                        height: 58.w,
+                        child: Stack(
+                          children: [
+                            Positioned.fill(
+                              child: NovaImage(
+                                url: product.imageUrl,
+                                route: NovaImageRoute.productsGrid,
+                                fit: BoxFit.cover,
+                                backgroundColor: cs.surfaceContainerHigh,
+                              ),
                             ),
-                          ),
-                          Positioned(
-                            left: 6.w,
-                            top: 6.h,
-                            child: _TrendingRankBadge(rank: rank),
-                          ),
-                        ],
+                            Positioned(
+                              left: 6.w,
+                              top: 6.h,
+                              child: _TrendingRankBadge(
+                                rank: rank,
+                                disableExpensiveEffects:
+                                    disableExpensiveEffects,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                  SizedBox(width: 10.w),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          product.title,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: Theme.of(context).textTheme.titleSmall
-                              ?.copyWith(fontWeight: FontWeight.w800),
-                        ),
-                        if (product.brand.trim().isNotEmpty) ...[
-                          SizedBox(height: 2.h),
+                    SizedBox(width: 10.w),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
                           Text(
-                            product.brand,
+                            product.title,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: Theme.of(context).textTheme.labelSmall
-                                ?.copyWith(
-                                  fontWeight: FontWeight.w800,
-                                  color: cs.onSurface.withValues(alpha: 0.55),
-                                ),
+                            style: tt.titleSmall?.copyWith(
+                              fontWeight: FontWeight.w800,
+                            ),
                           ),
+                          if (product.brand.trim().isNotEmpty) ...[
+                            SizedBox(height: 2.h),
+                            Text(
+                              product.brand,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: tt.labelSmall?.copyWith(
+                                fontWeight: FontWeight.w800,
+                                color: cs.onSurface.withValues(alpha: 0.55),
+                              ),
+                            ),
+                          ],
                         ],
+                      ),
+                    ),
+                    SizedBox(width: 8.w),
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          '${product.currency} ${product.price.toStringAsFixed(0)}',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: tt.titleSmall?.copyWith(
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                        SizedBox(height: 4.h),
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.trending_up_rounded,
+                              size: 16.r,
+                              color: cs.primary.withValues(alpha: 0.85),
+                            ),
+                            SizedBox(width: 6.w),
+                            _TrendingWishlistButton(
+                              isSaved: isSaved,
+                              onPressed: onToggleSaved,
+                            ),
+                          ],
+                        ),
                       ],
                     ),
-                  ),
-                  SizedBox(width: 8.w),
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Text(
-                        '${product.currency} ${product.price.toStringAsFixed(0)}',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                      SizedBox(height: 4.h),
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            Icons.trending_up_rounded,
-                            size: 16.r,
-                            color: cs.primary.withValues(alpha: 0.85),
-                          ),
-                          SizedBox(width: 6.w),
-                          _TrendingWishlistButton(
-                            isSaved: isSaved,
-                            onPressed: onToggleSaved,
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
@@ -1974,6 +2199,7 @@ class TrendingCard extends StatelessWidget {
     required this.product,
     required this.imageWidth,
     required this.isSaved,
+    required this.disableExpensiveEffects,
     required this.onTap,
     required this.onToggleSaved,
   });
@@ -1982,29 +2208,30 @@ class TrendingCard extends StatelessWidget {
   final Product product;
   final double imageWidth;
   final bool isSaved;
+  final bool disableExpensiveEffects;
   final VoidCallback onTap;
   final VoidCallback onToggleSaved;
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final tt = theme.textTheme;
     final radius = BorderRadius.circular(AppRadii.lg);
-    final dpr = ScreenUtil().pixelRatio ?? 1.0;
-
-    final memCacheWidth = (imageWidth * dpr).round();
-    final memCacheHeight = (imageWidth * dpr).round();
 
     return RepaintBoundary(
       child: DecoratedBox(
         decoration: BoxDecoration(
           borderRadius: radius,
           border: Border.all(color: cs.outlineVariant.withValues(alpha: 0.45)),
-          boxShadow: AppShadows.md(),
+          boxShadow: disableExpensiveEffects
+              ? const <BoxShadow>[]
+              : AppShadows.md(),
         ),
         child: Material(
           color: cs.surface,
           borderRadius: radius,
-          clipBehavior: Clip.antiAlias,
+          clipBehavior: Clip.hardEdge,
           child: InkWell(
             onTap: onTap,
             child: Column(
@@ -2017,11 +2244,12 @@ class TrendingCard extends StatelessWidget {
                       Positioned.fill(
                         child: Hero(
                           tag: 'product-${product.id}',
-                          child: AppCachedNetworkImage(
+                          child: NovaImage(
                             url: product.imageUrl,
+                            route: NovaImageRoute.productsGrid,
                             fit: BoxFit.cover,
-                            memCacheWidth: memCacheWidth,
-                            memCacheHeight: memCacheHeight,
+                            logicalDecodeWidth: imageWidth,
+                            logicalDecodeHeight: imageWidth,
                             backgroundColor: cs.surfaceContainerHigh,
                           ),
                         ),
@@ -2029,7 +2257,10 @@ class TrendingCard extends StatelessWidget {
                       Positioned(
                         left: 8.w,
                         top: 8.h,
-                        child: _TrendingRankBadge(rank: rank),
+                        child: _TrendingRankBadge(
+                          rank: rank,
+                          disableExpensiveEffects: disableExpensiveEffects,
+                        ),
                       ),
                       Positioned(
                         right: 6.w,
@@ -2052,12 +2283,11 @@ class TrendingCard extends StatelessWidget {
                           product.brand.toUpperCase(),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: Theme.of(context).textTheme.labelSmall
-                              ?.copyWith(
-                                fontWeight: FontWeight.w800,
-                                letterSpacing: 0.7,
-                                color: cs.onSurface.withValues(alpha: 0.55),
-                              ),
+                          style: tt.labelSmall?.copyWith(
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: 0.7,
+                            color: cs.onSurface.withValues(alpha: 0.55),
+                          ),
                         ),
                         SizedBox(height: 4.h),
                       ],
@@ -2065,7 +2295,7 @@ class TrendingCard extends StatelessWidget {
                         product.title,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
-                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        style: tt.titleSmall?.copyWith(
                           fontWeight: FontWeight.w800,
                           height: 1.15,
                         ),
@@ -2088,14 +2318,21 @@ class TrendingCard extends StatelessWidget {
 }
 
 class _TrendingRankBadge extends StatelessWidget {
-  const _TrendingRankBadge({required this.rank, this.large = false});
+  const _TrendingRankBadge({
+    required this.rank,
+    this.large = false,
+    this.disableExpensiveEffects = false,
+  });
 
   final int rank;
   final bool large;
+  final bool disableExpensiveEffects;
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final tt = theme.textTheme;
     final r = BorderRadius.circular(AppRadii.pill);
 
     final padding = large
@@ -2103,11 +2340,11 @@ class _TrendingRankBadge extends StatelessWidget {
         : EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h);
 
     final textStyle = large
-        ? Theme.of(context).textTheme.labelLarge?.copyWith(
+        ? tt.labelLarge?.copyWith(
             fontWeight: FontWeight.w800,
             color: Colors.white,
           )
-        : Theme.of(context).textTheme.labelSmall?.copyWith(
+        : tt.labelSmall?.copyWith(
             fontWeight: FontWeight.w800,
             color: Colors.white,
           );
@@ -2123,7 +2360,9 @@ class _TrendingRankBadge extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        boxShadow: AppShadows.sm(),
+        boxShadow: disableExpensiveEffects
+            ? const <BoxShadow>[]
+            : AppShadows.sm(),
       ),
       child: Padding(
         padding: padding,
@@ -2154,7 +2393,6 @@ class _TrendingWishlistButton extends StatelessWidget {
         color: cs.surface.withValues(alpha: 0.86),
         borderRadius: BorderRadius.circular(AppRadii.pill),
         border: Border.all(color: cs.outlineVariant.withValues(alpha: 0.55)),
-        boxShadow: AppShadows.sm(),
       ),
       child: IconButton(
         visualDensity: VisualDensity.compact,
@@ -2178,19 +2416,20 @@ class _TrendingPriceChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final tt = theme.textTheme;
     return DecoratedBox(
       decoration: BoxDecoration(
         color: cs.surface.withValues(alpha: 0.92),
         borderRadius: BorderRadius.circular(AppRadii.pill),
         border: Border.all(color: cs.outlineVariant.withValues(alpha: 0.45)),
-        boxShadow: AppShadows.sm(),
       ),
       child: Padding(
         padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 7.h),
         child: Text(
           text,
-          style: Theme.of(context).textTheme.labelLarge?.copyWith(
+          style: tt.labelLarge?.copyWith(
             fontWeight: FontWeight.w800,
             color: cs.onSurface,
           ),
@@ -2207,19 +2446,20 @@ class _TrendingDiscountChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final tt = theme.textTheme;
     return DecoratedBox(
       decoration: BoxDecoration(
         color: cs.errorContainer.withValues(alpha: 0.92),
         borderRadius: BorderRadius.circular(AppRadii.pill),
         border: Border.all(color: cs.outlineVariant.withValues(alpha: 0.35)),
-        boxShadow: AppShadows.sm(),
       ),
       child: Padding(
         padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 7.h),
         child: Text(
           text,
-          style: Theme.of(context).textTheme.labelLarge?.copyWith(
+          style: tt.labelLarge?.copyWith(
             fontWeight: FontWeight.w800,
             color: cs.onErrorContainer,
           ),
@@ -2233,14 +2473,16 @@ class PickedForYouCarousel extends StatefulWidget {
   const PickedForYouCarousel({
     super.key,
     required this.items,
-    required this.isSaved,
+    required this.reduceMotion,
+    required this.disableExpensiveEffects,
     required this.onTap,
     required this.onToggleSaved,
     required this.onTapSeeAll,
   });
 
   final List<Product> items;
-  final bool Function(Product product) isSaved;
+  final bool reduceMotion;
+  final bool disableExpensiveEffects;
   final void Function(Product product) onTap;
   final void Function(Product product) onToggleSaved;
   final VoidCallback onTapSeeAll;
@@ -2267,7 +2509,9 @@ class _PickedForYouCarouselState extends State<PickedForYouCarousel> {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final t = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -2293,41 +2537,62 @@ class _PickedForYouCarouselState extends State<PickedForYouCarousel> {
               PageView.builder(
                 controller: activeController,
                 padEnds: false,
+                allowImplicitScrolling: false,
                 itemCount: widget.items.length,
                 itemBuilder: (context, index) {
                   final p = widget.items[index];
-                  final saved = widget.isSaved(p);
 
-                  return AnimatedBuilder(
-                    animation: activeController,
-                    builder: (context, child) {
-                      final page = activeController.hasClients
-                          ? (activeController.page ??
-                                activeController.initialPage.toDouble())
-                          : activeController.initialPage.toDouble();
-                      final delta = (page - index).abs();
-                      final t = (1 - (delta * 0.18)).clamp(0.86, 1.0);
+                  return Consumer(
+                    builder: (context, ref, _) {
+                      final saved = ref.watch(
+                        wishlistIdsProvider.select((ids) => ids.contains(p.id)),
+                      );
+                      final card = PickedForYouCard(
+                        product: p,
+                        isSaved: saved,
+                        imageWidth: cardWidth,
+                        disableExpensiveEffects: widget.disableExpensiveEffects,
+                        onTap: () => widget.onTap(p),
+                        onToggleSaved: () => widget.onToggleSaved(p),
+                      );
 
-                      return Padding(
-                        padding: EdgeInsets.only(
-                          left: index == 0 ? 12.w : 10.w,
-                          right: 10.w,
-                          bottom: 6.h,
-                        ),
-                        child: Transform.scale(
-                          scale: t,
-                          alignment: Alignment.center,
-                          child: child,
-                        ),
+                      if (widget.reduceMotion) {
+                        return Padding(
+                          padding: EdgeInsets.only(
+                            left: index == 0 ? 12.w : 10.w,
+                            right: 10.w,
+                            bottom: 6.h,
+                          ),
+                          child: card,
+                        );
+                      }
+
+                      return AnimatedBuilder(
+                        animation: activeController,
+                        builder: (context, child) {
+                          final page = activeController.hasClients
+                              ? (activeController.page ??
+                                    activeController.initialPage.toDouble())
+                              : activeController.initialPage.toDouble();
+                          final delta = (page - index).abs();
+                          final t = (1 - (delta * 0.18)).clamp(0.86, 1.0);
+
+                          return Padding(
+                            padding: EdgeInsets.only(
+                              left: index == 0 ? 12.w : 10.w,
+                              right: 10.w,
+                              bottom: 6.h,
+                            ),
+                            child: Transform.scale(
+                              scale: t,
+                              alignment: Alignment.center,
+                              child: child,
+                            ),
+                          );
+                        },
+                        child: card,
                       );
                     },
-                    child: PickedForYouCard(
-                      product: p,
-                      isSaved: saved,
-                      imageWidth: cardWidth,
-                      onTap: () => widget.onTap(p),
-                      onToggleSaved: () => widget.onToggleSaved(p),
-                    ),
                   );
                 },
               ),
@@ -2341,10 +2606,12 @@ class _PickedForYouCarouselState extends State<PickedForYouCarousel> {
                     border: Border.all(
                       color: cs.outlineVariant.withValues(alpha: 0.45),
                     ),
-                    boxShadow: AppShadows.sm(),
+                    boxShadow: widget.disableExpensiveEffects
+                        ? const <BoxShadow>[]
+                        : AppShadows.sm(),
                   ),
                   child: IconButton(
-                    tooltip: 'See all',
+                    tooltip: t.commonSeeAll,
                     onPressed: widget.onTapSeeAll,
                     icon: const Icon(Icons.arrow_forward_rounded),
                     constraints: BoxConstraints.tightFor(
@@ -2368,6 +2635,7 @@ class PickedForYouCard extends StatelessWidget {
     required this.product,
     required this.isSaved,
     required this.imageWidth,
+    required this.disableExpensiveEffects,
     required this.onTap,
     required this.onToggleSaved,
     this.discountText,
@@ -2377,6 +2645,7 @@ class PickedForYouCard extends StatelessWidget {
   final Product product;
   final bool isSaved;
   final double imageWidth;
+  final bool disableExpensiveEffects;
   final VoidCallback onTap;
   final VoidCallback onToggleSaved;
   final String? discountText;
@@ -2384,24 +2653,24 @@ class PickedForYouCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final tt = theme.textTheme;
     final radius = BorderRadius.circular(compact ? AppRadii.lg : AppRadii.xl);
-    final dpr = ScreenUtil().pixelRatio ?? 1.0;
-
-    final memCacheWidth = (imageWidth * dpr).round();
-    final memCacheHeight = (imageWidth * dpr).round();
 
     return RepaintBoundary(
       child: DecoratedBox(
         decoration: BoxDecoration(
           borderRadius: radius,
           border: Border.all(color: cs.outlineVariant.withValues(alpha: 0.45)),
-          boxShadow: compact ? AppShadows.md() : AppShadows.lg(),
+          boxShadow: disableExpensiveEffects
+              ? const <BoxShadow>[]
+              : AppShadows.md(),
         ),
         child: Material(
           color: cs.surface,
           borderRadius: radius,
-          clipBehavior: Clip.antiAlias,
+          clipBehavior: Clip.hardEdge,
           child: InkWell(
             onTap: onTap,
             child: AspectRatio(
@@ -2411,11 +2680,12 @@ class PickedForYouCard extends StatelessWidget {
                   Positioned.fill(
                     child: Hero(
                       tag: 'product-${product.id}',
-                      child: AppCachedNetworkImage(
+                      child: NovaImage(
                         url: product.imageUrl,
+                        route: NovaImageRoute.productsGrid,
                         fit: BoxFit.cover,
-                        memCacheWidth: memCacheWidth,
-                        memCacheHeight: memCacheHeight,
+                        logicalDecodeWidth: imageWidth,
+                        logicalDecodeHeight: imageWidth,
                         backgroundColor: cs.surfaceContainerHigh,
                       ),
                     ),
@@ -2439,7 +2709,9 @@ class PickedForYouCard extends StatelessWidget {
                   Positioned(
                     left: 10.w,
                     top: 10.h,
-                    child: const _PickedForYouBadge(),
+                    child: _PickedForYouBadge(
+                      disableExpensiveEffects: disableExpensiveEffects,
+                    ),
                   ),
                   Positioned(
                     right: 10.w,
@@ -2462,12 +2734,11 @@ class PickedForYouCard extends StatelessWidget {
                             product.brand.toUpperCase(),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: Theme.of(context).textTheme.labelSmall
-                                ?.copyWith(
-                                  color: Colors.white.withValues(alpha: 0.82),
-                                  fontWeight: FontWeight.w800,
-                                  letterSpacing: 0.7,
-                                ),
+                            style: tt.labelSmall?.copyWith(
+                              color: Colors.white.withValues(alpha: 0.82),
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: 0.7,
+                            ),
                           ),
                           SizedBox(height: 6.h),
                         ],
@@ -2475,12 +2746,11 @@ class PickedForYouCard extends StatelessWidget {
                           product.title,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: Theme.of(context).textTheme.titleMedium
-                              ?.copyWith(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w800,
-                                height: 1.10,
-                              ),
+                          style: tt.titleMedium?.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w800,
+                            height: 1.10,
+                          ),
                         ),
                         SizedBox(height: 10.h),
                         Row(
@@ -2510,11 +2780,16 @@ class PickedForYouCard extends StatelessWidget {
 }
 
 class _PickedForYouBadge extends StatelessWidget {
-  const _PickedForYouBadge();
+  const _PickedForYouBadge({required this.disableExpensiveEffects});
+
+  final bool disableExpensiveEffects;
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final t = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final tt = theme.textTheme;
     final r = BorderRadius.circular(AppRadii.pill);
 
     return DecoratedBox(
@@ -2529,7 +2804,9 @@ class _PickedForYouBadge extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        boxShadow: AppShadows.sm(),
+        boxShadow: disableExpensiveEffects
+            ? const <BoxShadow>[]
+            : AppShadows.sm(),
       ),
       child: Padding(
         padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
@@ -2539,8 +2816,8 @@ class _PickedForYouBadge extends StatelessWidget {
             Icon(Icons.auto_awesome, size: 16.r, color: Colors.white),
             SizedBox(width: 6.w),
             Text(
-              'Picked for you',
-              style: Theme.of(context).textTheme.labelMedium?.copyWith(
+              t.homePickedForYouTitle,
+              style: tt.labelMedium?.copyWith(
                 fontWeight: FontWeight.w800,
                 color: Colors.white,
               ),
@@ -2565,6 +2842,7 @@ class _PickedWishlistButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
     final cs = Theme.of(context).colorScheme;
     final size = large ? 52.r : 48.r;
 
@@ -2573,10 +2851,11 @@ class _PickedWishlistButton extends StatelessWidget {
         color: cs.surface.withValues(alpha: 0.86),
         borderRadius: BorderRadius.circular(AppRadii.pill),
         border: Border.all(color: cs.outlineVariant.withValues(alpha: 0.55)),
-        boxShadow: AppShadows.sm(),
       ),
       child: IconButton(
-        tooltip: isSaved ? 'Remove from wishlist' : 'Add to wishlist',
+        tooltip: isSaved
+            ? t.productRemoveFromWishlistTooltip
+            : t.productSaveToWishlistTooltip,
         onPressed: onPressed,
         visualDensity: VisualDensity.compact,
         padding: EdgeInsets.zero,
@@ -2598,19 +2877,20 @@ class _PickedPriceChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final tt = theme.textTheme;
     return DecoratedBox(
       decoration: BoxDecoration(
         color: cs.surface.withValues(alpha: 0.92),
         borderRadius: BorderRadius.circular(AppRadii.pill),
         border: Border.all(color: cs.outlineVariant.withValues(alpha: 0.45)),
-        boxShadow: AppShadows.sm(),
       ),
       child: Padding(
         padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 7.h),
         child: Text(
           text,
-          style: Theme.of(context).textTheme.labelLarge?.copyWith(
+          style: tt.labelLarge?.copyWith(
             fontWeight: FontWeight.w800,
             color: cs.onSurface,
           ),
@@ -2627,18 +2907,19 @@ class _PickedDiscountChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final tt = theme.textTheme;
     return DecoratedBox(
       decoration: BoxDecoration(
         color: cs.errorContainer.withValues(alpha: 0.92),
         borderRadius: BorderRadius.circular(AppRadii.pill),
-        boxShadow: AppShadows.sm(),
       ),
       child: Padding(
         padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 7.h),
         child: Text(
           text,
-          style: Theme.of(context).textTheme.labelLarge?.copyWith(
+          style: tt.labelLarge?.copyWith(
             fontWeight: FontWeight.w800,
             color: cs.onErrorContainer,
           ),
@@ -2649,8 +2930,13 @@ class _PickedDiscountChip extends StatelessWidget {
 }
 
 class _HomeCategory {
-  const _HomeCategory({required this.name, required this.imageUrl});
+  const _HomeCategory({
+    required this.id,
+    required this.imageUrl,
+    this.backgroundAsset,
+  });
 
-  final String name;
+  final String id;
   final String imageUrl;
+  final String? backgroundAsset;
 }

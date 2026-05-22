@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../../domain/entities/product.dart';
-import '../theme/app_tokens.dart';
-import '../theme/app_shadows.dart';
+import '../../core/domain/entities/product.dart';
+import '../../app/theme/app_tokens.dart';
+import '../../app/theme/app_shadows.dart';
 import 'app_cached_network_image.dart';
 
 class ProductTileCompact extends StatelessWidget {
@@ -24,29 +24,25 @@ class ProductTileCompact extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final radius = BorderRadius.circular(AppRadii.md);
-    final dpr = ScreenUtil().pixelRatio ?? 1.0;
+    final dpr = MediaQuery.devicePixelRatioOf(context);
 
     final titleStrut = const StrutStyle(forceStrutHeight: true, height: 1.15);
 
-    return InkWell(
-      borderRadius: radius,
-      onTap: onTap,
-      child: Card(
-        elevation: AppElevation.low,
-        shadowColor: AppShadows.shadowColor.withValues(alpha: 0.10),
-        clipBehavior: Clip.none,
-        shape: RoundedRectangleBorder(borderRadius: radius),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.max,
-          children: [
-            Expanded(
-              flex: 7,
-              child: ClipRRect(
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(AppRadii.md),
-                  topRight: Radius.circular(AppRadii.md),
-                ),
+    return RepaintBoundary(
+      child: InkWell(
+        borderRadius: radius,
+        onTap: onTap,
+        child: Card(
+          elevation: AppElevation.low,
+          shadowColor: AppShadows.shadowColor.withValues(alpha: 0.10),
+          clipBehavior: Clip.none,
+          shape: RoundedRectangleBorder(borderRadius: radius),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.max,
+            children: [
+              Expanded(
+                flex: 7,
                 child: Stack(
                   children: [
                     Positioned.fill(
@@ -59,6 +55,10 @@ class ProductTileCompact extends StatelessWidget {
                           return AppCachedNetworkImage(
                             url: product.imageUrl,
                             fit: BoxFit.cover,
+                            borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(AppRadii.md),
+                              topRight: Radius.circular(AppRadii.md),
+                            ),
                             memCacheWidth: memCacheWidth,
                             memCacheHeight: memCacheHeight,
                             backgroundColor: cs.surfaceContainerHigh,
@@ -78,67 +78,68 @@ class ProductTileCompact extends StatelessWidget {
                   ],
                 ),
               ),
-            ),
-            Expanded(
-              flex: 5,
-              child: Padding(
-                padding: AppInsets.cardTight.copyWith(
-                  bottom: AppInsets.cardTight.bottom + AppSpace.xxs,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (product.brand.trim().isNotEmpty) ...[
-                      Text(
-                        product.brand,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        softWrap: false,
-                        strutStyle: titleStrut,
-                        style: Theme.of(context).textTheme.labelMedium
-                            ?.copyWith(
-                              fontWeight: FontWeight.w700,
-                              height: 1.15,
-                              color: cs.onSurface.withValues(alpha: 0.65),
-                            ),
-                      ),
-                      SizedBox(height: AppSpace.xxs),
-                    ],
-                    Expanded(
-                      child: Align(
-                        alignment: Alignment.topLeft,
-                        child: Text(
-                          product.title,
-                          maxLines: 2,
+              Expanded(
+                flex: 5,
+                child: Padding(
+                  padding: AppInsets.cardTight.copyWith(
+                    bottom: AppInsets.cardTight.bottom + AppSpace.xxs,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (product.brand.trim().isNotEmpty) ...[
+                        Text(
+                          product.brand,
+                          maxLines: 1,
                           overflow: TextOverflow.ellipsis,
+                          softWrap: false,
                           strutStyle: titleStrut,
-                          style: Theme.of(context).textTheme.titleSmall
+                          style: Theme.of(context).textTheme.labelMedium
                               ?.copyWith(
-                                fontWeight: FontWeight.w900,
+                                fontWeight: FontWeight.w700,
                                 height: 1.15,
+                                color: cs.onSurface.withValues(alpha: 0.65),
                               ),
                         ),
+                        SizedBox(height: AppSpace.xxs),
+                      ],
+                      Expanded(
+                        child: Align(
+                          alignment: Alignment.topLeft,
+                          child: Text(
+                            product.title,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            strutStyle: titleStrut,
+                            style: Theme.of(context).textTheme.titleSmall
+                                ?.copyWith(
+                                  fontWeight: FontWeight.w900,
+                                  height: 1.15,
+                                ),
+                          ),
+                        ),
                       ),
-                    ),
-                    SizedBox(height: AppSpace.xs),
-                    Text(
-                      '${product.currency} ${product.price.toStringAsFixed(0)}',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      strutStyle: const StrutStyle(
-                        forceStrutHeight: true,
-                        height: 1.1,
+                      SizedBox(height: AppSpace.xs),
+                      Text(
+                        '${product.currency} ${product.price.toStringAsFixed(0)}',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        strutStyle: const StrutStyle(
+                          forceStrutHeight: true,
+                          height: 1.1,
+                        ),
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(
+                              fontWeight: FontWeight.w900,
+                              height: 1.1,
+                            ),
                       ),
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w900,
-                        height: 1.1,
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

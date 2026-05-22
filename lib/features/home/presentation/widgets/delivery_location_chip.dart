@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
-import '../../../../core/theme/app_shadows.dart';
+import 'package:nova_commerce/gen_l10n/app_localizations.dart';
+
+import '../../../../app/theme/app_shadows.dart';
 import '../delivery_location_controller.dart';
 
 class DeliveryLocationChip extends ConsumerWidget {
@@ -12,13 +15,45 @@ class DeliveryLocationChip extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final t = AppLocalizations.of(context)!;
     final cs = Theme.of(context).colorScheme;
     final cityAsync = ref.watch(deliveryLocationProvider);
+
+    String resolveCityLabel(String city) {
+      switch (city.trim().toLowerCase()) {
+        case 'beirut':
+          return t.homeCityBeirut;
+        case 'tripoli':
+          return t.homeCityTripoli;
+        case 'sidon':
+          return t.homeCitySidon;
+        case 'tyre':
+          return t.homeCityTyre;
+        case 'jounieh':
+          return t.homeCityJounieh;
+        case 'byblos':
+          return t.homeCityByblos;
+        case 'zahle':
+          return t.homeCityZahle;
+        case 'baalbek':
+          return t.homeCityBaalbek;
+        case 'nabatieh':
+          return t.homeCityNabatieh;
+        case 'batroun':
+          return t.homeCityBatroun;
+        case 'bsharri':
+          return t.homeCityBsharri;
+        case 'aley':
+          return t.homeCityAley;
+        default:
+          return city;
+      }
+    }
 
     final city = cityAsync.when(
       data: (v) => v,
       loading: () => '…',
-      error: (_, __) => 'Beirut',
+      error: (_, __) => t.homeCityBeirut,
     );
 
     return LayoutBuilder(
@@ -27,7 +62,10 @@ class DeliveryLocationChip extends ConsumerWidget {
         final bool ultraCompact = maxW.isFinite && maxW < 72;
         final bool compact = maxW.isFinite && maxW < 140;
 
-        final String label = compact ? city : 'Deliver to $city';
+        final resolvedCity = resolveCityLabel(city);
+        final String label = compact
+            ? resolvedCity
+            : t.homeDeliverToCity(resolvedCity);
 
         return Material(
           color: cs.surface,
@@ -51,10 +89,13 @@ class DeliveryLocationChip extends ConsumerWidget {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(
-                      Icons.location_on_outlined,
-                      size: 16.r,
-                      color: cs.onSurface,
+                    SizedBox(
+                      width: 30.r,
+                      height: 30.r,
+                      child: SvgPicture.asset(
+                        'assets/icons/location.svg',
+                        fit: BoxFit.contain,
+                      ),
                     ),
                     if (!ultraCompact) ...[
                       SizedBox(width: 6.w),

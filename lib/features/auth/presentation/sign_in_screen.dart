@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../core/config/auth_providers.dart';
-import '../../../core/theme/app_colors.dart';
-import '../../../core/theme/app_shadows.dart';
-import '../../../core/theme/app_tokens.dart';
+import '../../../app/theme/app_colors.dart';
+import '../../../app/theme/app_shadows.dart';
+import '../../../app/theme/app_tokens.dart';
 import '../../../core/widgets/app_button.dart';
-import '../../../domain/repositories/auth_repository.dart';
+import 'package:nova_commerce/features/auth/presentation/state/sign_in_controller.dart';
+import 'package:nova_commerce/gen_l10n/app_localizations.dart';
 
 class SignInScreen extends ConsumerStatefulWidget {
   const SignInScreen({super.key});
@@ -23,12 +24,24 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
   final _emailFocus = FocusNode();
   final _passwordFocus = FocusNode();
 
-  String? _emailError;
-  String? _passwordError;
+  AppLocalizations get _l10n => AppLocalizations.of(context)!;
 
-  bool _showPassword = false;
+  String? _mapEmailError(SignInEmailError? error) {
+    final l10n = _l10n;
+    return switch (error) {
+      SignInEmailError.requiredField => l10n.authEmailRequired,
+      SignInEmailError.invalidFormat => l10n.authInvalidEmail,
+      null => null,
+    };
+  }
 
-  bool _busy = false;
+  String? _mapPasswordError(SignInPasswordError? error) {
+    final l10n = _l10n;
+    return switch (error) {
+      SignInPasswordError.requiredField => l10n.authPasswordRequired,
+      null => null,
+    };
+  }
 
   @override
   void dispose() {
@@ -39,122 +52,11 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
     super.dispose();
   }
 
-  String? _validateEmail(String v) {
-    final trimmed = v.trim();
-    if (trimmed.isEmpty) return 'Email is required';
-    final ok = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(trimmed);
-    if (!ok) return 'Enter a valid email address';
-    return null;
-  }
-
-  String? _validatePassword(String v) {
-    if (v.isEmpty) return 'Password is required';
-    return null;
-  }
-
-  bool _validateForm() {
-    final emailError = _validateEmail(_email.text);
-    final passwordError = _validatePassword(_password.text);
-
-    setState(() {
-      _emailError = emailError;
-      _passwordError = passwordError;
-    });
-
-    return emailError == null && passwordError == null;
-  }
-
-  Future<void> _signInEmail() async {
-    final auth = ref.read(authRepositoryProvider);
-    final email = _email.text.trim();
-    final password = _password.text;
-
-    if (!_validateForm()) return;
-
-    setState(() => _busy = true);
-    try {
-      await auth.signInEmail(email: email, password: password);
-      _maybeShowFallbackNotice(auth);
-      if (!mounted) return;
-      context.pop();
-    } on AuthException catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(e.message)));
-    } finally {
-      if (mounted) setState(() => _busy = false);
-    }
-  }
-
-  Future<void> _signUpEmail() async {
-    final auth = ref.read(authRepositoryProvider);
-    final email = _email.text.trim();
-    final password = _password.text;
-
-    if (!_validateForm()) return;
-
-    setState(() => _busy = true);
-    try {
-      await auth.createAccount(email: email, password: password);
-      _maybeShowFallbackNotice(auth);
-      if (!mounted) return;
-      context.pop();
-    } on AuthException catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(e.message)));
-    } finally {
-      if (mounted) setState(() => _busy = false);
-    }
-  }
-
-  Future<void> _signInGoogle() async {
-    final auth = ref.read(authRepositoryProvider);
-
-    setState(() => _busy = true);
-    try {
-      await auth.signInWithGoogle();
-      _maybeShowFallbackNotice(auth);
-      if (!mounted) return;
-      context.pop();
-    } on AuthException catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(e.message)));
-    } finally {
-      if (mounted) setState(() => _busy = false);
-    }
-  }
-
-  Future<void> _continueAsGuest() async {
-    final auth = ref.read(authRepositoryProvider);
-    setState(() => _busy = true);
-    try {
-      await auth.signInAnonymously();
-      _maybeShowFallbackNotice(auth);
-      if (!mounted) return;
-      context.pop();
-    } on AuthException catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(e.message)));
-    } finally {
-      if (mounted) setState(() => _busy = false);
-    }
-  }
-
-  void _maybeShowFallbackNotice(AuthRepository auth) {
-    final notice = auth.takeFallbackNotice();
-    if (notice == null || !mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(notice)));
-  }
-
   @override
   Widget build(BuildContext context) {
+    final l10n = _l10n;
+    final signInState = ref.watch(signInControllerProvider);
+    final signInController = ref.read(signInControllerProvider.notifier);
     final cs = Theme.of(context).colorScheme;
     final t = Theme.of(context).textTheme;
     final width = MediaQuery.sizeOf(context).width;
@@ -167,9 +69,23 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
     final blue = AppColors.categoryChipPalette[0].withValues(alpha: 0.92);
     final red = AppColors.categoryChipPalette[5].withValues(alpha: 0.86);
 
+    ref.listen<int>(signInControllerProvider.select((s) => s.eventId), (
+      previous,
+      next,
+    ) {
+      final event = ref.read(signInControllerProvider).event;
+      if (event is SignInShowMessage) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(event.message)));
+      } else if (event is SignInClose) {
+        context.pop();
+      }
+    });
+
     return Scaffold(
       body: AbsorbPointer(
-        absorbing: _busy,
+        absorbing: signInState.isBusy,
         child: Stack(
           children: [
             Positioned.fill(
@@ -183,12 +99,12 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                 ),
               ),
             ),
-            Positioned(
-              top: -120,
-              right: -140,
+            PositionedDirectional(
+              top: -120.h,
+              end: -140.w,
               child: Container(
-                width: 340,
-                height: 340,
+                width: 340.r,
+                height: 340.r,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   gradient: LinearGradient(
@@ -222,8 +138,8 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                             children: [
                               SizedBox(height: headerTopPad),
                               _BrandHeader(
-                                title: 'Nova',
-                                subtitle: 'Welcome back — sign in to continue',
+                                title: l10n.brandName,
+                                subtitle: l10n.authWelcomeBackSubtitle,
                               ),
                               SizedBox(height: AppSpace.lg),
                               DecoratedBox(
@@ -247,14 +163,14 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                                           CrossAxisAlignment.stretch,
                                       children: [
                                         Text(
-                                          'Sign in',
+                                          l10n.authSignInTitle,
                                           style: t.headlineSmall?.copyWith(
                                             fontWeight: FontWeight.w900,
                                           ),
                                         ),
                                         SizedBox(height: AppSpace.md),
                                         Text(
-                                          'Use your email and password to access your account.',
+                                          l10n.authSignInBody,
                                           style: t.bodyMedium?.copyWith(
                                             color: cs.onSurface.withValues(
                                               alpha: 0.70,
@@ -265,23 +181,19 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                                         _PremiumTextField(
                                           controller: _email,
                                           focusNode: _emailFocus,
-                                          labelText: 'Email',
-                                          hintText: 'you@example.com',
+                                          labelText: l10n.authEmailLabel,
+                                          hintText: l10n.authEmailHint,
                                           keyboardType:
                                               TextInputType.emailAddress,
                                           textInputAction: TextInputAction.next,
                                           autofillHints: const [
                                             AutofillHints.email,
                                           ],
-                                          errorText: _emailError,
+                                          errorText: _mapEmailError(
+                                            signInState.emailError,
+                                          ),
                                           prefixIcon: Icons.mail_outline,
-                                          onChanged: (_) {
-                                            if (_emailError != null) {
-                                              setState(
-                                                () => _emailError = null,
-                                              );
-                                            }
-                                          },
+                                          onChanged: signInController.setEmail,
                                           onSubmitted: () {
                                             _passwordFocus.requestFocus();
                                           },
@@ -290,56 +202,53 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                                         _PremiumTextField(
                                           controller: _password,
                                           focusNode: _passwordFocus,
-                                          labelText: 'Password',
-                                          hintText: '••••••••',
-                                          obscureText: !_showPassword,
+                                          labelText: l10n.authPasswordLabel,
+                                          hintText: l10n.authPasswordHint,
+                                          obscureText:
+                                              !signInState.showPassword,
                                           textInputAction: TextInputAction.done,
                                           autofillHints: const [
                                             AutofillHints.password,
                                           ],
-                                          errorText: _passwordError,
+                                          errorText: _mapPasswordError(
+                                            signInState.passwordError,
+                                          ),
                                           prefixIcon: Icons.lock_outline,
                                           suffix: IconButton(
-                                            onPressed: () {
-                                              setState(() {
-                                                _showPassword = !_showPassword;
-                                              });
-                                            },
+                                            onPressed: signInController
+                                                .togglePasswordVisibility,
                                             icon: Icon(
-                                              _showPassword
+                                              signInState.showPassword
                                                   ? Icons
                                                         .visibility_off_outlined
                                                   : Icons.visibility_outlined,
                                             ),
                                           ),
-                                          onChanged: (_) {
-                                            if (_passwordError != null) {
-                                              setState(
-                                                () => _passwordError = null,
-                                              );
-                                            }
-                                          },
-                                          onSubmitted: _signInEmail,
+                                          onChanged:
+                                              signInController.setPassword,
+                                          onSubmitted:
+                                              signInController.signInEmail,
                                         ),
                                         SizedBox(height: AppSpace.xs),
                                         Align(
-                                          alignment: Alignment.centerRight,
+                                          alignment:
+                                              AlignmentDirectional.centerEnd,
                                           child: TextButton(
-                                            onPressed: _busy
+                                            onPressed: signInState.isBusy
                                                 ? null
                                                 : () {
                                                     ScaffoldMessenger.of(
                                                       context,
                                                     ).showSnackBar(
-                                                      const SnackBar(
+                                                      SnackBar(
                                                         content: Text(
-                                                          'Password reset is not available yet.',
+                                                          l10n.authPasswordResetUnavailable,
                                                         ),
                                                       ),
                                                     );
                                                   },
-                                            child: const Text(
-                                              'Forgot password?',
+                                            child: Text(
+                                              l10n.authForgotPassword,
                                             ),
                                           ),
                                         ),
@@ -347,9 +256,10 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                                         SizedBox(
                                           width: double.infinity,
                                           child: AppButton.primary(
-                                            label: 'Sign in',
-                                            onPressed: _signInEmail,
-                                            isLoading: _busy,
+                                            label: l10n.authSignInTitle,
+                                            onPressed:
+                                                signInController.signInEmail,
+                                            isLoading: signInState.isBusy,
                                             icon: Icons.lock_open_outlined,
                                           ),
                                         ),
@@ -357,9 +267,10 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                                         SizedBox(
                                           width: double.infinity,
                                           child: AppButton.outlined(
-                                            label: 'Continue with Google',
-                                            onPressed: _signInGoogle,
-                                            isLoading: _busy,
+                                            label: l10n.authContinueWithGoogle,
+                                            onPressed:
+                                                signInController.signInGoogle,
+                                            isLoading: signInState.isBusy,
                                             icon: Icons.g_mobiledata,
                                           ),
                                         ),
@@ -367,9 +278,10 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                                         SizedBox(
                                           width: double.infinity,
                                           child: AppButton.outlined(
-                                            label: 'Create account',
-                                            onPressed: _signUpEmail,
-                                            isLoading: _busy,
+                                            label: l10n.authCreateAccount,
+                                            onPressed:
+                                                signInController.signUpEmail,
+                                            isLoading: signInState.isBusy,
                                             icon:
                                                 Icons.person_add_alt_1_outlined,
                                           ),
@@ -378,9 +290,10 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                                         SizedBox(
                                           width: double.infinity,
                                           child: AppButton.text(
-                                            label: 'Continue as guest',
-                                            onPressed: _continueAsGuest,
-                                            isLoading: _busy,
+                                            label: l10n.authContinueAsGuest,
+                                            onPressed: signInController
+                                                .continueAsGuest,
+                                            isLoading: signInState.isBusy,
                                           ),
                                         ),
                                       ],
@@ -390,18 +303,18 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                               ),
                               SizedBox(height: AppSpace.lg),
                               _TrustRow(
-                                items: const [
+                                items: [
                                   _TrustItem(
                                     icon: Icons.lock_outline,
-                                    label: 'Secure',
+                                    label: l10n.trustSecure,
                                   ),
                                   _TrustItem(
                                     icon: Icons.local_shipping_outlined,
-                                    label: 'Fast delivery',
+                                    label: l10n.trustFastDelivery,
                                   ),
                                   _TrustItem(
                                     icon: Icons.support_agent_outlined,
-                                    label: 'Support',
+                                    label: l10n.trustSupport,
                                   ),
                                 ],
                               ),
@@ -439,8 +352,8 @@ class _BrandHeader extends StatelessWidget {
         Row(
           children: [
             Container(
-              width: 42,
-              height: 42,
+              width: 42.r,
+              height: 42.r,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(AppRadii.md),
                 gradient: LinearGradient(
@@ -565,7 +478,7 @@ class _PremiumTextField extends StatelessWidget {
         ),
         SizedBox(height: AppSpace.xs),
         SizedBox(
-          height: 18,
+          height: 18.h,
           child: Text(
             errorText ?? '',
             maxLines: 1,
@@ -603,7 +516,7 @@ class _TrustRow extends StatelessWidget {
             children: [
               Icon(
                 i.icon,
-                size: 16,
+                size: 16.r,
                 color: cs.onSurface.withValues(alpha: 0.65),
               ),
               SizedBox(width: AppSpace.xs),

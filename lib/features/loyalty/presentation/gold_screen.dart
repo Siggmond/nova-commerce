@@ -1,163 +1,295 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:nova_commerce/gen_l10n/app_localizations.dart';
 
-import '../../../core/theme/app_shadows.dart';
-import '../../../core/theme/app_tokens.dart';
+import '../../../app/router/app_routes.dart';
+import '../../../app/theme/app_shadows.dart';
+import '../../../app/theme/app_tokens.dart';
 import '../gold_controller.dart';
+import 'reward_offer_card.dart';
 
 class GoldScreen extends ConsumerWidget {
   const GoldScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final t = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
     final cs = Theme.of(context).colorScheme;
     final gold = ref.watch(goldBalanceProvider);
-    final source = ref.watch(goldSourceLabelProvider);
+    final points = gold.valueOrNull ?? 0;
+
+    final ordersCompletedThisMonth = 0;
+    final monthlyTargetOrders = 0;
+
+    final rewards =
+        const <
+          ({
+            String id,
+            String title,
+            String pointsLabel,
+            String imageUrl,
+            String? badge,
+          })
+        >[];
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Gold')),
-      body: ListView(
-        padding: AppInsets.screen,
-        children: [
-          DecoratedBox(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(AppRadii.xl),
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  cs.primary.withValues(alpha: 0.22),
-                  cs.surfaceContainerHigh,
-                ],
+      body: CustomScrollView(
+        slivers: [
+          SliverAppBar(
+            pinned: true,
+            title: Text(t.goldTitle),
+            actions: [
+              IconButton(
+                tooltip: t.goldInfoTooltip,
+                onPressed: () {
+                  showModalBottomSheet<void>(
+                    context: context,
+                    showDragHandle: true,
+                    builder: (context) {
+                      return Padding(
+                        padding: AppInsets.screen,
+                        child: Text(
+                          t.goldTierRulesPlaceholder,
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                },
+                icon: const Icon(Icons.info_outline_rounded),
               ),
-              border: Border.all(
-                color: cs.outlineVariant.withValues(alpha: 0.55),
+              SizedBox(width: 6.w),
+            ],
+          ),
+          SliverPadding(
+            padding: AppInsets.screen,
+            sliver: SliverToBoxAdapter(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(AppRadii.xl),
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      cs.primary.withValues(alpha: 0.24),
+                      cs.surfaceContainerHigh,
+                    ],
+                  ),
+                  border: Border.all(
+                    color: cs.outlineVariant.withValues(alpha: 0.55),
+                  ),
+                  boxShadow: AppShadows.md(),
+                ),
+                child: Padding(
+                  padding: EdgeInsets.all(16.r),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Text(
+                        t.goldRetentionMessage(
+                          (monthlyTargetOrders - ordersCompletedThisMonth)
+                              .clamp(0, 999999),
+                          t.goldRetentionMonthPlaceholder,
+                        ),
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: cs.onSurface.withValues(alpha: 0.78),
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      SizedBox(height: 14.h),
+                      Center(
+                        child: SizedBox(
+                          width: 148.r,
+                          height: 148.r,
+                          child: Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              SizedBox(
+                                width: 148.r,
+                                height: 148.r,
+                                child: CircularProgressIndicator(
+                                  value: monthlyTargetOrders <= 0
+                                      ? 0
+                                      : (ordersCompletedThisMonth /
+                                                monthlyTargetOrders)
+                                            .clamp(0.0, 1.0),
+                                  strokeWidth: 10,
+                                  strokeCap: StrokeCap.round,
+                                  backgroundColor: cs.onSurface.withValues(
+                                    alpha: 0.08,
+                                  ),
+                                ),
+                              ),
+                              Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  gold.when(
+                                    data: (_) => Text(
+                                      '$points',
+                                      style: theme.textTheme.headlineMedium
+                                          ?.copyWith(
+                                            fontWeight: FontWeight.w900,
+                                            letterSpacing: -0.35,
+                                          ),
+                                    ),
+                                    loading: () => SizedBox(
+                                      width: 22.r,
+                                      height: 22.r,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 3,
+                                        color: cs.primary,
+                                      ),
+                                    ),
+                                    error: (_, __) => Text(
+                                      '—',
+                                      style: theme.textTheme.headlineMedium
+                                          ?.copyWith(
+                                            fontWeight: FontWeight.w900,
+                                            letterSpacing: -0.35,
+                                          ),
+                                    ),
+                                  ),
+                                  SizedBox(height: 2.h),
+                                  Text(
+                                    t.goldPointsLabel,
+                                    style: theme.textTheme.labelMedium
+                                        ?.copyWith(
+                                          color: cs.onSurface.withValues(
+                                            alpha: 0.70,
+                                          ),
+                                          fontWeight: FontWeight.w800,
+                                        ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: 12.h),
+                      Center(
+                        child: TextButton(
+                          onPressed: () =>
+                              context.push(AppRoutes.goldPointsHistory),
+                          child: Text(t.goldPointsHistoryCta),
+                        ),
+                      ),
+                      SizedBox(height: 10.h),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              t.goldOrdersCompletedLabel(
+                                ordersCompletedThisMonth,
+                              ),
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                          ),
+                          Text(
+                            t.goldOrdersOutOfLabel(monthlyTargetOrders),
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: cs.onSurface.withValues(alpha: 0.75),
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
               ),
-              boxShadow: AppShadows.md(),
             ),
-            child: Padding(
-              padding: EdgeInsets.all(14.r),
+          ),
+          SliverPadding(
+            padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 0),
+            sliver: SliverToBoxAdapter(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: cs.surface,
+                  borderRadius: BorderRadius.circular(AppRadii.xl),
+                  border: Border.all(
+                    color: cs.outlineVariant.withValues(alpha: 0.55),
+                  ),
+                ),
+                child: Padding(
+                  padding: EdgeInsets.all(14.r),
+                  child: Text(
+                    t.goldNoticeSimplifiedPoints,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                      color: cs.onSurface.withValues(alpha: 0.78),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          SliverPadding(
+            padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 10.h),
+            sliver: SliverToBoxAdapter(
               child: Row(
                 children: [
-                  Container(
-                    width: 44.r,
-                    height: 44.r,
-                    decoration: BoxDecoration(
-                      color: cs.primary.withValues(alpha: 0.14),
-                      shape: BoxShape.circle,
-                    ),
-                    alignment: Alignment.center,
-                    child: Icon(
-                      Icons.workspace_premium,
-                      color: cs.primary,
-                      size: 22.r,
-                    ),
-                  ),
-                  SizedBox(width: 12.w),
                   Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Your Gold balance',
-                          style: Theme.of(context).textTheme.titleMedium
-                              ?.copyWith(fontWeight: FontWeight.w900),
-                        ),
-                        SizedBox(height: 4.h),
-                        Text(
-                          'Source: $source',
-                          style: Theme.of(context).textTheme.bodySmall
-                              ?.copyWith(
-                                color: cs.onSurface.withValues(alpha: 0.70),
-                              ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  gold.when(
-                    data: (v) => Text(
-                      '$v',
-                      style: Theme.of(context).textTheme.headlineSmall
-                          ?.copyWith(
-                            fontWeight: FontWeight.w900,
-                            color: cs.primary,
-                          ),
-                    ),
-                    loading: () => SizedBox(
-                      width: 22.r,
-                      height: 22.r,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 3,
-                        color: cs.primary,
+                    child: Text(
+                      t.goldDiscountsAndOffersTitle,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: -0.2,
                       ),
                     ),
-                    error: (_, __) => Text(
-                      '—',
-                      style: Theme.of(context).textTheme.headlineSmall
-                          ?.copyWith(
-                            fontWeight: FontWeight.w900,
-                            color: cs.primary,
-                          ),
-                    ),
+                  ),
+                  Icon(
+                    Icons.chevron_right,
+                    color: cs.onSurface.withValues(alpha: 0.55),
                   ),
                 ],
               ),
             ),
           ),
-          SizedBox(height: 12.h),
-          Text(
-            'How Gold is earned',
-            style: Theme.of(
-              context,
-            ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w900),
-          ),
-          SizedBox(height: 6.h),
-          DecoratedBox(
-            decoration: BoxDecoration(
-              color: cs.surface,
-              borderRadius: BorderRadius.circular(AppRadii.lg),
-              border: Border.all(
-                color: cs.outlineVariant.withValues(alpha: 0.55),
+          if (rewards.isEmpty) ...[
+            SliverPadding(
+              padding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 16.h),
+              sliver: SliverToBoxAdapter(
+                child: Text(
+                  t.goldRewardsUnavailableBody,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: cs.onSurface.withValues(alpha: 0.75),
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
               ),
             ),
-            child: Padding(
-              padding: EdgeInsets.all(12.r),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Gold per order is calculated as:',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  SizedBox(height: 6.h),
-                  Text(
-                    'earned = floor(total / 10), minimum 1',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: cs.onSurface.withValues(alpha: 0.78),
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  SizedBox(height: 8.h),
-                  Text(
-                    'Example: 95 total → 9 Gold',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: cs.onSurface.withValues(alpha: 0.70),
-                    ),
-                  ),
-                  SizedBox(height: 2.h),
-                  Text(
-                    'Example: 8 total → 1 Gold (minimum)',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: cs.onSurface.withValues(alpha: 0.70),
-                    ),
-                  ),
-                ],
+          ] else ...[
+            SliverPadding(
+              padding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 18.h),
+              sliver: SliverGrid(
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  mainAxisSpacing: 12.h,
+                  crossAxisSpacing: 12.w,
+                  childAspectRatio: 0.78,
+                ),
+                delegate: SliverChildBuilderDelegate((context, index) {
+                  final r = rewards[index];
+                  return RewardOfferCard(
+                    title: r.title,
+                    pointsLabel: r.pointsLabel,
+                    imageUrl: r.imageUrl,
+                    badgeLabel: r.badge,
+                    onTap: () =>
+                        context.push('${AppRoutes.goldRewardDetails}/${r.id}'),
+                  );
+                }, childCount: rewards.length),
               ),
             ),
-          ),
+          ],
         ],
       ),
     );

@@ -1,14 +1,14 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+﻿import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../core/config/app_env.dart';
-import '../../core/config/auth_providers.dart';
-import '../../data/datasources/shared_prefs_gold_datasource.dart';
-import '../../data/repositories/firestore_gold_repository.dart';
-import '../../data/repositories/shared_prefs_gold_repository.dart';
-import '../../domain/entities/auth_user.dart';
-import '../../domain/repositories/gold_repository.dart';
+import 'package:nova_commerce/app/config/app_env.dart';
+import 'package:nova_commerce/app/di/app_providers.dart';
+import 'package:nova_commerce/features/auth/auth.dart';
+import 'package:nova_commerce/features/loyalty/data/datasources/shared_prefs_gold_datasource.dart';
+import 'package:nova_commerce/features/loyalty/data/repositories/firestore_gold_repository.dart';
+import 'package:nova_commerce/features/loyalty/data/repositories/shared_prefs_gold_repository.dart';
+import 'package:nova_commerce/features/loyalty/domain/repositories/gold_repository.dart';
 
 int goldEarnedFromOrderTotal(double orderTotal) {
   if (orderTotal <= 0) return 0;

@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'package:nova_commerce/data/services/local_data_exporter.dart';
+import 'package:nova_commerce/core/services/local_data_exporter.dart';
 
 void main() {
   test('LocalDataExporter exports cart + wishlist as JSON', () async {

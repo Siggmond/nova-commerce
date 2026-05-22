@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/config/providers.dart';
-import '../../../domain/entities/product.dart';
+import 'package:nova_commerce/app/di/app_providers.dart';
+import '../../../core/domain/entities/product.dart';
 import 'search_categories.dart';
 import 'search_filters.dart';
 
@@ -74,14 +74,26 @@ List<Product> _applyFilters({
 }) {
   final q = filters.query.trim().toLowerCase();
   final category = filters.category.trim();
+  final hasPriceTier = filters.priceTier != null;
+  final hasCategory = category.isNotEmpty && category != 'all';
+  final hasQuery = q.isNotEmpty;
+  final hasSort = filters.sort != SearchSort.recommended;
 
-  final prices = items.map((p) => p.price).toList(growable: false)..sort();
-  final p33 = prices.isEmpty
-      ? 0.0
-      : prices[(prices.length * 0.33).floor().clamp(0, prices.length - 1)];
-  final p66 = prices.isEmpty
-      ? 0.0
-      : prices[(prices.length * 0.66).floor().clamp(0, prices.length - 1)];
+  if (!hasPriceTier && !hasCategory && !hasQuery && !hasSort) {
+    return items;
+  }
+
+  var p33 = 0.0;
+  var p66 = 0.0;
+  if (hasPriceTier) {
+    final prices = items.map((p) => p.price).toList(growable: false)..sort();
+    p33 = prices.isEmpty
+        ? 0.0
+        : prices[(prices.length * 0.33).floor().clamp(0, prices.length - 1)];
+    p66 = prices.isEmpty
+        ? 0.0
+        : prices[(prices.length * 0.66).floor().clamp(0, prices.length - 1)];
+  }
 
   bool matchesPriceTier(Product p) {
     final tier = filters.priceTier;
@@ -100,7 +112,7 @@ List<Product> _applyFilters({
   }
 
   bool matchesCategory(Product p) {
-    if (category.isEmpty || category == 'All') return true;
+    if (!hasCategory) return true;
     return _categoryForProduct(p) == category;
   }
 
@@ -127,17 +139,17 @@ List<Product> _applyFilters({
 }
 
 String _categoryForProduct(Product p) {
-  final names = searchCategoryNames
-      .where((e) => e != 'All')
+  final ids = searchCategoryIds
+      .where((e) => e != 'all')
       .toList(growable: false);
-  if (names.isEmpty) return 'All';
+  if (ids.isEmpty) return 'all';
 
   var hash = 0;
   for (final u in p.id.codeUnits) {
     hash = (hash + u) & 0x7fffffff;
   }
-  final idx = hash % names.length;
-  return names[idx];
+  final idx = hash % ids.length;
+  return ids[idx];
 }
 
 int _stableScore(String s) {

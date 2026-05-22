@@ -1,14 +1,20 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/app_colors.dart';
-import '../../../../core/theme/app_shadows.dart';
-import '../../../../core/theme/app_tokens.dart';
+import '../../../../app/theme/app_colors.dart';
+import '../../../../app/theme/app_shadows.dart';
+import '../../../../app/theme/app_tokens.dart';
 
 class SearchBarFrame extends StatelessWidget {
-  const SearchBarFrame({super.key, required this.child, this.docked = false});
+  const SearchBarFrame({
+    super.key,
+    required this.child,
+    this.docked = false,
+    this.reduceEffects = false,
+  });
 
   final Widget child;
   final bool docked;
+  final bool reduceEffects;
 
   @override
   Widget build(BuildContext context) {
@@ -32,30 +38,40 @@ class SearchBarFrame extends StatelessWidget {
           colors: [blue, cs.primary.withValues(alpha: 0.10), red],
           stops: const [0.0, 0.52, 1.0],
         ),
-        boxShadow: docked ? AppShadows.lg() : AppShadows.md(),
+        boxShadow: reduceEffects
+            ? const <BoxShadow>[]
+            : (docked ? AppShadows.lg() : AppShadows.md()),
       ),
       child: Padding(
         padding: EdgeInsets.all(frameInset),
-        child: ClipRRect(
-          borderRadius: innerRadius,
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              borderRadius: innerRadius,
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  blue.withValues(alpha: 0.18),
-                  Colors.transparent,
-                  red.withValues(alpha: 0.18),
-                ],
-                stops: const [0.0, 0.55, 1.0],
+        child: reduceEffects
+            ? DecoratedBox(
+                decoration: BoxDecoration(
+                  borderRadius: innerRadius,
+                  color: cs.surface,
+                ),
+                child: child,
+              )
+            : ClipRRect(
+                borderRadius: innerRadius,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    borderRadius: innerRadius,
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        blue.withValues(alpha: 0.18),
+                        Colors.transparent,
+                        red.withValues(alpha: 0.18),
+                      ],
+                      stops: const [0.0, 0.55, 1.0],
+                    ),
+                  ),
+                  child: child,
+                ),
               ),
-            ),
-            child: child,
-          ),
         ),
-      ),
     );
   }
 }

@@ -1,17 +1,22 @@
 import 'package:hive/hive.dart';
+import 'package:nova_commerce/core/runtime/local_storage_runtime.dart';
 
-import '../../../domain/entities/chat_message.dart';
-import '../../../domain/entities/chat_session.dart';
+import 'package:nova_commerce/features/ai_assistant/domain/entities/ai_chat_snapshot.dart';
+import 'package:nova_commerce/features/ai_assistant/domain/entities/chat_message.dart';
+import 'package:nova_commerce/features/ai_assistant/domain/entities/chat_session.dart';
+import 'package:nova_commerce/features/ai_assistant/domain/repositories/ai_chat_store.dart';
 
-class AiChatStorage {
+class AiChatStorage implements AiChatStore {
   static const String _boxName = 'ai_chat';
   static const String _sessionsKey = 'sessions';
   static const String _activeSessionKey = 'active_session_id';
 
-  Future<Box<dynamic>> _openBox() {
+  Future<Box<dynamic>> _openBox() async {
+    await LocalStorageRuntime.ensureInitialized();
     return Hive.openBox<dynamic>(_boxName);
   }
 
+  @override
   Future<AiChatSnapshot?> load() async {
     final box = await _openBox();
     final rawSessions = box.get(_sessionsKey);
@@ -31,6 +36,7 @@ class AiChatStorage {
     );
   }
 
+  @override
   Future<void> save({
     required List<ChatSession> sessions,
     required String activeSessionId,
@@ -108,11 +114,4 @@ class AiChatStorage {
       isStreaming: false,
     );
   }
-}
-
-class AiChatSnapshot {
-  const AiChatSnapshot({required this.sessions, required this.activeSessionId});
-
-  final List<ChatSession> sessions;
-  final String activeSessionId;
 }

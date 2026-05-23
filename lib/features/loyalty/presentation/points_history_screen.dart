@@ -12,6 +12,7 @@ class PointsHistoryScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final t = AppLocalizations.of(context)!;
+    final cs = Theme.of(context).colorScheme;
 
     return Scaffold(
       body: CustomScrollView(
@@ -22,21 +23,35 @@ class PointsHistoryScreen extends ConsumerWidget {
             sliver: SliverToBoxAdapter(
               child: DecoratedBox(
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surface,
+                  color: cs.surface,
                   borderRadius: BorderRadius.circular(AppRadii.xl),
                   border: Border.all(
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.outlineVariant.withValues(alpha: 0.55),
+                    color: cs.outlineVariant.withValues(alpha: 0.26),
                   ),
                 ),
                 child: Padding(
                   padding: EdgeInsets.all(14.r),
-                  child: Text(
-                    t.goldPointsHistoryUnavailableBody,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
-                    ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Icon(
+                        Icons.history_rounded,
+                        size: 20.r,
+                        color: cs.onSurface.withValues(alpha: 0.58),
+                      ),
+                      SizedBox(width: AppSpace.sm),
+                      Expanded(
+                        child: Text(
+                          t.goldPointsHistoryUnavailableBody,
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(
+                                fontWeight: FontWeight.w700,
+                                color: cs.onSurface.withValues(alpha: 0.78),
+                                height: 1.28,
+                              ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),

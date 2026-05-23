@@ -125,7 +125,7 @@ class _OffersScreenState extends ConsumerState<OffersScreen> {
     return <Widget>[
       if (feedState.heroItems.isNotEmpty)
         SliverPadding(
-          padding: EdgeInsets.fromLTRB(0, 8.h, 0, 0),
+          padding: EdgeInsets.fromLTRB(0, 10.h, 0, 0),
           sliver: SliverToBoxAdapter(
             child: _FeaturedOffersCarousel(
               offers: feedState.heroItems,
@@ -139,7 +139,7 @@ class _OffersScreenState extends ConsumerState<OffersScreen> {
           ),
         ),
       SliverPadding(
-        padding: EdgeInsets.fromLTRB(12.w, 12.h, 12.w, 16.h),
+        padding: EdgeInsets.fromLTRB(16.w, 14.h, 16.w, 18.h),
         sliver: _OffersResultsSliver(
           items: feedState.items,
           isLoadingMore: feedState.isLoadingMore,
@@ -173,9 +173,9 @@ class _OffersScreenState extends ConsumerState<OffersScreen> {
               pinned: true,
               automaticallyImplyLeading: false,
               titleSpacing: 0,
-              toolbarHeight: 72.h,
+              toolbarHeight: 76.h,
               title: Padding(
-                padding: EdgeInsets.fromLTRB(12.w, 10.h, 12.w, 10.h),
+                padding: EdgeInsets.fromLTRB(16.w, 10.h, 12.w, 10.h),
                 child: Row(
                   children: [
                     _NovaOffersBadge(size: 52.r),
@@ -190,7 +190,7 @@ class _OffersScreenState extends ConsumerState<OffersScreen> {
                             style: Theme.of(context).textTheme.titleLarge
                                 ?.copyWith(
                                   fontWeight: FontWeight.w900,
-                                  letterSpacing: -0.35,
+                                  letterSpacing: 0,
                                 ),
                           ),
                           SizedBox(height: 2.h),
@@ -265,24 +265,26 @@ class _OffersSearchControlsSliver extends ConsumerWidget {
     }
 
     return SliverPadding(
-      padding: AppInsets.screenTight,
+      padding: EdgeInsets.fromLTRB(16.w, 10.h, 16.w, 10.h),
       sliver: SliverToBoxAdapter(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SizedBox(height: 6.h),
+            SizedBox(height: 8.h),
             SizedBox(
-              height: 46.h,
+              height: AppHitTargets.comfortable,
               child: DecoratedBox(
                 decoration: BoxDecoration(
-                  color: cs.surfaceContainerLow,
+                  color: cs.surface,
                   borderRadius: BorderRadius.circular(20.r),
                   border: Border.all(
-                    color: cs.outlineVariant.withValues(alpha: 0.28),
+                    color: cs.outlineVariant.withValues(alpha: 0.24),
                   ),
                   boxShadow: reduceEffects
                       ? const <BoxShadow>[]
-                      : AppShadows.sm(),
+                      : AppShadows.sm(
+                          color: AppShadows.shadowColor.withValues(alpha: 0.08),
+                        ),
                 ),
                 child: TextField(
                   controller: searchController,
@@ -320,7 +322,7 @@ class _OffersSearchControlsSliver extends ConsumerWidget {
                 ),
               ),
             ),
-            SizedBox(height: 10.h),
+            SizedBox(height: 12.h),
             _PremiumQuickTabs(
               value: quickFilter,
               reduceEffects: reduceEffects,
@@ -502,7 +504,7 @@ class _PremiumQuickTabs extends StatelessWidget {
     ];
 
     return SizedBox(
-      height: 42.h + (vPad * 2),
+      height: 44.h + (vPad * 2),
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         clipBehavior: Clip.none,
@@ -519,17 +521,17 @@ class _PremiumQuickTabs extends StatelessWidget {
                 duration: reduceEffects
                     ? Duration.zero
                     : const Duration(milliseconds: 180),
-                padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
+                constraints: BoxConstraints(minHeight: AppHitTargets.min),
+                padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 0),
                 decoration: BoxDecoration(
                   color: selected
-                      ? cs.surfaceContainerLow
-                      : cs.surfaceContainerLow,
+                      ? cs.primary.withValues(alpha: 0.10)
+                      : cs.surface,
                   borderRadius: BorderRadius.circular(AppRadii.pill),
                   border: Border.all(
                     color: selected
-                        ? cs.primary.withValues(alpha: 0.75)
-                        : cs.outlineVariant.withValues(alpha: 0.25),
-                    width: selected ? 1.4 : 1,
+                        ? cs.primary.withValues(alpha: 0.28)
+                        : cs.outlineVariant.withValues(alpha: 0.24),
                   ),
                   boxShadow: reduceEffects
                       ? const <BoxShadow>[]
@@ -537,18 +539,14 @@ class _PremiumQuickTabs extends StatelessWidget {
                             ? AppShadows.sm(
                                 color: cs.primary.withValues(alpha: 0.22),
                               )
-                            : AppShadows.sm(
-                                color: AppShadows.shadowColor.withValues(
-                                  alpha: 0.10,
-                                ),
-                              )),
+                            : const <BoxShadow>[]),
                 ),
                 child: Center(
                   child: Text(
                     item.label,
                     style: Theme.of(context).textTheme.labelLarge?.copyWith(
                       fontWeight: FontWeight.w900,
-                      letterSpacing: -0.1,
+                      letterSpacing: 0,
                       color: selected
                           ? cs.primary
                           : cs.onSurface.withValues(alpha: 0.78),
@@ -590,7 +588,7 @@ class _FeaturedOffersCarousel extends StatelessWidget {
     return Column(
       children: [
         SizedBox(
-          height: 176.h,
+          height: 184.h,
           child: NotificationListener<ScrollNotification>(
             onNotification: (n) {
               if (n is ScrollUpdateNotification && controller.page != null) {
@@ -695,8 +693,8 @@ class _FeaturedHeroCard extends StatelessWidget {
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                     colors: [
-                      Colors.black.withValues(alpha: 0.06),
-                      Colors.black.withValues(alpha: 0.62),
+                      Colors.black.withValues(alpha: 0.04),
+                      Colors.black.withValues(alpha: 0.58),
                     ],
                   ),
                 ),
@@ -726,7 +724,7 @@ class _FeaturedHeroCard extends StatelessWidget {
                         style: Theme.of(context).textTheme.labelSmall?.copyWith(
                           color: Colors.white,
                           fontWeight: FontWeight.w900,
-                          letterSpacing: 0.2,
+                          letterSpacing: 0,
                         ),
                       ),
                     ),
@@ -818,7 +816,7 @@ class _OffersFilterSheetState extends ConsumerState<_OffersFilterSheet> {
   Widget build(BuildContext context) {
     final t = AppLocalizations.of(context)!;
     final cs = Theme.of(context).colorScheme;
-    final radius = BorderRadius.vertical(top: Radius.circular(22.r));
+    final radius = BorderRadius.vertical(top: Radius.circular(28.r));
     final primary = cs.primary;
 
     return DraggableScrollableSheet(
@@ -850,14 +848,14 @@ class _OffersFilterSheetState extends ConsumerState<_OffersFilterSheet> {
                 ),
                 SizedBox(height: 10.h),
                 Padding(
-                  padding: EdgeInsets.fromLTRB(16.w, 4.h, 10.w, 8.h),
+                  padding: EdgeInsets.fromLTRB(20.w, 4.h, 12.w, 10.h),
                   child: Row(
                     children: [
                       Text(
                         t.offersFiltersTitle,
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.w900,
-                          letterSpacing: -0.3,
+                          letterSpacing: 0,
                         ),
                       ),
                       const Spacer(),
@@ -884,7 +882,7 @@ class _OffersFilterSheetState extends ConsumerState<_OffersFilterSheet> {
                 Expanded(
                   child: ListView(
                     controller: scrollController,
-                    padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 12.h),
+                    padding: EdgeInsets.fromLTRB(20.w, 16.h, 20.w, 14.h),
                     children: [
                       _SheetSectionTitle(title: t.offersFiltersSortBy),
                       SizedBox(height: 8.h),
@@ -928,7 +926,7 @@ class _OffersFilterSheetState extends ConsumerState<_OffersFilterSheet> {
                 SafeArea(
                   top: false,
                   child: Padding(
-                    padding: EdgeInsets.fromLTRB(16.w, 10.h, 16.w, 14.h),
+                    padding: EdgeInsets.fromLTRB(20.w, 10.h, 20.w, 14.h),
                     child: SizedBox(
                       width: double.infinity,
                       child: AppButton.primary(
@@ -979,7 +977,7 @@ class _SheetSectionTitle extends StatelessWidget {
       title,
       style: Theme.of(context).textTheme.titleSmall?.copyWith(
         fontWeight: FontWeight.w900,
-        letterSpacing: -0.2,
+        letterSpacing: 0,
       ),
     );
   }
@@ -1161,27 +1159,30 @@ class _FilterChip extends StatelessWidget {
     return InkWell(
       borderRadius: BorderRadius.circular(AppRadii.pill),
       onTap: onTap,
-      child: DecoratedBox(
+      child: Ink(
         decoration: BoxDecoration(
-          color: selected
-              ? cs.primary.withValues(alpha: 0.10)
-              : cs.surfaceContainerLow,
+          color: selected ? cs.primary.withValues(alpha: 0.10) : cs.surface,
           borderRadius: BorderRadius.circular(AppRadii.pill),
           border: Border.all(
             color: selected
-                ? cs.primary.withValues(alpha: 0.5)
-                : cs.outlineVariant.withValues(alpha: 0.3),
+                ? cs.primary.withValues(alpha: 0.32)
+                : cs.outlineVariant.withValues(alpha: 0.26),
           ),
         ),
-        child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
-          child: Text(
-            label,
-            style: Theme.of(context).textTheme.labelLarge?.copyWith(
-              fontWeight: FontWeight.w800,
-              color: selected
-                  ? cs.primary
-                  : cs.onSurface.withValues(alpha: 0.78),
+        child: ConstrainedBox(
+          constraints: BoxConstraints(minHeight: AppHitTargets.min),
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+            child: Center(
+              child: Text(
+                label,
+                style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                  fontWeight: FontWeight.w800,
+                  color: selected
+                      ? cs.primary
+                      : cs.onSurface.withValues(alpha: 0.78),
+                ),
+              ),
             ),
           ),
         ),

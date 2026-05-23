@@ -42,7 +42,7 @@ class RewardDetailsScreen extends StatelessWidget {
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(AppRadii.xl),
                           border: Border.all(
-                            color: cs.outlineVariant.withValues(alpha: 0.55),
+                            color: cs.outlineVariant.withValues(alpha: 0.26),
                           ),
                         ),
                         clipBehavior: Clip.hardEdge,
@@ -60,7 +60,8 @@ class RewardDetailsScreen extends StatelessWidget {
                         t.goldRewardDetailsPlaceholderTitle,
                         style: tt.headlineSmall?.copyWith(
                           fontWeight: FontWeight.w900,
-                          letterSpacing: -0.35,
+                          letterSpacing: 0,
+                          height: 1.12,
                         ),
                       ),
                       SizedBox(height: 6.h),
@@ -80,16 +81,17 @@ class RewardDetailsScreen extends StatelessWidget {
                             vertical: 8.h,
                           ),
                           decoration: BoxDecoration(
-                            color: cs.surfaceContainerHigh,
+                            color: cs.primary.withValues(alpha: 0.10),
                             borderRadius: BorderRadius.circular(AppRadii.pill),
                             border: Border.all(
-                              color: cs.outlineVariant.withValues(alpha: 0.55),
+                              color: cs.primary.withValues(alpha: 0.20),
                             ),
                           ),
                           child: Text(
                             t.goldRewardPointsChip(0),
                             style: tt.labelLarge?.copyWith(
                               fontWeight: FontWeight.w900,
+                              color: cs.primary,
                             ),
                           ),
                         ),
@@ -100,17 +102,31 @@ class RewardDetailsScreen extends StatelessWidget {
                           color: cs.surfaceContainerLow,
                           borderRadius: BorderRadius.circular(AppRadii.xl),
                           border: Border.all(
-                            color: cs.outlineVariant.withValues(alpha: 0.55),
+                            color: cs.outlineVariant.withValues(alpha: 0.26),
                           ),
                         ),
                         child: Padding(
                           padding: EdgeInsets.all(14.r),
-                          child: Text(
-                            t.goldRewardTermsPlaceholder,
-                            style: tt.bodyMedium?.copyWith(
-                              color: cs.onSurface.withValues(alpha: 0.78),
-                              fontWeight: FontWeight.w700,
-                            ),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Icon(
+                                Icons.info_outline_rounded,
+                                size: 20.r,
+                                color: cs.onSurface.withValues(alpha: 0.58),
+                              ),
+                              SizedBox(width: AppSpace.sm),
+                              Expanded(
+                                child: Text(
+                                  t.goldRewardTermsPlaceholder,
+                                  style: tt.bodyMedium?.copyWith(
+                                    color: cs.onSurface.withValues(alpha: 0.78),
+                                    fontWeight: FontWeight.w700,
+                                    height: 1.28,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ),
@@ -127,14 +143,24 @@ class RewardDetailsScreen extends StatelessWidget {
             bottom: 0,
             child: SafeArea(
               top: false,
-              child: Padding(
-                padding: AppInsets.screen,
-                child: SizedBox(
-                  width: double.infinity,
-                  height: AppHitTargets.min,
-                  child: FilledButton(
-                    onPressed: null,
-                    child: Text(t.goldClaimRewardCta),
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: cs.surface.withValues(alpha: 0.96),
+                  border: Border(
+                    top: BorderSide(
+                      color: cs.outlineVariant.withValues(alpha: 0.24),
+                    ),
+                  ),
+                ),
+                child: Padding(
+                  padding: AppInsets.screen,
+                  child: SizedBox(
+                    width: double.infinity,
+                    height: AppHitTargets.min,
+                    child: FilledButton(
+                      onPressed: null,
+                      child: Text(t.goldClaimRewardCta),
+                    ),
                   ),
                 ),
               ),

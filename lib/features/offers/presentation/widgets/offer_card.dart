@@ -32,7 +32,7 @@ class OfferCard extends StatelessWidget {
     final cs = theme.colorScheme;
     final tt = theme.textTheme;
     final dpr = MediaQuery.devicePixelRatioOf(context);
-    final radius = BorderRadius.circular(AppRadii.lg);
+    final radius = BorderRadius.circular(AppRadii.xl);
 
     final expiresIn = offer.endAt.difference(DateTime.now());
     final expiresText = expiresIn.isNegative
@@ -58,8 +58,9 @@ class OfferCard extends StatelessWidget {
       };
     }
 
-    final imageWidth = (variant == OfferCardVariant.row ? 120.0 : 132.0).w;
-    final imageHeight = (variant == OfferCardVariant.row ? 104.0 : 112.0).h;
+    final isRow = variant == OfferCardVariant.row;
+    final imageWidth = (isRow ? 116.0 : 132.0).w;
+    final imageHeight = (isRow ? 108.0 : 112.0).h;
 
     final memCacheWidth = (imageWidth * dpr).round();
     final memCacheHeight = (imageHeight * dpr).round();
@@ -69,10 +70,14 @@ class OfferCard extends StatelessWidget {
         borderRadius: radius,
         onTap: onTap,
         child: Card(
-          elevation: reduceEffects ? 0 : AppElevation.card,
-          shadowColor: AppShadows.shadowColor.withValues(alpha: 0.08),
+          elevation: 0,
+          color: cs.surface,
+          shadowColor: AppShadows.shadowColor.withValues(alpha: 0.06),
           clipBehavior: Clip.hardEdge,
-          shape: RoundedRectangleBorder(borderRadius: radius),
+          shape: RoundedRectangleBorder(
+            borderRadius: radius,
+            side: BorderSide(color: cs.outlineVariant.withValues(alpha: 0.24)),
+          ),
           child: Padding(
             padding: EdgeInsets.fromLTRB(12.w, 12.h, 12.w, 12.h),
             child: Row(
@@ -115,17 +120,24 @@ class OfferCard extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        offer.title,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: tt.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: -0.35,
-                          height: 1.05,
-                        ),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              offer.title,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: tt.titleMedium?.copyWith(
+                                fontWeight: FontWeight.w900,
+                                letterSpacing: 0,
+                                height: 1.08,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                      SizedBox(height: 4.h),
+                      SizedBox(height: 5.h),
                       Text(
                         offer.brandName,
                         maxLines: 1,
@@ -135,27 +147,39 @@ class OfferCard extends StatelessWidget {
                           fontWeight: FontWeight.w700,
                         ),
                       ),
-                      SizedBox(height: 6.h),
+                      SizedBox(height: 7.h),
                       Row(
                         children: [
+                          Icon(
+                            Icons.schedule_rounded,
+                            size: 15.r,
+                            color: cs.onSurface.withValues(alpha: 0.56),
+                          ),
+                          SizedBox(width: 4.w),
                           Flexible(
                             child: Text(
                               expiresText,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: tt.bodySmall?.copyWith(
-                                color: cs.onSurface.withValues(alpha: 0.65),
+                                color: cs.onSurface.withValues(alpha: 0.66),
                                 fontWeight: FontWeight.w700,
                               ),
                             ),
                           ),
-                          SizedBox(width: 8.w),
+                        ],
+                      ),
+                      SizedBox(height: 8.h),
+                      Wrap(
+                        spacing: 6.w,
+                        runSpacing: 6.h,
+                        children: [
+                          for (final channel in offer.channels.take(2))
+                            _Pill(text: _channelLabel(t, channel)),
                           if (offer.promoCode != null)
                             _Pill(text: t.offersPillCode),
-                          if (offer.isFeatured) ...[
-                            SizedBox(width: 6.w),
+                          if (offer.isFeatured)
                             _Pill(text: t.offersPillFeatured),
-                          ],
                         ],
                       ),
                       SizedBox(height: 10.h),
@@ -166,7 +190,7 @@ class OfferCard extends StatelessWidget {
                             color: cs.primary.withValues(alpha: 0.10),
                             borderRadius: BorderRadius.circular(AppRadii.pill),
                             border: Border.all(
-                              color: cs.primary.withValues(alpha: 0.22),
+                              color: cs.primary.withValues(alpha: 0.20),
                             ),
                             boxShadow: reduceEffects
                                 ? const <BoxShadow>[]
@@ -181,7 +205,7 @@ class OfferCard extends StatelessWidget {
                               t.offersViewDealCta,
                               style: tt.labelLarge?.copyWith(
                                 fontWeight: FontWeight.w900,
-                                letterSpacing: -0.15,
+                                letterSpacing: 0,
                                 color: cs.primary,
                               ),
                             ),
@@ -225,7 +249,7 @@ class _Badge extends StatelessWidget {
           text,
           style: tt.labelSmall?.copyWith(
             fontWeight: FontWeight.w900,
-            letterSpacing: 0.4,
+            letterSpacing: 0,
             color: cs.onSurface,
           ),
         ),
@@ -263,4 +287,12 @@ class _Pill extends StatelessWidget {
       ),
     );
   }
+}
+
+String _channelLabel(AppLocalizations t, OfferChannel channel) {
+  return switch (channel) {
+    OfferChannel.online => t.offersChannelOnline,
+    OfferChannel.inStore => t.offersChannelInStore,
+    OfferChannel.other => t.offersChannelAll,
+  };
 }

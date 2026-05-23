@@ -34,7 +34,7 @@ class RewardOfferCard extends StatelessWidget {
         color: cs.surface,
         shape: RoundedRectangleBorder(
           borderRadius: radius,
-          side: BorderSide(color: cs.outlineVariant.withValues(alpha: 0.55)),
+          side: BorderSide(color: cs.outlineVariant.withValues(alpha: 0.26)),
         ),
         elevation: 0,
         child: InkWell(
@@ -43,7 +43,9 @@ class RewardOfferCard extends StatelessWidget {
           child: DecoratedBox(
             decoration: BoxDecoration(
               borderRadius: radius,
-              boxShadow: AppShadows.sm(),
+              boxShadow: AppShadows.sm(
+                color: cs.shadow.withValues(alpha: 0.08),
+              ),
             ),
             child: ClipRRect(
               borderRadius: radius,
@@ -72,9 +74,14 @@ class RewardOfferCard extends StatelessWidget {
                                     vertical: 6.h,
                                   ),
                                   decoration: BoxDecoration(
-                                    color: Colors.black.withValues(alpha: 0.55),
+                                    color: Colors.black.withValues(alpha: 0.46),
                                     borderRadius: BorderRadius.circular(
                                       AppRadii.pill,
+                                    ),
+                                    border: Border.all(
+                                      color: Colors.white.withValues(
+                                        alpha: 0.18,
+                                      ),
                                     ),
                                   ),
                                   child: Text(
@@ -100,7 +107,8 @@ class RewardOfferCard extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                           style: tt.titleSmall?.copyWith(
                             fontWeight: FontWeight.w900,
-                            letterSpacing: -0.2,
+                            letterSpacing: 0,
+                            height: 1.12,
                           ),
                         ),
                         SizedBox(height: 10.h),
@@ -110,16 +118,17 @@ class RewardOfferCard extends StatelessWidget {
                             vertical: 6.h,
                           ),
                           decoration: BoxDecoration(
-                            color: cs.surfaceContainerHigh,
+                            color: cs.primary.withValues(alpha: 0.10),
                             borderRadius: BorderRadius.circular(AppRadii.pill),
                             border: Border.all(
-                              color: cs.outlineVariant.withValues(alpha: 0.55),
+                              color: cs.primary.withValues(alpha: 0.20),
                             ),
                           ),
                           child: Text(
                             pointsLabel,
                             style: tt.labelMedium?.copyWith(
                               fontWeight: FontWeight.w900,
+                              color: cs.primary,
                             ),
                           ),
                         ),

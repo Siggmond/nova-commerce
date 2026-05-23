@@ -29,6 +29,7 @@ class TrendsEditorialSliverSection extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final t = AppLocalizations.of(context)!;
     final productsAsync = ref.watch(trendingProductsProvider);
+    final cs = Theme.of(context).colorScheme;
 
     void toggleSaved(String id) {
       ref.read(wishlistViewModelProvider.notifier).toggle(id);
@@ -37,8 +38,20 @@ class TrendsEditorialSliverSection extends ConsumerWidget {
     return productsAsync.when(
       loading: () => SliverToBoxAdapter(
         child: Padding(
-          padding: EdgeInsets.symmetric(vertical: 18.h),
-          child: Center(child: CircularProgressIndicator()),
+          padding: EdgeInsets.fromLTRB(20.w, 20.h, 20.w, 12.h),
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              color: cs.surface,
+              borderRadius: BorderRadius.circular(AppRadii.xl),
+              border: Border.all(
+                color: cs.outlineVariant.withValues(alpha: 0.34),
+              ),
+            ),
+            child: SizedBox(
+              height: 180.h,
+              child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+            ),
+          ),
         ),
       ),
       error: (e, _) => SliverToBoxAdapter(
@@ -54,7 +67,7 @@ class TrendsEditorialSliverSection extends ConsumerWidget {
           return SliverToBoxAdapter(
             child: AppEmptyState(
               title: t.homeCuratedTrendsEmptyTitle,
-              subtitle: '',
+              subtitle: t.homeCuratedTrendsIntroSubtitle,
               icon: Icons.trending_up_outlined,
             ),
           );
@@ -75,7 +88,7 @@ class TrendsEditorialSliverSection extends ConsumerWidget {
           slivers: [
             SliverToBoxAdapter(
               child: Padding(
-                padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 0),
+                padding: EdgeInsets.fromLTRB(20.w, 16.h, 20.w, 0),
                 child: Consumer(
                   builder: (context, ref, _) {
                     final isSaved = ref.watch(
@@ -96,7 +109,7 @@ class TrendsEditorialSliverSection extends ConsumerWidget {
             ),
             SliverToBoxAdapter(
               child: Padding(
-                padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 8.h),
+                padding: EdgeInsets.fromLTRB(20.w, 16.h, 20.w, 8.h),
                 child: _EditorialIntroCard(
                   title: t.homeCuratedTrendsIntroTitle,
                   subtitle: t.homeCuratedTrendsIntroSubtitle,
@@ -106,7 +119,7 @@ class TrendsEditorialSliverSection extends ConsumerWidget {
             if (favorites.isNotEmpty)
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: EdgeInsets.fromLTRB(8.w, 16.h, 0, 8.h),
+                  padding: EdgeInsets.fromLTRB(20.w, 16.h, 0, 8.h),
                   child: _EditorsFavoritesShowcase(
                     title: t.homeCuratedTrendsEditorsFavoritesTitle,
                     subtitle: t.homeCuratedTrendsEditorsFavoritesSubtitle,
@@ -121,7 +134,7 @@ class TrendsEditorialSliverSection extends ConsumerWidget {
             if (worthALook.isNotEmpty)
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 12.h),
+                  padding: EdgeInsets.fromLTRB(20.w, 18.h, 20.w, 12.h),
                   child: _SectionHeader(
                     title: t.homeCuratedTrendsWorthALookTitle,
                     subtitle: t.homeCuratedTrendsWorthALookSubtitle,
@@ -130,7 +143,7 @@ class TrendsEditorialSliverSection extends ConsumerWidget {
               ),
             if (worthALook.isNotEmpty)
               SliverPadding(
-                padding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 8.h),
+                padding: EdgeInsets.fromLTRB(20.w, 0, 20.w, 8.h),
                 sliver: SliverGrid(
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: _gridCrossAxisCount(context),
@@ -168,7 +181,7 @@ class TrendsEditorialSliverSection extends ConsumerWidget {
             if (morePicks.isNotEmpty)
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 12.h),
+                  padding: EdgeInsets.fromLTRB(20.w, 18.h, 20.w, 12.h),
                   child: _SectionHeader(
                     title: t.homeCuratedTrendsMorePicksTitle,
                     subtitle: t.homeCuratedTrendsMorePicksSubtitle,
@@ -180,7 +193,7 @@ class TrendsEditorialSliverSection extends ConsumerWidget {
                 child: SizedBox(
                   height: 228.h,
                   child: ListView.separated(
-                    padding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 16.h),
+                    padding: EdgeInsets.fromLTRB(20.w, 0, 20.w, 16.h),
                     scrollDirection: Axis.horizontal,
                     itemCount: morePicks.length,
                     separatorBuilder: (_, __) => SizedBox(width: AppSpace.md),
@@ -251,9 +264,10 @@ class _SectionHeader extends StatelessWidget {
       children: [
         Text(
           title,
-          style: Theme.of(
-            context,
-          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900),
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.w900,
+            height: 1.12,
+          ),
         ),
         SizedBox(height: AppSpace.xxs),
         Text(
@@ -279,27 +293,50 @@ class _EditorialIntroCard extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: cs.surfaceContainerHighest,
+        color: cs.surface,
         borderRadius: BorderRadius.circular(AppRadii.xl),
-        border: Border.all(color: cs.outlineVariant.withValues(alpha: 0.55)),
+        border: Border.all(color: cs.outlineVariant.withValues(alpha: 0.34)),
       ),
       child: Padding(
-        padding: EdgeInsets.fromLTRB(12.w, 12.h, 12.w, 12.h),
-        child: Column(
+        padding: EdgeInsets.fromLTRB(14.w, 14.h, 14.w, 14.h),
+        child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              title,
-              style: Theme.of(
-                context,
-              ).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w900),
+            Container(
+              width: 38.r,
+              height: 38.r,
+              decoration: BoxDecoration(
+                color: cs.primary.withValues(alpha: 0.10),
+                borderRadius: BorderRadius.circular(AppRadii.pill),
+                border: Border.all(color: cs.primary.withValues(alpha: 0.18)),
+              ),
+              child: Icon(
+                Icons.trending_up_rounded,
+                color: cs.primary,
+                size: 20.r,
+              ),
             ),
-            SizedBox(height: AppSpace.xs),
-            Text(
-              subtitle,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                height: 1.28,
-                color: cs.onSurface.withValues(alpha: 0.82),
+            SizedBox(width: AppSpace.md),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                      fontWeight: FontWeight.w900,
+                      height: 1.14,
+                    ),
+                  ),
+                  SizedBox(height: AppSpace.xs),
+                  Text(
+                    subtitle,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      height: 1.3,
+                      color: cs.onSurface.withValues(alpha: 0.78),
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
@@ -340,35 +377,26 @@ class _EditorsFavoritesShowcase extends StatelessWidget {
     return DecoratedBox(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(AppRadii.xl),
-        border: Border(
-          top: BorderSide(color: showcaseBorderColor),
-          left: BorderSide(color: showcaseBorderColor),
-          right: BorderSide(color: showcaseBorderColor),
-        ),
+        border: Border.all(color: showcaseBorderColor),
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            cs.primary.withValues(alpha: 0.08),
+            cs.primary.withValues(alpha: 0.06),
             cs.surfaceContainerHigh,
-            cs.surfaceContainerHighest.withValues(alpha: 0.84),
+            cs.surfaceContainerHighest.withValues(alpha: 0.72),
           ],
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.07),
-            blurRadius: 16,
-            offset: const Offset(0, -2),
-          ),
-          BoxShadow(
-            color: cs.primary.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, -1),
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 14,
+            offset: const Offset(0, 6),
           ),
         ],
       ),
       child: Padding(
-        padding: EdgeInsets.fromLTRB(0, 12.h, 0, 14.h),
+        padding: EdgeInsets.fromLTRB(12.w, 14.h, 0, 14.h),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -436,7 +464,7 @@ class _EditorsFavoritesShowcase extends StatelessWidget {
               height: 292.h,
               child: ListView.separated(
                 clipBehavior: Clip.none,
-                padding: EdgeInsetsDirectional.only(start: 12.w),
+                padding: EdgeInsetsDirectional.only(end: 12.w),
                 scrollDirection: Axis.horizontal,
                 itemCount: products.length,
                 separatorBuilder: (_, __) => SizedBox(width: 10.w),
@@ -501,16 +529,12 @@ class _EditorsFavoriteCard extends StatelessWidget {
       child: DecoratedBox(
         decoration: BoxDecoration(
           borderRadius: radius,
+          border: Border.all(color: cs.outlineVariant.withValues(alpha: 0.32)),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.14),
-              blurRadius: 18,
-              offset: const Offset(0, 10),
-            ),
-            BoxShadow(
-              color: cs.primary.withValues(alpha: 0.07),
+              color: Colors.black.withValues(alpha: 0.08),
               blurRadius: 14,
-              offset: const Offset(0, 2),
+              offset: const Offset(0, 8),
             ),
           ],
         ),
@@ -655,13 +679,13 @@ class _EditorsFavoriteCard extends StatelessWidget {
                       children: [
                         if (product.brand.trim().isNotEmpty) ...[
                           Text(
-                            product.brand.toUpperCase(),
+                            product.brand,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: tt.labelSmall?.copyWith(
                               color: cs.onSurface.withValues(alpha: 0.58),
                               fontWeight: FontWeight.w800,
-                              letterSpacing: 0.5,
+                              letterSpacing: 0,
                             ),
                           ),
                           SizedBox(height: 4.h),
@@ -735,7 +759,7 @@ class _EditorialHero extends StatelessWidget {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(AppRadii.xl),
             border: Border.all(
-              color: cs.outlineVariant.withValues(alpha: 0.55),
+              color: cs.outlineVariant.withValues(alpha: 0.38),
             ),
           ),
           clipBehavior: Clip.hardEdge,
@@ -778,45 +802,48 @@ class _EditorialHero extends StatelessWidget {
                   ),
                 ),
                 Positioned(
-                  top: 10,
-                  left: 10,
+                  top: 10.h,
+                  left: 10.w,
                   child: DecoratedBox(
                     decoration: BoxDecoration(
-                      color: cs.surface.withValues(alpha: 0.86),
+                      color: cs.surface.withValues(alpha: 0.90),
                       borderRadius: BorderRadius.circular(AppRadii.pill),
                       border: Border.all(
-                        color: cs.outlineVariant.withValues(alpha: 0.55),
+                        color: cs.outlineVariant.withValues(alpha: 0.42),
                       ),
                     ),
                     child: Padding(
                       padding: EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 6,
+                        horizontal: 10.w,
+                        vertical: 6.h,
                       ),
                       child: Text(
                         t.homeCuratedTrendsEditorsPickBadge,
-                        style: const TextStyle(fontWeight: FontWeight.w900),
+                        style: TextStyle(
+                          color: cs.primary,
+                          fontWeight: FontWeight.w900,
+                        ),
                       ),
                     ),
                   ),
                 ),
                 Positioned(
-                  top: 6.h,
-                  right: 6.w,
+                  top: 8.h,
+                  right: 8.w,
                   child: DecoratedBox(
                     decoration: BoxDecoration(
                       color: cs.surface.withValues(alpha: 0.86),
                       borderRadius: BorderRadius.circular(AppRadii.pill),
                       border: Border.all(
-                        color: cs.outlineVariant.withValues(alpha: 0.5),
+                        color: cs.outlineVariant.withValues(alpha: 0.42),
                       ),
                     ),
                     child: IconButton(
                       visualDensity: VisualDensity.compact,
                       padding: EdgeInsets.zero,
                       constraints: BoxConstraints.tightFor(
-                        width: 40.r,
-                        height: 40.r,
+                        width: AppHitTargets.min,
+                        height: AppHitTargets.min,
                       ),
                       onPressed: onToggleSaved,
                       icon: Icon(

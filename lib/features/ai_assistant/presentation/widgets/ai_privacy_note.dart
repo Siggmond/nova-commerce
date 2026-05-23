@@ -12,29 +12,36 @@ class AiPrivacyNote extends StatelessWidget {
     final t = AppLocalizations.of(context)!;
     final cs = Theme.of(context).colorScheme;
     return Padding(
-      padding: EdgeInsets.fromLTRB(16.w, 10.h, 16.w, 6.h),
+      padding: EdgeInsets.fromLTRB(20.w, 10.h, 20.w, 6.h),
       child: DecoratedBox(
         decoration: BoxDecoration(
-          color: cs.surfaceContainerHighest,
-          borderRadius: BorderRadius.circular(AppRadii.md),
-          border: Border.all(color: cs.outlineVariant.withValues(alpha: 0.5)),
+          color: cs.surface,
+          borderRadius: BorderRadius.circular(AppRadii.lg),
+          border: Border.all(color: cs.outlineVariant.withValues(alpha: 0.34)),
         ),
         child: Padding(
           padding: AppInsets.cardTight,
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Icon(
-                Icons.info_outline,
-                color: cs.onSurface.withValues(alpha: 0.7),
+              Container(
+                width: 34.r,
+                height: 34.r,
+                decoration: BoxDecoration(
+                  color: cs.primary.withValues(alpha: 0.10),
+                  borderRadius: BorderRadius.circular(AppRadii.pill),
+                  border: Border.all(color: cs.primary.withValues(alpha: 0.18)),
+                ),
+                child: Icon(Icons.info_outline, size: 18.r, color: cs.primary),
               ),
               SizedBox(width: AppSpace.sm),
               Expanded(
                 child: Text(
                   t.aiChatPrivacyNote,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: cs.onSurface.withValues(alpha: 0.75),
-                    height: 1.25,
+                    color: cs.onSurface.withValues(alpha: 0.78),
+                    height: 1.32,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ),

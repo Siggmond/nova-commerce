@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:nova_commerce/app/di/app_providers.dart';
 import 'package:nova_commerce/app/router/app_routes.dart';
 import 'package:nova_commerce/app/theme/app_shadows.dart';
+import 'package:nova_commerce/app/theme/app_tokens.dart';
 import 'package:nova_commerce/core/widgets/app_cached_network_image.dart';
 import 'package:nova_commerce/gen_l10n/app_localizations.dart';
 import 'package:nova_commerce/features/ai_assistant/domain/entities/chat_message.dart';
@@ -46,28 +47,24 @@ class _LuxuryInputBar extends StatelessWidget {
     final t = AppLocalizations.of(context)!;
     final cs = Theme.of(context).colorScheme;
     final canSend = !isStreaming;
-    final inputSurface = cs.surfaceContainerLow.withValues(alpha: 0.60);
+    final inputSurface = cs.surfaceContainerLow.withValues(alpha: 0.58);
     return DecoratedBox(
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [cs.surface, inputSurface],
-        ),
-        borderRadius: BorderRadius.circular(28.r),
-        border: Border.all(color: cs.outlineVariant.withValues(alpha: 0.55)),
-        boxShadow: AppShadows.md(color: Colors.black.withValues(alpha: 0.12)),
+        color: inputSurface,
+        borderRadius: BorderRadius.circular(AppRadii.xl),
+        border: Border.all(color: cs.outlineVariant.withValues(alpha: 0.38)),
+        boxShadow: AppShadows.sm(color: Colors.black.withValues(alpha: 0.08)),
       ),
       child: Padding(
-        padding: EdgeInsets.fromLTRB(10.w, 8.h, 8.w, 8.h),
+        padding: EdgeInsets.fromLTRB(10.w, 7.h, 7.w, 7.h),
         child: Row(
           children: [
             DecoratedBox(
               decoration: BoxDecoration(
-                color: cs.surfaceContainerHigh.withValues(alpha: 0.92),
-                borderRadius: BorderRadius.circular(14.r),
+                color: cs.surface.withValues(alpha: 0.92),
+                borderRadius: BorderRadius.circular(AppRadii.md),
                 border: Border.all(
-                  color: cs.outlineVariant.withValues(alpha: 0.45),
+                  color: cs.outlineVariant.withValues(alpha: 0.34),
                 ),
               ),
               child: Padding(
@@ -104,13 +101,18 @@ class _LuxuryInputBar extends StatelessWidget {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 gradient: LinearGradient(
-                  colors: [
-                    cs.primary.withValues(alpha: 0.95),
-                    cs.tertiary.withValues(alpha: 0.85),
-                  ],
+                  colors: canSend
+                      ? [
+                          cs.primary.withValues(alpha: 0.95),
+                          cs.tertiary.withValues(alpha: 0.82),
+                        ]
+                      : [
+                          cs.onSurface.withValues(alpha: 0.22),
+                          cs.onSurface.withValues(alpha: 0.16),
+                        ],
                 ),
                 boxShadow: AppShadows.sm(
-                  color: cs.primary.withValues(alpha: 0.30),
+                  color: cs.primary.withValues(alpha: canSend ? 0.24 : 0.0),
                 ),
               ),
               child: IconButton(
@@ -118,6 +120,10 @@ class _LuxuryInputBar extends StatelessWidget {
                 onPressed: canSend ? onSend : null,
                 icon: Icon(Icons.arrow_upward_rounded, size: 18.r),
                 color: Colors.white,
+                constraints: BoxConstraints.tightFor(
+                  width: AppHitTargets.comfortable,
+                  height: AppHitTargets.comfortable,
+                ),
               ),
             ),
           ],
@@ -173,7 +179,7 @@ class _AiChatScreenState extends ConsumerState<AiChatScreen>
               Expanded(
                 child: ListView.builder(
                   reverse: true,
-                  padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 16.h),
+                  padding: EdgeInsets.fromLTRB(20.w, 16.h, 20.w, 18.h),
                   itemCount: chatItems.length,
                   itemBuilder: (context, index) {
                     final item = chatItems[index];
@@ -196,8 +202,8 @@ class _AiChatScreenState extends ConsumerState<AiChatScreen>
                 duration: const Duration(milliseconds: 220),
                 curve: Curves.easeOutCubic,
                 padding: EdgeInsets.only(
-                  left: 16,
-                  right: 16,
+                  left: 16.w,
+                  right: 16.w,
                   bottom: MediaQuery.of(context).viewInsets.bottom,
                 ),
                 child: SafeArea(
@@ -299,36 +305,12 @@ class _ConciergeBackdrop extends StatelessWidget {
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [
-            cs.primary.withValues(alpha: 0.08),
+            cs.primary.withValues(alpha: 0.06),
             Colors.transparent,
-            cs.tertiary.withValues(alpha: 0.05),
+            cs.surfaceContainerHigh.withValues(alpha: 0.26),
           ],
-          stops: const [0.0, 0.36, 1.0],
+          stops: const [0.0, 0.42, 1.0],
         ),
-      ),
-      child: Stack(
-        children: [
-          Align(
-            alignment: const Alignment(-1.0, -0.86),
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: cs.primary.withValues(alpha: 0.10),
-              ),
-              child: SizedBox(width: 180.w, height: 180.h),
-            ),
-          ),
-          Align(
-            alignment: const Alignment(1.0, -0.70),
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: cs.secondary.withValues(alpha: 0.08),
-              ),
-              child: SizedBox(width: 140.w, height: 140.h),
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -401,7 +383,7 @@ class _ConciergeAppBar extends ConsumerWidget implements PreferredSizeWidget {
     final cs = Theme.of(context).colorScheme;
     return AppBar(
       centerTitle: false,
-      titleSpacing: 12,
+      titleSpacing: 16.w,
       title: Row(
         children: [
           DecoratedBox(
@@ -409,12 +391,12 @@ class _ConciergeAppBar extends ConsumerWidget implements PreferredSizeWidget {
               shape: BoxShape.circle,
               gradient: LinearGradient(
                 colors: [
-                  cs.primary.withValues(alpha: 0.95),
-                  cs.tertiary.withValues(alpha: 0.85),
+                  cs.primary.withValues(alpha: 0.92),
+                  cs.tertiary.withValues(alpha: 0.78),
                 ],
               ),
               boxShadow: AppShadows.sm(
-                color: cs.primary.withValues(alpha: 0.24),
+                color: cs.primary.withValues(alpha: 0.16),
               ),
             ),
             child: Padding(
@@ -432,9 +414,10 @@ class _ConciergeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                   t.aiChatTitle,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: Theme.of(
-                    context,
-                  ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w900),
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w900,
+                    height: 1.1,
+                  ),
                 ),
                 Text(
                   t.aiChatSubtitle,
@@ -443,6 +426,7 @@ class _ConciergeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: cs.onSurface.withValues(alpha: 0.7),
                     fontWeight: FontWeight.w700,
+                    height: 1.15,
                   ),
                 ),
               ],
@@ -488,25 +472,24 @@ class _MessageBubble extends ConsumerWidget {
         _isConciergeQuerySpecificEnough(lastUserText);
 
     final bubbleFg = cs.onSurface;
-    final bubbleRadius = BorderRadius.circular(isUser ? 26 : 22);
+    final bubbleRadius = BorderRadius.circular(
+      isUser ? AppRadii.xl : AppRadii.lg,
+    );
 
     final bubbleDecoration = isUser
         ? BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                cs.primary.withValues(alpha: 0.16),
-                cs.tertiary.withValues(alpha: 0.10),
-              ],
-            ),
+            color: cs.primary.withValues(alpha: 0.11),
             borderRadius: bubbleRadius,
+            border: Border.all(color: cs.primary.withValues(alpha: 0.18)),
           )
         : BoxDecoration(
             color: cs.surface,
             borderRadius: bubbleRadius,
-            boxShadow: AppShadows.md(
-              color: Colors.black.withValues(alpha: 0.10),
+            border: Border.all(
+              color: cs.outlineVariant.withValues(alpha: 0.34),
+            ),
+            boxShadow: AppShadows.sm(
+              color: Colors.black.withValues(alpha: 0.06),
             ),
           );
 
@@ -519,12 +502,12 @@ class _MessageBubble extends ConsumerWidget {
         children: [
           ConstrainedBox(
             constraints: BoxConstraints(
-              maxWidth: MediaQuery.sizeOf(context).width * 0.78,
+              maxWidth: MediaQuery.sizeOf(context).width * 0.80,
             ),
             child: DecoratedBox(
               decoration: bubbleDecoration,
               child: Padding(
-                padding: EdgeInsets.fromLTRB(12.w, 10.h, 12.w, 10.h),
+                padding: EdgeInsets.fromLTRB(13.w, 11.h, 13.w, 11.h),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -536,8 +519,8 @@ class _MessageBubble extends ConsumerWidget {
                               shape: BoxShape.circle,
                               gradient: LinearGradient(
                                 colors: [
-                                  cs.primary.withValues(alpha: 0.95),
-                                  cs.tertiary.withValues(alpha: 0.85),
+                                  cs.primary.withValues(alpha: 0.92),
+                                  cs.tertiary.withValues(alpha: 0.78),
                                 ],
                               ),
                             ),
@@ -576,9 +559,9 @@ class _MessageBubble extends ConsumerWidget {
                     else
                       Text(
                         _localizedAssistantSeedMessage(t, message.text),
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: bubbleFg,
-                          height: 1.28,
+                          height: 1.34,
                           fontWeight: isUser
                               ? FontWeight.w700
                               : FontWeight.w600,
@@ -632,15 +615,15 @@ class _ChatContextPanel extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: cs.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(color: cs.outlineVariant.withValues(alpha: 0.5)),
+        color: cs.surface,
+        borderRadius: BorderRadius.circular(AppRadii.lg),
+        border: Border.all(color: cs.outlineVariant.withValues(alpha: 0.36)),
       ),
       child: Padding(
         padding: EdgeInsets.fromLTRB(12.w, 10.h, 12.w, 10.h),
         child: Wrap(
-          spacing: 8,
-          runSpacing: 8,
+          spacing: AppSpace.sm,
+          runSpacing: AppSpace.sm,
           children: [
             _ContextChip(
               label: t.navCart,
@@ -668,9 +651,9 @@ class _ContextChip extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: cs.surface,
-        borderRadius: BorderRadius.circular(999.r),
-        border: Border.all(color: cs.outlineVariant.withValues(alpha: 0.5)),
+        color: cs.surfaceContainerHighest.withValues(alpha: 0.38),
+        borderRadius: BorderRadius.circular(AppRadii.pill),
+        border: Border.all(color: cs.outlineVariant.withValues(alpha: 0.34)),
       ),
       child: Padding(
         padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
@@ -704,10 +687,11 @@ class _ChatSessionsSheet extends ConsumerWidget {
     final sessions = state.filteredSessions;
     final cs = Theme.of(context).colorScheme;
     return Padding(
-      padding: EdgeInsets.only(
-        left: 16,
-        right: 16,
-        bottom: MediaQuery.of(context).viewInsets.bottom + 16,
+      padding: EdgeInsets.fromLTRB(
+        20.w,
+        4.h,
+        20.w,
+        MediaQuery.of(context).viewInsets.bottom + 18.h,
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -733,13 +717,13 @@ class _ChatSessionsSheet extends ConsumerWidget {
               ),
             ],
           ),
-          SizedBox(height: 12.h),
+          SizedBox(height: AppSpace.md),
           DecoratedBox(
             decoration: BoxDecoration(
               color: cs.surface,
-              borderRadius: BorderRadius.circular(16.r),
+              borderRadius: BorderRadius.circular(AppRadii.lg),
               border: Border.all(
-                color: cs.outlineVariant.withValues(alpha: 0.55),
+                color: cs.outlineVariant.withValues(alpha: 0.38),
               ),
             ),
             child: TextField(
@@ -750,6 +734,7 @@ class _ChatSessionsSheet extends ConsumerWidget {
                 hintText: t.aiChatSearchSessionsHint,
                 prefixIcon: const Icon(Icons.search),
                 border: InputBorder.none,
+                contentPadding: EdgeInsets.symmetric(vertical: 14.h),
                 hintStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: cs.onSurface.withValues(alpha: 0.65),
                   fontWeight: FontWeight.w700,
@@ -757,11 +742,11 @@ class _ChatSessionsSheet extends ConsumerWidget {
               ),
             ),
           ),
-          SizedBox(height: 12.h),
+          SizedBox(height: AppSpace.md),
           Flexible(
             child: ListView.separated(
               itemCount: sessions.length,
-              separatorBuilder: (_, __) => SizedBox(height: 10.h),
+              separatorBuilder: (_, __) => SizedBox(height: AppSpace.sm),
               itemBuilder: (context, index) {
                 final session = sessions[index];
                 final preview = session.messages.isEmpty
@@ -775,15 +760,17 @@ class _ChatSessionsSheet extends ConsumerWidget {
                         .selectSession(session.id);
                     Navigator.of(context).pop();
                   },
-                  borderRadius: BorderRadius.circular(18.r),
+                  borderRadius: BorderRadius.circular(AppRadii.lg),
                   child: DecoratedBox(
                     decoration: BoxDecoration(
                       color: selected
-                          ? cs.primary.withValues(alpha: 0.08)
+                          ? cs.primary.withValues(alpha: 0.07)
                           : cs.surface,
-                      borderRadius: BorderRadius.circular(18.r),
+                      borderRadius: BorderRadius.circular(AppRadii.lg),
                       border: Border.all(
-                        color: cs.outlineVariant.withValues(alpha: 0.55),
+                        color: selected
+                            ? cs.primary.withValues(alpha: 0.24)
+                            : cs.outlineVariant.withValues(alpha: 0.36),
                       ),
                     ),
                     child: Padding(
@@ -872,6 +859,8 @@ class _MessageActions extends ConsumerWidget {
         OutlinedButton.icon(
           style: OutlinedButton.styleFrom(
             textStyle: Theme.of(context).textTheme.labelMedium,
+            minimumSize: Size(0, AppHitTargets.min),
+            padding: EdgeInsets.symmetric(horizontal: 12.w),
           ),
           onPressed: () {
             Clipboard.setData(ClipboardData(text: message.text));
@@ -885,6 +874,8 @@ class _MessageActions extends ConsumerWidget {
         OutlinedButton.icon(
           style: OutlinedButton.styleFrom(
             textStyle: Theme.of(context).textTheme.labelMedium,
+            minimumSize: Size(0, AppHitTargets.min),
+            padding: EdgeInsets.symmetric(horizontal: 12.w),
           ),
           onPressed: () =>
               ref.read(aiChatViewModelProvider.notifier).regenerateLast(),
@@ -911,8 +902,9 @@ class _InlineResultsSection extends ConsumerWidget {
       child: DecoratedBox(
         decoration: BoxDecoration(
           color: cs.surface,
-          borderRadius: BorderRadius.circular(22.r),
-          boxShadow: AppShadows.md(color: Colors.black.withValues(alpha: 0.10)),
+          borderRadius: BorderRadius.circular(AppRadii.xl),
+          border: Border.all(color: cs.outlineVariant.withValues(alpha: 0.34)),
+          boxShadow: AppShadows.sm(color: Colors.black.withValues(alpha: 0.06)),
         ),
         child: Padding(
           padding: EdgeInsets.fromLTRB(12.w, 12.h, 12.w, 12.h),
@@ -999,13 +991,13 @@ class _InlineProductCard extends StatelessWidget {
       width: 190.w,
       child: InkWell(
         onTap: () => context.push('${AppRoutes.product}?id=${product.id}'),
-        borderRadius: BorderRadius.circular(18.r),
+        borderRadius: BorderRadius.circular(AppRadii.lg),
         child: DecoratedBox(
           decoration: BoxDecoration(
             color: cs.surface,
-            borderRadius: BorderRadius.circular(18.r),
+            borderRadius: BorderRadius.circular(AppRadii.lg),
             border: Border.all(
-              color: cs.outlineVariant.withValues(alpha: 0.55),
+              color: cs.outlineVariant.withValues(alpha: 0.34),
             ),
           ),
           child: Padding(
@@ -1070,7 +1062,12 @@ class _InlineProductCard extends StatelessWidget {
                           child: DecoratedBox(
                             decoration: BoxDecoration(
                               color: buttonBg,
-                              borderRadius: BorderRadius.circular(999.r),
+                              borderRadius: BorderRadius.circular(
+                                AppRadii.pill,
+                              ),
+                              border: Border.all(
+                                color: cs.primary.withValues(alpha: 0.16),
+                              ),
                             ),
                             child: Padding(
                               padding: EdgeInsets.symmetric(
@@ -1228,26 +1225,18 @@ class _ConciergeLanding extends StatelessWidget {
     ];
 
     return Padding(
-      padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 10.h),
+      padding: EdgeInsets.fromLTRB(20.w, 10.h, 20.w, 10.h),
       child: Column(
         children: [
           DecoratedBox(
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  cs.primary.withValues(alpha: 0.10),
-                  cs.surface,
-                  cs.tertiary.withValues(alpha: 0.10),
-                ],
-              ),
-              borderRadius: BorderRadius.circular(24.r),
-              boxShadow: AppShadows.md(
-                color: Colors.black.withValues(alpha: 0.10),
+              color: cs.surface,
+              borderRadius: BorderRadius.circular(AppRadii.xl),
+              boxShadow: AppShadows.sm(
+                color: Colors.black.withValues(alpha: 0.06),
               ),
               border: Border.all(
-                color: cs.outlineVariant.withValues(alpha: 0.55),
+                color: cs.outlineVariant.withValues(alpha: 0.36),
               ),
             ),
             child: Padding(
@@ -1260,8 +1249,8 @@ class _ConciergeLanding extends StatelessWidget {
                       shape: BoxShape.circle,
                       gradient: LinearGradient(
                         colors: [
-                          cs.primary.withValues(alpha: 0.95),
-                          cs.tertiary.withValues(alpha: 0.85),
+                          cs.primary.withValues(alpha: 0.92),
+                          cs.tertiary.withValues(alpha: 0.78),
                         ],
                       ),
                     ),
@@ -1315,7 +1304,7 @@ class _ConciergeLanding extends StatelessWidget {
               ),
             ),
           ),
-          SizedBox(height: 12.h),
+          SizedBox(height: AppSpace.md),
           SizedBox(
             height: 116.h,
             child: ListView.separated(
@@ -1359,21 +1348,13 @@ class _ActionTile extends StatelessWidget {
       width: 180.w,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(20.r),
+        borderRadius: BorderRadius.circular(AppRadii.lg),
         child: DecoratedBox(
           decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                tint.withValues(alpha: 0.18),
-                tint.withValues(alpha: 0.06),
-                cs.surface,
-              ],
-            ),
-            borderRadius: BorderRadius.circular(20.r),
-            border: Border.all(color: tint.withValues(alpha: 0.30)),
-            boxShadow: AppShadows.sm(color: tint.withValues(alpha: 0.22)),
+            color: cs.surface,
+            borderRadius: BorderRadius.circular(AppRadii.lg),
+            border: Border.all(color: tint.withValues(alpha: 0.20)),
+            boxShadow: AppShadows.sm(color: tint.withValues(alpha: 0.10)),
           ),
           child: Padding(
             padding: EdgeInsets.fromLTRB(12.w, 10.h, 12.w, 10.h),
@@ -1381,11 +1362,9 @@ class _ActionTile extends StatelessWidget {
               children: [
                 DecoratedBox(
                   decoration: BoxDecoration(
-                    color: cs.surface.withValues(alpha: 0.90),
+                    color: tint.withValues(alpha: 0.10),
                     borderRadius: BorderRadius.circular(12.r),
-                    border: Border.all(
-                      color: cs.outlineVariant.withValues(alpha: 0.42),
-                    ),
+                    border: Border.all(color: tint.withValues(alpha: 0.18)),
                   ),
                   child: Padding(
                     padding: EdgeInsets.all(7.r),
@@ -1436,8 +1415,11 @@ class _DaySeparator extends StatelessWidget {
       child: Center(
         child: DecoratedBox(
           decoration: BoxDecoration(
-            color: cs.surfaceContainerHighest,
-            borderRadius: BorderRadius.circular(999.r),
+            color: cs.surfaceContainerHighest.withValues(alpha: 0.52),
+            borderRadius: BorderRadius.circular(AppRadii.pill),
+            border: Border.all(
+              color: cs.outlineVariant.withValues(alpha: 0.30),
+            ),
           ),
           child: Padding(
             padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),

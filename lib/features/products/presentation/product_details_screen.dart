@@ -8,9 +8,11 @@ import 'package:go_router/go_router.dart';
 import '../../../app/config/app_env.dart';
 import '../../../app/router/app_routes.dart';
 import '../../../app/theme/app_shadows.dart';
+import '../../../app/theme/app_tokens.dart';
 import '../../../core/errors/app_error_mapper.dart';
 import '../../../core/images/image_policy.dart';
 import '../../../core/images/nova_image.dart';
+import '../../../core/widgets/empty_state.dart';
 import '../../../core/widgets/error_state.dart';
 import '../../../core/widgets/nova_app_bar.dart';
 import '../../../core/widgets/nova_button.dart';
@@ -204,27 +206,27 @@ class ProductDetailsScreen extends ConsumerWidget {
           final availableColors = data.availableColors;
           final availableSizes = data.availableSizes;
 
-          final listBottomPadding = 128.h;
+          final listBottomPadding = 148.h;
 
           return ListView(
             padding: EdgeInsets.fromLTRB(
-              16.w,
-              useNovaUi ? 16.h : 12.h,
-              16.w,
+              AppSpace.xl,
+              useNovaUi ? AppSpace.xl : AppSpace.md,
+              AppSpace.xl,
               listBottomPadding,
             ),
             children: [
               RepaintBoundary(
                 child: _ProductImagePager(
                   imageUrls: images,
-                  borderRadius: BorderRadius.circular(20.r),
+                  borderRadius: BorderRadius.circular(AppRadii.xl),
                   topLeftLabel: product.brand.trim().isEmpty
                       ? null
                       : product.brand,
                   topRightLabel: hasStock ? 'In stock' : 'Unavailable',
                 ),
               ),
-              SizedBox(height: 14.h),
+              SizedBox(height: AppSpace.lg),
               RepaintBoundary(
                 child: _ProductHeadlineCard(
                   useNovaUi: useNovaUi,
@@ -234,21 +236,21 @@ class ProductDetailsScreen extends ConsumerWidget {
                   hasStock: hasStock,
                 ),
               ),
-              SizedBox(height: 12.h),
+              SizedBox(height: AppSpace.md),
               RepaintBoundary(
                 child: _ProductDescriptionCard(
                   useNovaUi: useNovaUi,
                   description: product.description,
                 ),
               ),
-              SizedBox(height: 12.h),
+              SizedBox(height: AppSpace.md),
               if (!hasStock)
                 RepaintBoundary(child: _StockNoticeCard(useNovaUi: useNovaUi))
               else ...[
                 RepaintBoundary(
                   child: _DetailsSurface(
                     useNovaUi: useNovaUi,
-                    padding: EdgeInsets.all(16.r),
+                    padding: AppInsets.card,
                     child: useNovaUi
                         ? _NovaVariantPicker(
                             title: 'Color',
@@ -278,11 +280,11 @@ class ProductDetailsScreen extends ConsumerWidget {
                           ),
                   ),
                 ),
-                SizedBox(height: 12.h),
+                SizedBox(height: AppSpace.md),
                 RepaintBoundary(
                   child: _DetailsSurface(
                     useNovaUi: useNovaUi,
-                    padding: EdgeInsets.all(16.r),
+                    padding: AppInsets.card,
                     child: useNovaUi
                         ? _NovaVariantPicker(
                             title: 'Size',
@@ -356,6 +358,16 @@ class ProductDetailsScreen extends ConsumerWidget {
                         controller;
                         controller = messenger.showSnackBar(
                           SnackBar(
+                            behavior: SnackBarBehavior.floating,
+                            margin: EdgeInsets.fromLTRB(
+                              AppSpace.xl,
+                              0,
+                              AppSpace.xl,
+                              92.h,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(AppRadii.lg),
+                            ),
                             content: const Text('Added to cart'),
                             action: SnackBarAction(
                               label: 'View cart',
@@ -441,7 +453,11 @@ class _ProductImagePagerState extends State<_ProductImagePager> {
 
     return Container(
       clipBehavior: Clip.hardEdge,
-      decoration: BoxDecoration(borderRadius: widget.borderRadius),
+      decoration: BoxDecoration(
+        borderRadius: widget.borderRadius,
+        border: Border.all(color: cs.outlineVariant.withValues(alpha: 0.38)),
+        boxShadow: AppShadows.sm(color: Colors.black.withValues(alpha: 0.10)),
+      ),
       child: Stack(
         children: [
           AspectRatio(
@@ -468,9 +484,9 @@ class _ProductImagePagerState extends State<_ProductImagePager> {
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                     colors: [
-                      Colors.black.withValues(alpha: 0.12),
+                      Colors.black.withValues(alpha: 0.10),
                       Colors.transparent,
-                      Colors.black.withValues(alpha: 0.22),
+                      Colors.black.withValues(alpha: 0.26),
                     ],
                   ),
                 ),
@@ -480,21 +496,31 @@ class _ProductImagePagerState extends State<_ProductImagePager> {
           if ((widget.topLeftLabel ?? '').trim().isNotEmpty ||
               (widget.topRightLabel ?? '').trim().isNotEmpty)
             Positioned(
-              left: 10.w,
-              right: 10.w,
-              top: 10.h,
+              left: AppSpace.md,
+              right: AppSpace.md,
+              top: AppSpace.md,
               child: Row(
                 children: [
                   if ((widget.topLeftLabel ?? '').trim().isNotEmpty)
-                    _ProductImageTag(
-                      label: widget.topLeftLabel!,
-                      alignStart: true,
+                    Flexible(
+                      child: Align(
+                        alignment: AlignmentDirectional.centerStart,
+                        child: _ProductImageTag(
+                          label: widget.topLeftLabel!,
+                          alignStart: true,
+                        ),
+                      ),
                     ),
                   const Spacer(),
                   if ((widget.topRightLabel ?? '').trim().isNotEmpty)
-                    _ProductImageTag(
-                      label: widget.topRightLabel!,
-                      alignStart: false,
+                    Flexible(
+                      child: Align(
+                        alignment: AlignmentDirectional.centerEnd,
+                        child: _ProductImageTag(
+                          label: widget.topRightLabel!,
+                          alignStart: false,
+                        ),
+                      ),
                     ),
                 ],
               ),
@@ -503,9 +529,9 @@ class _ProductImagePagerState extends State<_ProductImagePager> {
             Positioned(
               left: 0,
               right: 0,
-              bottom: 12.h,
+              bottom: AppSpace.md,
               child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 10.w),
+                padding: EdgeInsets.symmetric(horizontal: AppSpace.md),
                 child: Row(
                   children: [
                     Expanded(
@@ -515,7 +541,9 @@ class _ProductImagePagerState extends State<_ProductImagePager> {
                           final active = i == _index;
                           return AnimatedContainer(
                             duration: const Duration(milliseconds: 180),
-                            margin: EdgeInsets.symmetric(horizontal: 3.w),
+                            margin: EdgeInsets.symmetric(
+                              horizontal: AppSpace.xxs,
+                            ),
                             width: active ? 14.w : 7.w,
                             height: 7.w,
                             decoration: BoxDecoration(
@@ -530,12 +558,15 @@ class _ProductImagePagerState extends State<_ProductImagePager> {
                     ),
                     Container(
                       padding: EdgeInsets.symmetric(
-                        horizontal: 8.w,
-                        vertical: 4.h,
+                        horizontal: AppSpace.sm,
+                        vertical: AppSpace.xxs,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.black.withValues(alpha: 0.38),
-                        borderRadius: BorderRadius.circular(999.r),
+                        color: Colors.black.withValues(alpha: 0.42),
+                        borderRadius: BorderRadius.circular(AppRadii.pill),
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.16),
+                        ),
                       ),
                       child: Text(
                         '${_index + 1}/${urls.length}',
@@ -564,20 +595,25 @@ class _ProductImageTag extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tt = Theme.of(context).textTheme;
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 9.w, vertical: 5.h),
-      decoration: BoxDecoration(
-        color: Colors.black.withValues(alpha: 0.38),
-        borderRadius: BorderRadius.circular(999.r),
-      ),
-      child: Text(
-        label,
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-        textAlign: alignStart ? TextAlign.start : TextAlign.end,
-        style: tt.labelSmall?.copyWith(
-          color: Colors.white,
-          fontWeight: FontWeight.w800,
+    return ConstrainedBox(
+      constraints: BoxConstraints(maxWidth: 180.w),
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
+        decoration: BoxDecoration(
+          color: Colors.black.withValues(alpha: 0.42),
+          borderRadius: BorderRadius.circular(AppRadii.pill),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.16)),
+        ),
+        child: Text(
+          label,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          textAlign: alignStart ? TextAlign.start : TextAlign.end,
+          style: tt.labelSmall?.copyWith(
+            color: Colors.white,
+            fontWeight: FontWeight.w800,
+            height: 1.15,
+          ),
         ),
       ),
     );
@@ -598,15 +634,12 @@ class _DetailsSurface extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final content = Padding(
-      padding: padding ?? EdgeInsets.all(16.r),
-      child: child,
-    );
+    final content = Padding(padding: padding ?? AppInsets.card, child: child);
 
     if (useNovaUi) {
       return NovaSurface(
         padding: EdgeInsets.zero,
-        borderRadius: 18.r,
+        borderRadius: AppRadii.lg,
         child: content,
       );
     }
@@ -614,9 +647,9 @@ class _DetailsSurface extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: cs.surface,
-        borderRadius: BorderRadius.circular(18.r),
-        border: Border.all(color: cs.outlineVariant.withValues(alpha: 0.55)),
-        boxShadow: AppShadows.sm(),
+        borderRadius: BorderRadius.circular(AppRadii.lg),
+        border: Border.all(color: cs.outlineVariant.withValues(alpha: 0.36)),
+        boxShadow: AppShadows.sm(color: Colors.black.withValues(alpha: 0.08)),
       ),
       child: content,
     );
@@ -651,25 +684,30 @@ class _ProductHeadlineCard extends StatelessWidget {
             Text(
               brand,
               style: tt.labelLarge?.copyWith(
-                color: cs.onSurface.withValues(alpha: 0.72),
+                color: cs.onSurface.withValues(alpha: 0.66),
                 fontWeight: FontWeight.w700,
+                height: 1.15,
               ),
             ),
-          if (brand.trim().isNotEmpty) SizedBox(height: 4.h),
+          if (brand.trim().isNotEmpty) SizedBox(height: AppSpace.xxs),
           Text(
             title,
             style: tt.headlineSmall?.copyWith(
-              fontWeight: FontWeight.w900,
-              height: 1.12,
+              fontWeight: FontWeight.w800,
+              height: 1.14,
             ),
           ),
-          SizedBox(height: 12.h),
+          SizedBox(height: AppSpace.md),
           Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Expanded(
                 child: Text(
                   priceText,
-                  style: tt.titleLarge?.copyWith(fontWeight: FontWeight.w900),
+                  style: tt.titleLarge?.copyWith(
+                    fontWeight: FontWeight.w900,
+                    height: 1.05,
+                  ),
                 ),
               ),
               _OptionBadge(
@@ -713,14 +751,14 @@ class _ProductDescriptionCard extends StatelessWidget {
                 size: 18.r,
                 color: cs.onSurface.withValues(alpha: 0.8),
               ),
-              SizedBox(width: 8.w),
+              SizedBox(width: AppSpace.sm),
               Text(
                 'Details',
-                style: tt.titleSmall?.copyWith(fontWeight: FontWeight.w900),
+                style: tt.titleSmall?.copyWith(fontWeight: FontWeight.w800),
               ),
             ],
           ),
-          SizedBox(height: 8.h),
+          SizedBox(height: AppSpace.sm),
           Text(
             normalized,
             style: tt.bodyMedium?.copyWith(
@@ -749,28 +787,29 @@ class _StockNoticeCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            width: 34.r,
-            height: 34.r,
+            width: AppHitTargets.min,
+            height: AppHitTargets.min,
             decoration: BoxDecoration(
-              color: cs.surfaceContainerHigh,
-              borderRadius: BorderRadius.circular(10.r),
+              color: cs.errorContainer.withValues(alpha: 0.50),
+              borderRadius: BorderRadius.circular(AppRadii.md),
+              border: Border.all(color: cs.error.withValues(alpha: 0.18)),
             ),
             child: Icon(
               Icons.inventory_2_outlined,
-              size: 18.r,
-              color: cs.onSurface.withValues(alpha: 0.8),
+              size: 20.r,
+              color: cs.error,
             ),
           ),
-          SizedBox(width: 10.w),
+          SizedBox(width: AppSpace.md),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   'Out of stock',
-                  style: tt.titleMedium?.copyWith(fontWeight: FontWeight.w900),
+                  style: tt.titleMedium?.copyWith(fontWeight: FontWeight.w800),
                 ),
-                SizedBox(height: 4.h),
+                SizedBox(height: AppSpace.xxs),
                 Text(
                   'This item is currently unavailable in any variant.',
                   style: tt.bodySmall?.copyWith(
@@ -821,15 +860,16 @@ class _PremiumAddToCartBar extends StatelessWidget {
     final label = !inStock ? 'Out of stock' : 'Add to cart';
 
     return Padding(
-      padding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 12.h),
+      padding: EdgeInsets.fromLTRB(AppSpace.xl, 0, AppSpace.xl, AppSpace.md),
       child: _DetailsSurface(
         useNovaUi: useNovaUi,
-        padding: EdgeInsets.all(12.r),
+        padding: EdgeInsets.all(AppSpace.md),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
             Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Expanded(
                   child: Text(
@@ -838,6 +878,7 @@ class _PremiumAddToCartBar extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     style: tt.titleMedium?.copyWith(
                       fontWeight: FontWeight.w900,
+                      height: 1.1,
                     ),
                   ),
                 ),
@@ -847,7 +888,7 @@ class _PremiumAddToCartBar extends StatelessWidget {
                 ),
               ],
             ),
-            SizedBox(height: 8.h),
+            SizedBox(height: AppSpace.sm),
             Row(
               children: [
                 Expanded(
@@ -856,7 +897,7 @@ class _PremiumAddToCartBar extends StatelessWidget {
                     emphasized: selectedColor?.trim().isNotEmpty == true,
                   ),
                 ),
-                SizedBox(width: 8.w),
+                SizedBox(width: AppSpace.sm),
                 Expanded(
                   child: _OptionBadge(
                     label: 'Size: $sizeText',
@@ -866,19 +907,20 @@ class _PremiumAddToCartBar extends StatelessWidget {
               ],
             ),
             if (helper != null) ...[
-              SizedBox(height: 6.h),
+              SizedBox(height: AppSpace.xs),
               Text(
                 helper,
                 style: tt.bodySmall?.copyWith(
                   color: cs.onSurface.withValues(alpha: 0.7),
+                  height: 1.25,
                 ),
               ),
             ],
-            SizedBox(height: 10.h),
+            SizedBox(height: AppSpace.sm),
             if (useNovaUi)
               SizedBox(
                 width: double.infinity,
-                height: 40.h,
+                height: AppHitTargets.min,
                 child: NovaButton.primary(
                   onPressed: inStock ? onAdd : null,
                   label: label,
@@ -887,7 +929,7 @@ class _PremiumAddToCartBar extends StatelessWidget {
             else
               SizedBox(
                 width: double.infinity,
-                height: 44.h,
+                height: AppHitTargets.min,
                 child: FilledButton(
                   onPressed: inStock ? onAdd : null,
                   child: Text(label),
@@ -911,12 +953,12 @@ class _OptionBadge extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
+      padding: EdgeInsets.symmetric(horizontal: 11.w, vertical: 6.h),
       decoration: BoxDecoration(
         color: emphasized
             ? cs.primary.withValues(alpha: 0.12)
             : cs.surfaceContainerHigh,
-        borderRadius: BorderRadius.circular(999.r),
+        borderRadius: BorderRadius.circular(AppRadii.pill),
         border: Border.all(
           color: emphasized
               ? cs.primary.withValues(alpha: 0.42)
@@ -930,6 +972,7 @@ class _OptionBadge extends StatelessWidget {
         style: tt.labelSmall?.copyWith(
           color: emphasized ? cs.primary : cs.onSurface.withValues(alpha: 0.78),
           fontWeight: FontWeight.w800,
+          height: 1.15,
         ),
       ),
     );
@@ -953,29 +996,50 @@ class _VariantOptionChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
-    return Opacity(
-      opacity: enabled ? 1 : 0.42,
+    final borderColor = selected
+        ? cs.primary
+        : enabled
+        ? cs.outlineVariant.withValues(alpha: 0.50)
+        : cs.outlineVariant.withValues(alpha: 0.34);
+    final textColor = selected
+        ? cs.onPrimary
+        : enabled
+        ? cs.onSurface
+        : cs.onSurface.withValues(alpha: 0.46);
+
+    return Semantics(
+      button: true,
+      selected: selected,
+      enabled: enabled,
       child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
         onTap: enabled ? onTap : null,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 160),
           curve: Curves.easeOutCubic,
-          padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+          constraints: BoxConstraints(minHeight: AppHitTargets.min),
+          padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 9.h),
           decoration: BoxDecoration(
-            color: selected ? cs.primary : cs.surfaceContainerLow,
-            borderRadius: BorderRadius.circular(999.r),
-            border: Border.all(
-              color: selected
-                  ? cs.primary
-                  : cs.outlineVariant.withValues(alpha: 0.5),
-            ),
-            boxShadow: selected ? AppShadows.sm() : null,
+            color: selected
+                ? cs.primary
+                : enabled
+                ? cs.surfaceContainerLow
+                : cs.surfaceContainerHighest.withValues(alpha: 0.44),
+            borderRadius: BorderRadius.circular(AppRadii.pill),
+            border: Border.all(color: borderColor, width: selected ? 1.4 : 1),
+            boxShadow: selected
+                ? AppShadows.sm(color: cs.primary.withValues(alpha: 0.18))
+                : null,
           ),
           child: Text(
             label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             style: tt.labelLarge?.copyWith(
-              color: selected ? cs.onPrimary : cs.onSurface,
-              fontWeight: FontWeight.w800,
+              color: textColor,
+              fontWeight: selected ? FontWeight.w800 : FontWeight.w700,
+              decoration: enabled ? null : TextDecoration.lineThrough,
+              decorationColor: textColor,
             ),
           ),
         ),
@@ -1111,22 +1175,42 @@ class _NovaVariantPicker extends StatelessWidget {
           children: [
             Text(
               title,
-              style: tt.titleMedium?.copyWith(fontWeight: FontWeight.w900),
+              style: tt.titleMedium?.copyWith(
+                fontWeight: FontWeight.w800,
+                height: 1.15,
+              ),
             ),
             const Spacer(),
-            Text(
-              selectedLabel.isEmpty ? 'Not selected' : selectedLabel,
-              style: tt.labelSmall?.copyWith(
-                color: cs.onSurface.withValues(alpha: 0.68),
-                fontWeight: FontWeight.w700,
+            Container(
+              constraints: BoxConstraints(maxWidth: 148.w),
+              padding: EdgeInsets.symmetric(
+                horizontal: AppSpace.sm,
+                vertical: AppSpace.xxs,
+              ),
+              decoration: BoxDecoration(
+                color: cs.surfaceContainerHigh,
+                borderRadius: BorderRadius.circular(AppRadii.pill),
+                border: Border.all(
+                  color: cs.outlineVariant.withValues(alpha: 0.34),
+                ),
+              ),
+              child: Text(
+                selectedLabel.isEmpty ? 'Not selected' : selectedLabel,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: tt.labelSmall?.copyWith(
+                  color: cs.onSurface.withValues(alpha: 0.70),
+                  fontWeight: FontWeight.w800,
+                  height: 1.15,
+                ),
               ),
             ),
           ],
         ),
-        SizedBox(height: 10.h),
+        SizedBox(height: AppSpace.sm),
         Wrap(
-          spacing: 10.w,
-          runSpacing: 10.h,
+          spacing: AppSpace.sm,
+          runSpacing: AppSpace.sm,
           children: options
               .map((o) {
                 final selected = o == value;
@@ -1172,22 +1256,42 @@ class _VariantPicker extends StatelessWidget {
           children: [
             Text(
               title,
-              style: tt.titleMedium?.copyWith(fontWeight: FontWeight.w900),
+              style: tt.titleMedium?.copyWith(
+                fontWeight: FontWeight.w800,
+                height: 1.15,
+              ),
             ),
             const Spacer(),
-            Text(
-              selectedLabel.isEmpty ? 'Not selected' : selectedLabel,
-              style: tt.labelSmall?.copyWith(
-                color: cs.onSurface.withValues(alpha: 0.68),
-                fontWeight: FontWeight.w700,
+            Container(
+              constraints: BoxConstraints(maxWidth: 148.w),
+              padding: EdgeInsets.symmetric(
+                horizontal: AppSpace.sm,
+                vertical: AppSpace.xxs,
+              ),
+              decoration: BoxDecoration(
+                color: cs.surfaceContainerHigh,
+                borderRadius: BorderRadius.circular(AppRadii.pill),
+                border: Border.all(
+                  color: cs.outlineVariant.withValues(alpha: 0.34),
+                ),
+              ),
+              child: Text(
+                selectedLabel.isEmpty ? 'Not selected' : selectedLabel,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: tt.labelSmall?.copyWith(
+                  color: cs.onSurface.withValues(alpha: 0.70),
+                  fontWeight: FontWeight.w800,
+                  height: 1.15,
+                ),
               ),
             ),
           ],
         ),
-        SizedBox(height: 10.h),
+        SizedBox(height: AppSpace.sm),
         Wrap(
-          spacing: 10.w,
-          runSpacing: 10.h,
+          spacing: AppSpace.sm,
+          runSpacing: AppSpace.sm,
           children: options
               .map((o) {
                 final selected = o == value;
@@ -1237,30 +1341,51 @@ class _DetailsSkeleton extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     return ListView(
-      padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 24.h),
+      padding: EdgeInsets.fromLTRB(
+        AppSpace.xl,
+        AppSpace.xl,
+        AppSpace.xl,
+        AppSpace.section,
+      ),
       children: [
         Container(
           height: 260.h,
           decoration: BoxDecoration(
             color: cs.surfaceContainerHighest,
-            borderRadius: BorderRadius.circular(20.r),
+            borderRadius: BorderRadius.circular(AppRadii.xl),
           ),
         ),
-        SizedBox(height: 16.h),
+        SizedBox(height: AppSpace.xl),
         Container(
           height: 20.h,
           width: 120.w,
           decoration: BoxDecoration(
             color: cs.surfaceContainerHighest,
-            borderRadius: BorderRadius.circular(10.r),
+            borderRadius: BorderRadius.circular(AppRadii.sm),
           ),
         ),
-        SizedBox(height: 12.h),
+        SizedBox(height: AppSpace.md),
         Container(
           height: 26.h,
           decoration: BoxDecoration(
             color: cs.surfaceContainerHighest,
-            borderRadius: BorderRadius.circular(10.r),
+            borderRadius: BorderRadius.circular(AppRadii.sm),
+          ),
+        ),
+        SizedBox(height: AppSpace.md),
+        Container(
+          height: 96.h,
+          decoration: BoxDecoration(
+            color: cs.surfaceContainerHighest,
+            borderRadius: BorderRadius.circular(AppRadii.lg),
+          ),
+        ),
+        SizedBox(height: AppSpace.md),
+        Container(
+          height: 116.h,
+          decoration: BoxDecoration(
+            color: cs.surfaceContainerHighest,
+            borderRadius: BorderRadius.circular(AppRadii.lg),
           ),
         ),
       ],
@@ -1273,15 +1398,10 @@ class _NotFoundState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tt = Theme.of(context).textTheme;
-    return Center(
-      child: Padding(
-        padding: EdgeInsets.all(20.r),
-        child: Text(
-          'Product not found',
-          style: tt.titleLarge?.copyWith(fontWeight: FontWeight.w800),
-        ),
-      ),
+    return const AppEmptyState(
+      title: 'Product not found',
+      subtitle: 'This product may no longer be available.',
+      icon: Icons.inventory_2_outlined,
     );
   }
 }

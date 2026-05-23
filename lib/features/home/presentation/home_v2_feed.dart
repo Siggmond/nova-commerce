@@ -45,6 +45,10 @@ class HomeV2Feed extends ConsumerStatefulWidget {
   ConsumerState<HomeV2Feed> createState() => _HomeV2FeedState();
 }
 
+const double _homeHorizontalPadding = 16;
+const double _homeSectionGap = 16;
+const double _homeSectionTightGap = 12;
+
 class _GoldGiftButton extends StatelessWidget {
   const _GoldGiftButton({required this.onTap});
 
@@ -59,9 +63,18 @@ class _GoldGiftButton extends StatelessWidget {
         onTap: onTap,
         customBorder: const CircleBorder(),
         child: SizedBox(
-          width: 48.r,
-          height: 48.r,
-          child: SvgPicture.asset('assets/icons/gold.svg', fit: BoxFit.contain),
+          width: AppHitTargets.comfortable,
+          height: AppHitTargets.comfortable,
+          child: Center(
+            child: SizedBox(
+              width: 40.r,
+              height: 40.r,
+              child: SvgPicture.asset(
+                'assets/icons/gold.svg',
+                fit: BoxFit.contain,
+              ),
+            ),
+          ),
         ),
       ),
     );
@@ -131,8 +144,8 @@ class _HomeV2FeedState extends ConsumerState<HomeV2Feed> {
   static const double _searchDockThreshold = 84.0;
   late final ValueNotifier<double> _searchDockTNotifier = ValueNotifier(0);
 
-  static const double _dockedSearchHeight = 44.0;
-  static const double _dockedSearchTopPadding = 6.0;
+  static const double _dockedSearchHeight = 48.0;
+  static const double _dockedSearchTopPadding = 8.0;
   static const double _dockedSearchBottomPadding = 8.0;
   static const double _dockedSearchPreferredHeight =
       _dockedSearchTopPadding +
@@ -418,7 +431,7 @@ class _HomeV2FeedState extends ConsumerState<HomeV2Feed> {
           SliverAppBar(
             pinned: true,
             automaticallyImplyLeading: false,
-            titleSpacing: 12,
+            titleSpacing: _homeHorizontalPadding,
             title: Row(
               children: [
                 Text(t.brandName),
@@ -529,20 +542,24 @@ class _HomeV2FeedState extends ConsumerState<HomeV2Feed> {
                     child: SliverAppBar(
                       pinned: true,
                       automaticallyImplyLeading: false,
-                      titleSpacing: 12,
+                      titleSpacing: _homeHorizontalPadding,
                       title: Row(
                         children: [
-                          Text(t.brandName),
-                          SizedBox(width: 8.w),
+                          Text(
+                            t.brandName,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          SizedBox(width: AppSpace.sm),
                           Flexible(
                             child: ConstrainedBox(
-                              constraints: const BoxConstraints(maxWidth: 180),
+                              constraints: BoxConstraints(maxWidth: 190.w),
                               child: DeliveryLocationChip(
                                 onTap: _openCityPicker,
                               ),
                             ),
                           ),
-                          SizedBox(width: 8.w),
+                          SizedBox(width: AppSpace.xs),
                           _GoldGiftButton(
                             onTap: () => context.push(AppRoutes.gold),
                           ),
@@ -572,9 +589,9 @@ class _HomeV2FeedState extends ConsumerState<HomeV2Feed> {
                           child: showDockedSearch
                               ? Padding(
                                   padding: EdgeInsets.fromLTRB(
-                                    12.w,
+                                    _homeHorizontalPadding.w,
                                     _dockedSearchTopPadding.h,
-                                    12.w,
+                                    _homeHorizontalPadding.w,
                                     _dockedSearchBottomPadding.h,
                                   ),
                                   child: SizedBox(
@@ -631,7 +648,12 @@ class _HomeV2FeedState extends ConsumerState<HomeV2Feed> {
                     label: 'home.header.searchInline',
                     child: SliverToBoxAdapter(
                       child: Padding(
-                        padding: EdgeInsets.fromLTRB(12.w, 12.h, 12.w, 0),
+                        padding: EdgeInsets.fromLTRB(
+                          _homeHorizontalPadding.w,
+                          _homeSectionTightGap.h,
+                          _homeHorizontalPadding.w,
+                          0,
+                        ),
                         child: IgnorePointer(
                           ignoring: !showInlineSearch,
                           child: showInlineSearch
@@ -676,16 +698,21 @@ class _HomeV2FeedState extends ConsumerState<HomeV2Feed> {
               ),
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: EdgeInsets.fromLTRB(12.w, 10.h, 0, 0),
+                  padding: EdgeInsets.fromLTRB(
+                    _homeHorizontalPadding.w,
+                    _homeSectionTightGap.h,
+                    0,
+                    0,
+                  ),
                   child: _CategoryTabsRow(
                     categories: HomeV2SectionRenderer.categoryTabIds,
                     disableExpensiveEffects: disableExpensiveEffects,
                   ),
                 ),
               ),
-              SliverToBoxAdapter(child: SizedBox(height: 12.h)),
+              SliverToBoxAdapter(child: SizedBox(height: _homeSectionGap.h)),
               ...sectionSlivers,
-              SliverToBoxAdapter(child: SizedBox(height: 14.h)),
+              SliverToBoxAdapter(child: SizedBox(height: _homeSectionGap.h)),
             ],
           ),
         ),
@@ -826,17 +853,31 @@ class HomeV2SectionRenderer {
           child: Padding(
             padding: EdgeInsets.symmetric(vertical: 18.h),
             child: Center(
-              child: SizedBox(
-                width: 22.r,
-                height: 22.r,
-                child: CircularProgressIndicator(strokeWidth: 2.5),
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surfaceContainerHigh,
+                  borderRadius: BorderRadius.circular(AppRadii.pill),
+                  border: Border.all(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.outlineVariant.withValues(alpha: 0.32),
+                  ),
+                ),
+                child: Padding(
+                  padding: EdgeInsets.all(AppSpace.md),
+                  child: SizedBox(
+                    width: 20.r,
+                    height: 20.r,
+                    child: CircularProgressIndicator(strokeWidth: 2.4),
+                  ),
+                ),
               ),
             ),
           ),
         ),
       );
     } else {
-      out.add(SliverToBoxAdapter(child: SizedBox(height: 18.h)));
+      out.add(SliverToBoxAdapter(child: SizedBox(height: _homeSectionGap.h)));
     }
 
     return out;
@@ -900,7 +941,12 @@ class HomeV2SectionRenderer {
     final t = AppLocalizations.of(context)!;
     return [
       SliverPadding(
-        padding: EdgeInsets.fromLTRB(12.w, 8.h, 12.w, 0),
+        padding: EdgeInsets.fromLTRB(
+          _homeHorizontalPadding.w,
+          _homeSectionTightGap.h,
+          _homeHorizontalPadding.w,
+          0,
+        ),
         sliver: SliverToBoxAdapter(
           child: NovaSectionHeader(
             title: t.homeCuratedTrendsTitle,
@@ -920,7 +966,12 @@ class HomeV2SectionRenderer {
   }) {
     return [
       SliverPadding(
-        padding: EdgeInsets.fromLTRB(12.w, 10.h, 12.w, 0),
+        padding: EdgeInsets.fromLTRB(
+          _homeHorizontalPadding.w,
+          _homeSectionGap.h,
+          _homeHorizontalPadding.w,
+          0,
+        ),
         sliver: SliverToBoxAdapter(
           child: NovaSectionHeader(
             title: title,
@@ -928,6 +979,12 @@ class HomeV2SectionRenderer {
             trailing: IconButton(
               tooltip: t.commonSeeAll,
               onPressed: onSeeAll,
+              style: IconButton.styleFrom(
+                minimumSize: Size(
+                  AppHitTargets.comfortable,
+                  AppHitTargets.comfortable,
+                ),
+              ),
               icon: const Icon(Icons.arrow_forward_rounded),
             ),
           ),
@@ -955,7 +1012,7 @@ class HomeV2SectionRenderer {
           ),
         ),
       ),
-      SliverToBoxAdapter(child: SizedBox(height: 14.h)),
+      SliverToBoxAdapter(child: SizedBox(height: _homeSectionGap.h)),
     ];
   }
 
@@ -963,7 +1020,12 @@ class HomeV2SectionRenderer {
     final t = AppLocalizations.of(context)!;
     return [
       SliverPadding(
-        padding: EdgeInsets.fromLTRB(12.w, 6.h, 12.w, 0),
+        padding: EdgeInsets.fromLTRB(
+          _homeHorizontalPadding.w,
+          _homeSectionTightGap.h,
+          _homeHorizontalPadding.w,
+          0,
+        ),
         sliver: SliverToBoxAdapter(
           child: NovaSectionHeader(
             title: t.homeShopByCategoryTitle,
@@ -977,11 +1039,16 @@ class HomeV2SectionRenderer {
         ),
       ),
       SliverPadding(
-        padding: EdgeInsets.fromLTRB(12.w, 10.h, 12.w, 10.h),
+        padding: EdgeInsets.fromLTRB(
+          _homeHorizontalPadding.w,
+          _homeSectionTightGap.h,
+          _homeHorizontalPadding.w,
+          _homeSectionTightGap.h,
+        ),
         sliver: SliverLayoutBuilder(
           builder: (context, constraints) {
             final width = constraints.crossAxisExtent;
-            final spacing = 10.0;
+            final spacing = _homeSectionTightGap;
             final crossAxisCount =
                 ResponsiveGridDelegate.crossAxisCountForWidth(width);
             final tileWidth =
@@ -1052,7 +1119,12 @@ class HomeV2SectionRenderer {
     final t = AppLocalizations.of(context)!;
     return [
       SliverPadding(
-        padding: EdgeInsets.fromLTRB(12.w, 6.h, 12.w, 6.h),
+        padding: EdgeInsets.fromLTRB(
+          _homeHorizontalPadding.w,
+          _homeSectionTightGap.h,
+          _homeHorizontalPadding.w,
+          _homeSectionTightGap.h,
+        ),
         sliver: SliverToBoxAdapter(
           child: _EditorialBanner(
             title: t.homeWeekendSaleTitle,
@@ -1063,7 +1135,7 @@ class HomeV2SectionRenderer {
           ),
         ),
       ),
-      SliverToBoxAdapter(child: SizedBox(height: 10.h)),
+      SliverToBoxAdapter(child: SizedBox(height: _homeSectionTightGap.h)),
     ];
   }
 
@@ -1077,7 +1149,7 @@ class HomeV2SectionRenderer {
 
     return [
       SliverPadding(
-        padding: EdgeInsets.fromLTRB(0, 6.h, 0, 0),
+        padding: EdgeInsets.fromLTRB(0, _homeSectionTightGap.h, 0, 0),
         sliver: SliverToBoxAdapter(
           child: PickedForYouCarousel(
             items: items,
@@ -1090,22 +1162,27 @@ class HomeV2SectionRenderer {
           ),
         ),
       ),
-      SliverToBoxAdapter(child: SizedBox(height: 10.h)),
+      SliverToBoxAdapter(child: SizedBox(height: _homeSectionTightGap.h)),
       SliverLayoutBuilder(
         builder: (context, constraints) {
           final width = constraints.crossAxisExtent;
           if (width < 600) return const SliverToBoxAdapter();
 
           final crossAxisCount = width < 900 ? 2 : 3;
-          const spacing = 10.0;
+          const spacing = _homeSectionTightGap;
 
-          final availableWidth = width - 24.w;
+          final availableWidth = width - (_homeHorizontalPadding * 2).w;
           final tileWidth =
               (availableWidth - (crossAxisCount - 1) * spacing) /
               crossAxisCount;
 
           return SliverPadding(
-            padding: EdgeInsets.fromLTRB(12.w, 0, 12.w, 10.h),
+            padding: EdgeInsets.fromLTRB(
+              _homeHorizontalPadding.w,
+              0,
+              _homeHorizontalPadding.w,
+              _homeSectionTightGap.h,
+            ),
             sliver: SliverGrid(
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: crossAxisCount,
@@ -1159,11 +1236,21 @@ class HomeV2SectionRenderer {
 
     return [
       SliverPadding(
-        padding: EdgeInsets.fromLTRB(12.w, 6.h, 12.w, 10.h),
+        padding: EdgeInsets.fromLTRB(
+          _homeHorizontalPadding.w,
+          _homeSectionTightGap.h,
+          _homeHorizontalPadding.w,
+          _homeSectionTightGap.h,
+        ),
         sliver: SliverToBoxAdapter(child: _TrendingMetaRow()),
       ),
       SliverPadding(
-        padding: EdgeInsets.fromLTRB(12.w, 0, 12.w, 10.h),
+        padding: EdgeInsets.fromLTRB(
+          _homeHorizontalPadding.w,
+          0,
+          _homeHorizontalPadding.w,
+          _homeSectionTightGap.h,
+        ),
         sliver: SliverLayoutBuilder(
           builder: (context, constraints) {
             final width = constraints.crossAxisExtent;
@@ -1221,7 +1308,9 @@ class HomeV2SectionRenderer {
                         );
 
                         return Padding(
-                          padding: EdgeInsets.only(bottom: 10.h),
+                          padding: EdgeInsets.only(
+                            bottom: _homeSectionTightGap.h,
+                          ),
                           child: TrendingRankRow(
                             rank: rank,
                             product: p,
@@ -1244,7 +1333,7 @@ class HomeV2SectionRenderer {
               );
             }
 
-            const spacing = 10.0;
+            const spacing = _homeSectionTightGap;
             final tileWidth =
                 (width - (crossAxisCount - 1) * spacing) / crossAxisCount;
 
@@ -1304,11 +1393,11 @@ class _HomeV2Skeleton extends StatelessWidget {
       slivers: [
         SliverAppBar(
           pinned: true,
-          titleSpacing: 12,
+          titleSpacing: _homeHorizontalPadding,
           title: Row(
             children: [
               Text(t.brandName),
-              SizedBox(width: 10.w),
+              SizedBox(width: AppSpace.md),
               SizedBox(
                 width: 110.w,
                 child: NovaSkeleton(child: NovaSkeletonBox(height: 28.h)),
@@ -1393,9 +1482,9 @@ class _SearchBar extends StatelessWidget {
 
     final radius = BorderRadius.circular(AppRadii.xl);
     final borderSide = BorderSide(
-      color: cs.outlineVariant.withValues(alpha: 0.72),
+      color: cs.outlineVariant.withValues(alpha: 0.54),
     );
-    final fillColor = cs.surfaceContainerHighest;
+    final fillColor = cs.surfaceContainerHigh;
 
     return Material(
       color: fillColor,
@@ -1404,14 +1493,15 @@ class _SearchBar extends StatelessWidget {
         borderRadius: radius,
         onTap: onTap,
         child: Padding(
-          padding: EdgeInsets.symmetric(
-            horizontal: 12.w,
-            vertical: compact ? 10.h : 12.h,
-          ),
+          padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 4.h),
           child: Row(
             children: [
-              Icon(Icons.search, color: cs.onSurface.withValues(alpha: 0.6)),
-              SizedBox(width: 10.w),
+              Icon(
+                Icons.search,
+                size: 20.r,
+                color: cs.onSurface.withValues(alpha: 0.62),
+              ),
+              SizedBox(width: AppSpace.sm),
               Expanded(
                 child: Text(
                   t.searchHintSearchForProducts,
@@ -1428,10 +1518,14 @@ class _SearchBar extends StatelessWidget {
                 onPressed: onOpenFilters,
                 visualDensity: VisualDensity.compact,
                 padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
+                constraints: BoxConstraints(
+                  minWidth: compact ? 40.r : AppHitTargets.min,
+                  minHeight: compact ? 40.r : AppHitTargets.min,
+                ),
                 icon: Icon(
                   Icons.tune,
-                  color: cs.onSurface.withValues(alpha: 0.6),
+                  size: 20.r,
+                  color: cs.onSurface.withValues(alpha: 0.64),
                 ),
               ),
             ],
@@ -1458,7 +1552,7 @@ class _CategoryTabsRow extends ConsumerWidget {
     final active = ref.watch(homeActiveCategoryProvider);
 
     return SizedBox(
-      height: 34.h,
+      height: AppHitTargets.min,
       child: ListView.separated(
         padding: EdgeInsets.zero,
         scrollDirection: Axis.horizontal,
@@ -1527,7 +1621,7 @@ class _CategoryTabChip extends StatelessWidget {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
         curve: Curves.easeOutCubic,
-        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+        padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 8.h),
         decoration: BoxDecoration(
           color: fillC,
           borderRadius: BorderRadius.circular(999.r),
@@ -1602,8 +1696,8 @@ class _HeroCarouselState extends State<_HeroCarousel> {
 
               return Padding(
                 padding: EdgeInsets.only(
-                  left: i == 0 ? 12.w : 0,
-                  right: isLast ? 0 : 10.w,
+                  left: i == 0 ? _homeHorizontalPadding.w : 0,
+                  right: isLast ? _homeHorizontalPadding.w : 12.w,
                 ),
                 child: _HeroDealCard(
                   product: p,
@@ -1932,7 +2026,7 @@ class TrendingHeroCard extends StatelessWidget {
         border: Border.all(color: cs.outlineVariant.withValues(alpha: 0.45)),
         boxShadow: disableExpensiveEffects
             ? const <BoxShadow>[]
-            : AppShadows.md(),
+            : AppShadows.sm(color: Colors.black.withValues(alpha: 0.10)),
       ),
       child: Material(
         color: cs.surface,
@@ -2078,7 +2172,7 @@ class TrendingRankRow extends StatelessWidget {
           border: Border.all(color: cs.outlineVariant.withValues(alpha: 0.45)),
           boxShadow: disableExpensiveEffects
               ? const <BoxShadow>[]
-              : AppShadows.md(),
+              : AppShadows.sm(color: Colors.black.withValues(alpha: 0.10)),
         ),
         child: Material(
           type: MaterialType.transparency,
@@ -2227,7 +2321,7 @@ class TrendingCard extends StatelessWidget {
           border: Border.all(color: cs.outlineVariant.withValues(alpha: 0.45)),
           boxShadow: disableExpensiveEffects
               ? const <BoxShadow>[]
-              : AppShadows.md(),
+              : AppShadows.sm(color: Colors.black.withValues(alpha: 0.10)),
         ),
         child: Material(
           color: cs.surface,
@@ -2560,8 +2654,8 @@ class _PickedForYouCarouselState extends State<PickedForYouCarousel> {
                       if (widget.reduceMotion) {
                         return Padding(
                           padding: EdgeInsets.only(
-                            left: index == 0 ? 12.w : 10.w,
-                            right: 10.w,
+                            left: index == 0 ? _homeHorizontalPadding.w : 10.w,
+                            right: _homeSectionTightGap.w,
                             bottom: 6.h,
                           ),
                           child: card,
@@ -2580,8 +2674,10 @@ class _PickedForYouCarouselState extends State<PickedForYouCarousel> {
 
                           return Padding(
                             padding: EdgeInsets.only(
-                              left: index == 0 ? 12.w : 10.w,
-                              right: 10.w,
+                              left: index == 0
+                                  ? _homeHorizontalPadding.w
+                                  : 10.w,
+                              right: _homeSectionTightGap.w,
                               bottom: 6.h,
                             ),
                             child: Transform.scale(
@@ -2666,7 +2762,7 @@ class PickedForYouCard extends StatelessWidget {
           border: Border.all(color: cs.outlineVariant.withValues(alpha: 0.45)),
           boxShadow: disableExpensiveEffects
               ? const <BoxShadow>[]
-              : AppShadows.md(),
+              : AppShadows.sm(color: Colors.black.withValues(alpha: 0.10)),
         ),
         child: Material(
           color: cs.surface,

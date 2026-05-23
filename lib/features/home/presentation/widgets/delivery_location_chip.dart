@@ -6,6 +6,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:nova_commerce/gen_l10n/app_localizations.dart';
 
 import '../../../../app/theme/app_shadows.dart';
+import '../../../../app/theme/app_tokens.dart';
 import '../delivery_location_controller.dart';
 
 class DeliveryLocationChip extends ConsumerWidget {
@@ -52,7 +53,7 @@ class DeliveryLocationChip extends ConsumerWidget {
 
     final city = cityAsync.when(
       data: (v) => v,
-      loading: () => '…',
+      loading: () => '...',
       error: (_, __) => t.homeCityBeirut,
     );
 
@@ -69,58 +70,63 @@ class DeliveryLocationChip extends ConsumerWidget {
 
         return Material(
           color: cs.surface,
-          borderRadius: BorderRadius.circular(999.r),
+          borderRadius: BorderRadius.circular(AppRadii.pill),
           child: InkWell(
             onTap: onTap,
-            borderRadius: BorderRadius.circular(999.r),
+            borderRadius: BorderRadius.circular(AppRadii.pill),
             child: DecoratedBox(
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(999.r),
+                borderRadius: BorderRadius.circular(AppRadii.pill),
                 border: Border.all(
-                  color: cs.outlineVariant.withValues(alpha: 0.75),
+                  color: cs.outlineVariant.withValues(alpha: 0.50),
                 ),
-                boxShadow: AppShadows.sm(),
+                boxShadow: AppShadows.sm(
+                  color: Colors.black.withValues(alpha: 0.08),
+                ),
               ),
-              child: Padding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: ultraCompact ? 8.w : 10.w,
-                  vertical: 7.h,
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    SizedBox(
-                      width: 30.r,
-                      height: 30.r,
-                      child: SvgPicture.asset(
-                        'assets/icons/location.svg',
-                        fit: BoxFit.contain,
-                      ),
-                    ),
-                    if (!ultraCompact) ...[
-                      SizedBox(width: 6.w),
-                      Flexible(
-                        child: Text(
-                          label,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: Theme.of(context).textTheme.labelLarge
-                              ?.copyWith(
-                                color: cs.onSurface,
-                                fontWeight: FontWeight.w700,
-                              ),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minHeight: AppHitTargets.min),
+                child: Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: ultraCompact ? AppSpace.sm : AppSpace.md,
+                    vertical: AppSpace.xs,
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      SizedBox(
+                        width: 28.r,
+                        height: 28.r,
+                        child: SvgPicture.asset(
+                          'assets/icons/location.svg',
+                          fit: BoxFit.contain,
                         ),
                       ),
-                      if (!compact) ...[
-                        SizedBox(width: 6.w),
-                        Icon(
-                          Icons.keyboard_arrow_down,
-                          size: 18.r,
-                          color: cs.onSurface,
+                      if (!ultraCompact) ...[
+                        SizedBox(width: AppSpace.sm),
+                        Flexible(
+                          child: Text(
+                            label,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: Theme.of(context).textTheme.labelLarge
+                                ?.copyWith(
+                                  color: cs.onSurface,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                          ),
                         ),
+                        if (!compact) ...[
+                          SizedBox(width: AppSpace.xs),
+                          Icon(
+                            Icons.keyboard_arrow_down,
+                            size: 18.r,
+                            color: cs.onSurface.withValues(alpha: 0.78),
+                          ),
+                        ],
                       ],
                     ],
-                  ],
+                  ),
                 ),
               ),
             ),

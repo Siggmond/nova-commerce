@@ -26,8 +26,8 @@ class SearchBarFrame extends StatelessWidget {
       (AppRadii.xl - frameInset).clamp(0, AppRadii.xl),
     );
 
-    final blue = AppColors.categoryChipPalette[0].withValues(alpha: 0.92);
-    final red = AppColors.categoryChipPalette[5].withValues(alpha: 0.88);
+    final blue = AppColors.categoryChipPalette[0].withValues(alpha: 0.52);
+    final red = AppColors.categoryChipPalette[5].withValues(alpha: 0.42);
 
     return DecoratedBox(
       decoration: BoxDecoration(
@@ -40,7 +40,9 @@ class SearchBarFrame extends StatelessWidget {
         ),
         boxShadow: reduceEffects
             ? const <BoxShadow>[]
-            : (docked ? AppShadows.lg() : AppShadows.md()),
+            : (docked
+                  ? AppShadows.sm(color: Colors.black.withValues(alpha: 0.10))
+                  : AppShadows.md(color: Colors.black.withValues(alpha: 0.10))),
       ),
       child: Padding(
         padding: EdgeInsets.all(frameInset),
@@ -61,9 +63,9 @@ class SearchBarFrame extends StatelessWidget {
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                       colors: [
-                        blue.withValues(alpha: 0.18),
+                        blue.withValues(alpha: 0.10),
                         Colors.transparent,
-                        red.withValues(alpha: 0.18),
+                        red.withValues(alpha: 0.10),
                       ],
                       stops: const [0.0, 0.55, 1.0],
                     ),

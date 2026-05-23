@@ -47,8 +47,8 @@ class HomeFilterChipStyle {
   }) {
     if (!enabled) return const <BoxShadow>[];
     final base = baseColor(index: index);
-    final tint = base.withValues(alpha: selected ? 0.18 : 0.10);
-    return selected ? AppShadows.md(color: tint) : AppShadows.sm(color: tint);
+    final tint = base.withValues(alpha: selected ? 0.14 : 0.08);
+    return AppShadows.sm(color: tint);
   }
 
   static TextStyle? labelStyle({
@@ -59,11 +59,11 @@ class HomeFilterChipStyle {
   }) {
     final base = baseColor(index: index);
     final c = selected
-        ? Color.alphaBlend(base.withValues(alpha: 0.10), cs.onSurface)
+        ? Color.alphaBlend(base.withValues(alpha: 0.08), cs.onSurface)
         : cs.onSurface.withValues(alpha: 0.86);
 
     return Theme.of(
       context,
-    ).textTheme.labelSmall?.copyWith(fontWeight: FontWeight.w800, color: c);
+    ).textTheme.labelMedium?.copyWith(fontWeight: FontWeight.w700, color: c);
   }
 }

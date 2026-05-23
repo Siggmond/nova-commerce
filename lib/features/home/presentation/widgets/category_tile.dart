@@ -53,7 +53,7 @@ class _CategoryTileState extends State<CategoryTile> {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
     final tt = theme.textTheme;
-    final radius = BorderRadius.circular(AppRadii.xl);
+    final radius = BorderRadius.circular(AppRadii.lg);
     final hasImage =
         !widget.isSeeAll &&
         widget.imageUrl != null &&
@@ -77,14 +77,24 @@ class _CategoryTileState extends State<CategoryTile> {
             boxShadow: widget.reduceEffects
                 ? const <BoxShadow>[]
                 : (hasArtwork
-                      ? AppShadows.md(
-                          color: Colors.black.withValues(alpha: 0.20),
+                      ? AppShadows.sm(
+                          color: Colors.black.withValues(alpha: 0.16),
                         )
-                      : AppShadows.sm()),
+                      : AppShadows.sm(
+                          color: Colors.black.withValues(alpha: 0.10),
+                        )),
           ),
           child: Material(
             color: cs.surfaceContainerHigh,
-            borderRadius: radius,
+            shape: RoundedRectangleBorder(
+              borderRadius: radius,
+              side: BorderSide(
+                color: hasArtwork
+                    ? Colors.white.withValues(alpha: 0.10)
+                    : cs.outlineVariant.withValues(alpha: 0.36),
+              ),
+            ),
+            clipBehavior: Clip.antiAlias,
             child: InkWell(
               onTap: widget.onTap,
               borderRadius: radius,
@@ -109,13 +119,13 @@ class _CategoryTileState extends State<CategoryTile> {
                       ? constraints.maxHeight
                       : 156.h;
                   final tight = h <= 140;
-                  final pad = tight ? 10.r : 12.r;
+                  final pad = tight ? AppSpace.md : AppSpace.lg;
                   final iconSize = tight ? 42.r : 48.r;
                   final memCacheWidth = (w * dpr).round();
                   final memCacheHeight = (h * dpr).round();
                   final titleStyle = tt.titleSmall?.copyWith(
                     fontWeight: FontWeight.w800,
-                    height: 1.10,
+                    height: 1.14,
                     color: hasArtwork ? Colors.white : cs.onSurface,
                   );
                   final subtitleStyle = tt.labelMedium?.copyWith(
@@ -133,12 +143,12 @@ class _CategoryTileState extends State<CategoryTile> {
                       : cs.surfaceContainerHigh.withValues(alpha: 0.78);
 
                   final gradA = widget.isSeeAll
-                      ? cs.primary.withValues(alpha: 0.22)
-                      : cs.primary.withValues(alpha: 0.12);
+                      ? cs.primary.withValues(alpha: 0.18)
+                      : cs.primary.withValues(alpha: 0.08);
 
                   final gradB = widget.isSeeAll
-                      ? cs.secondary.withValues(alpha: 0.14)
-                      : cs.secondary.withValues(alpha: 0.08);
+                      ? cs.secondary.withValues(alpha: 0.10)
+                      : cs.secondary.withValues(alpha: 0.05);
 
                   final content = Stack(
                     fit: StackFit.expand,
@@ -298,13 +308,15 @@ class _IconCapsule extends StatelessWidget {
     return DecoratedBox(
       decoration: BoxDecoration(
         color: bg,
-        borderRadius: BorderRadius.circular(14.r),
+        borderRadius: BorderRadius.circular(AppRadii.md),
         border: Border.all(
           color: onImage
               ? Colors.white.withValues(alpha: 0.30)
-              : cs.outlineVariant.withValues(alpha: 0.24),
+              : cs.outlineVariant.withValues(alpha: 0.30),
         ),
-        boxShadow: reduceEffects ? const <BoxShadow>[] : AppShadows.sm(),
+        boxShadow: reduceEffects
+            ? const <BoxShadow>[]
+            : AppShadows.sm(color: Colors.black.withValues(alpha: 0.08)),
       ),
       child: SizedBox(
         width: size ?? 44.r,
@@ -346,9 +358,12 @@ class _Badge extends StatelessWidget {
         ),
       ),
       child: ConstrainedBox(
-        constraints: BoxConstraints(maxHeight: 24.h),
+        constraints: BoxConstraints(maxHeight: 26.h),
         child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+          padding: EdgeInsets.symmetric(
+            horizontal: AppSpace.sm,
+            vertical: AppSpace.xxs,
+          ),
           child: FittedBox(
             fit: BoxFit.scaleDown,
             alignment: AlignmentDirectional.centerStart,

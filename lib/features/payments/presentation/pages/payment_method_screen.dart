@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:nova_commerce/app/theme/app_tokens.dart';
 import 'package:nova_commerce/app/router/app_routes.dart';
 import 'package:nova_commerce/features/checkout/domain/checkout_cart_summary.dart';
 import 'package:nova_commerce/gen_l10n/app_localizations.dart';
@@ -40,28 +41,30 @@ class PaymentMethodScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: Text(t.paymentsTitle)),
       body: ListView(
-        padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 16.h),
+        padding: AppInsets.screen,
         children: [
           PaymentSummaryCard(summary: summary),
-          SizedBox(height: 14.h),
+          SizedBox(height: AppSpace.lg),
           Text(
             t.paymentsChooseMethod,
-            style: Theme.of(
-              context,
-            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900),
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w800,
+              height: 1.15,
+            ),
           ),
-          SizedBox(height: 10.h),
+          SizedBox(height: AppSpace.sm),
           for (final m in notifier.supportedMethods) ...[
             PaymentMethodTile(
               method: m,
               selected: state.selectedMethod == m.type,
               onTap: () => notifier.selectMethod(m.type),
             ),
-            SizedBox(height: 10.h),
+            SizedBox(height: AppSpace.md),
           ],
-          SizedBox(height: 6.h),
+          SizedBox(height: AppSpace.xs),
           SizedBox(
             width: double.infinity,
+            height: AppHitTargets.comfortable,
             child: FilledButton(
               onPressed: state.isProcessing ? null : notifier.goToConfirm,
               child: state.isProcessing

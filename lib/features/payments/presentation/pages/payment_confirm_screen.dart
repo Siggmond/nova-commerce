@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:nova_commerce/app/router/app_routes.dart';
+import 'package:nova_commerce/app/theme/app_tokens.dart';
 import 'package:nova_commerce/gen_l10n/app_localizations.dart';
 
 import '../../domain/entities/payment_method.dart';
@@ -42,19 +43,21 @@ class PaymentConfirmScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: Text(t.paymentsConfirmTitle)),
       body: ListView(
-        padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 16.h),
+        padding: AppInsets.screen,
         children: [
           PaymentSummaryCard(summary: args.flow.summary),
-          SizedBox(height: 14.h),
+          SizedBox(height: AppSpace.lg),
           Text(
             t.paymentsSelectedMethod(_methodLabel(t, args.method)),
-            style: Theme.of(
-              context,
-            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900),
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w800,
+              height: 1.15,
+            ),
           ),
-          SizedBox(height: 10.h),
+          SizedBox(height: AppSpace.sm),
           SizedBox(
             width: double.infinity,
+            height: AppHitTargets.comfortable,
             child: FilledButton(
               onPressed: state.isProcessing
                   ? null
@@ -68,9 +71,10 @@ class PaymentConfirmScreen extends ConsumerWidget {
                   : Text(t.paymentsPayCta),
             ),
           ),
-          SizedBox(height: 10.h),
+          SizedBox(height: AppSpace.sm),
           SizedBox(
             width: double.infinity,
+            height: AppHitTargets.comfortable,
             child: OutlinedButton(
               onPressed: state.isProcessing ? null : () => context.pop(),
               child: Text(t.commonBack),

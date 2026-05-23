@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 
 import 'package:nova_commerce/app/config/app_env.dart';
 import 'package:nova_commerce/app/router/app_routes.dart';
+import 'package:nova_commerce/app/theme/app_tokens.dart';
 import 'package:nova_commerce/core/perf/perf_markers.dart';
 import 'package:nova_commerce/core/widgets/nova_app_bar.dart';
 import 'package:nova_commerce/core/widgets/nova_button.dart';
@@ -102,9 +103,16 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
             l10n.commonSomethingWentWrongTryAgain,
           null => event.message ?? '',
         };
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(message)));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            behavior: SnackBarBehavior.floating,
+            margin: EdgeInsets.all(AppSpace.xl),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppRadii.lg),
+            ),
+            content: Text(message),
+          ),
+        );
       } else if (event is CheckoutGoToSignIn) {
         context.push(AppRoutes.signIn);
       } else if (event is CheckoutGoToPayment) {
@@ -133,28 +141,30 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
             : AppBar(title: Text(l10n.checkoutTitle)),
         body: ListView(
           padding: EdgeInsets.fromLTRB(
-            16.w,
-            12.h,
-            16.w,
-            MediaQuery.of(context).viewInsets.bottom + 20.h,
+            AppSpace.xl,
+            AppSpace.md,
+            AppSpace.xl,
+            MediaQuery.of(context).viewInsets.bottom + AppSpace.section,
           ),
           children: [
             Text(
               l10n.checkoutShippingTitle,
-              style: Theme.of(
-                context,
-              ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w900),
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.w800,
+                height: 1.12,
+              ),
             ),
-            SizedBox(height: 8.h),
+            SizedBox(height: AppSpace.sm),
             Text(
               l10n.checkoutShippingSubtitle,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: Theme.of(
                   context,
                 ).colorScheme.onSurface.withValues(alpha: 0.75),
+                height: 1.3,
               ),
             ),
-            SizedBox(height: 16.h),
+            SizedBox(height: AppSpace.xl),
             _CheckoutFormCard(
               useNovaUi: useNovaUi,
               fullName: _fullName,
@@ -173,9 +183,9 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
               countryFocus: _countryFocus,
               onTapPhoneCountry: () => _showCountryPicker(context, vm),
             ),
-            SizedBox(height: 12.h),
+            SizedBox(height: AppSpace.md),
             _CheckoutSummaryCard(useNovaUi: useNovaUi),
-            SizedBox(height: 12.h),
+            SizedBox(height: AppSpace.md),
             _CheckoutActions(useNovaUi: useNovaUi),
           ],
         ),
@@ -268,11 +278,12 @@ class _CheckoutFormCard extends ConsumerWidget {
       children: [
         Text(
           l10n.checkoutDeliveryTitle,
-          style: Theme.of(
-            context,
-          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.w800,
+            height: 1.15,
+          ),
         ),
-        SizedBox(height: 12.h),
+        SizedBox(height: AppSpace.md),
         _Field(
           useNovaUi: useNovaUi,
           label: l10n.checkoutFullNameLabel,
@@ -283,7 +294,7 @@ class _CheckoutFormCard extends ConsumerWidget {
           textInputAction: TextInputAction.next,
           onSubmitted: () => phoneFocus.requestFocus(),
         ),
-        SizedBox(height: 10.h),
+        SizedBox(height: AppSpace.sm),
         _Field(
           useNovaUi: useNovaUi,
           label: l10n.checkoutPhoneLabel,
@@ -299,7 +310,7 @@ class _CheckoutFormCard extends ConsumerWidget {
             onTap: onTapPhoneCountry,
           ),
         ),
-        SizedBox(height: 10.h),
+        SizedBox(height: AppSpace.sm),
         _Field(
           useNovaUi: useNovaUi,
           label: l10n.checkoutAddressLabel,
@@ -320,7 +331,7 @@ class _CheckoutFormCard extends ConsumerWidget {
             onSelected: vm.selectSuggestion,
             onManualEntry: vm.markManualEntry,
           ),
-        SizedBox(height: 10.h),
+        SizedBox(height: AppSpace.sm),
         Row(
           children: [
             Expanded(
@@ -335,7 +346,7 @@ class _CheckoutFormCard extends ConsumerWidget {
                 onSubmitted: () => stateFocus.requestFocus(),
               ),
             ),
-            SizedBox(width: 10.w),
+            SizedBox(width: AppSpace.sm),
             Expanded(
               child: _Field(
                 useNovaUi: useNovaUi,
@@ -350,7 +361,7 @@ class _CheckoutFormCard extends ConsumerWidget {
             ),
           ],
         ),
-        SizedBox(height: 10.h),
+        SizedBox(height: AppSpace.sm),
         Row(
           children: [
             Expanded(
@@ -365,7 +376,7 @@ class _CheckoutFormCard extends ConsumerWidget {
                 onSubmitted: () => countryFocus.requestFocus(),
               ),
             ),
-            SizedBox(width: 10.w),
+            SizedBox(width: AppSpace.sm),
             Expanded(
               child: _Field(
                 useNovaUi: useNovaUi,
@@ -384,10 +395,17 @@ class _CheckoutFormCard extends ConsumerWidget {
     );
 
     if (useNovaUi) {
-      return NovaSurface(padding: EdgeInsets.all(14.r), child: cardChild);
+      return NovaSurface(
+        padding: AppInsets.card,
+        borderRadius: AppRadii.lg,
+        child: cardChild,
+      );
     }
     return Card(
-      child: Padding(padding: EdgeInsets.all(14.r), child: cardChild),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppRadii.lg),
+      ),
+      child: Padding(padding: AppInsets.card, child: cardChild),
     );
   }
 }
@@ -402,8 +420,12 @@ class _CheckoutSummaryCard extends ConsumerWidget {
     final summary = ref.watch(checkoutCartSummaryProvider);
     final l10n = AppLocalizations.of(context)!;
     final currency = summary.currency.toUpperCase();
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final tt = theme.textTheme;
 
     final content = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           children: [
@@ -412,22 +434,24 @@ class _CheckoutSummaryCard extends ConsumerWidget {
                 l10n.checkoutSubtotalLabel,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: Theme.of(
-                  context,
-                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
+                style: tt.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w800,
+                  height: 1.15,
+                ),
               ),
             ),
             Text(
               '$currency ${summary.subtotal.toStringAsFixed(0)}',
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: Theme.of(
-                context,
-              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900),
+              style: tt.titleMedium?.copyWith(
+                fontWeight: FontWeight.w900,
+                height: 1.15,
+              ),
             ),
           ],
         ),
-        SizedBox(height: 10.h),
+        SizedBox(height: AppSpace.md),
         Row(
           children: [
             Expanded(
@@ -435,52 +459,67 @@ class _CheckoutSummaryCard extends ConsumerWidget {
                 l10n.checkoutShippingFeeLabel,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: Theme.of(context).textTheme.bodyMedium,
+                style: tt.bodyMedium?.copyWith(
+                  color: cs.onSurface.withValues(alpha: 0.76),
+                ),
               ),
             ),
             Text(
               summary.shippingFee <= 0
                   ? l10n.checkoutFreeShipping
                   : '$currency ${summary.shippingFee.toStringAsFixed(0)}',
-              style: Theme.of(
-                context,
-              ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700),
+              style: tt.bodyMedium?.copyWith(fontWeight: FontWeight.w800),
             ),
           ],
         ),
-        SizedBox(height: 10.h),
-        Divider(height: 1.h),
-        SizedBox(height: 10.h),
-        Row(
-          children: [
-            Expanded(
-              child: Text(
-                l10n.checkoutTotalLabel,
+        SizedBox(height: AppSpace.md),
+        Container(
+          padding: AppInsets.cardTight,
+          decoration: BoxDecoration(
+            color: cs.primaryContainer.withValues(alpha: 0.14),
+            borderRadius: BorderRadius.circular(AppRadii.md),
+            border: Border.all(color: cs.primary.withValues(alpha: 0.18)),
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  l10n.checkoutTotalLabel,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: tt.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w900,
+                    height: 1.1,
+                  ),
+                ),
+              ),
+              Text(
+                '$currency ${summary.total.toStringAsFixed(0)}',
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: Theme.of(
-                  context,
-                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900),
+                style: tt.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.w900,
+                  height: 1.05,
+                ),
               ),
-            ),
-            Text(
-              '$currency ${summary.total.toStringAsFixed(0)}',
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: Theme.of(
-                context,
-              ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w900),
-            ),
-          ],
+            ],
+          ),
         ),
       ],
     );
 
     if (useNovaUi) {
-      return NovaSurface(padding: EdgeInsets.all(14.r), child: content);
+      return NovaSurface(
+        padding: AppInsets.card,
+        borderRadius: AppRadii.lg,
+        child: content,
+      );
     }
     return Card(
-      child: Padding(padding: EdgeInsets.all(14.r), child: content),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppRadii.lg),
+      ),
+      child: Padding(padding: AppInsets.card, child: content),
     );
   }
 }
@@ -510,13 +549,14 @@ class _CheckoutActions extends ConsumerWidget {
                 : l10n.checkoutHintSignIn,
             useNovaUi: useNovaUi,
           ),
-          SizedBox(height: 12.h),
+          SizedBox(height: AppSpace.md),
         ],
         SafeArea(
           top: false,
           child: useNovaUi
               ? SizedBox(
                   width: double.infinity,
+                  height: AppHitTargets.comfortable,
                   child: NovaButton.primary(
                     onPressed: canSubmit ? vm.submit : null,
                     label: action.isSubmitting
@@ -525,27 +565,31 @@ class _CheckoutActions extends ConsumerWidget {
                     isLoading: action.isSubmitting,
                   ),
                 )
-              : FilledButton(
-                  onPressed: canSubmit ? vm.submit : null,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      if (action.isSubmitting) ...[
-                        SizedBox(
-                          width: 16.r,
-                          height: 16.r,
-                          child: const CircularProgressIndicator(
-                            strokeWidth: 2,
+              : SizedBox(
+                  width: double.infinity,
+                  height: AppHitTargets.comfortable,
+                  child: FilledButton(
+                    onPressed: canSubmit ? vm.submit : null,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        if (action.isSubmitting) ...[
+                          SizedBox(
+                            width: 16.r,
+                            height: 16.r,
+                            child: const CircularProgressIndicator(
+                              strokeWidth: 2,
+                            ),
                           ),
+                          SizedBox(width: AppSpace.sm),
+                        ],
+                        Text(
+                          action.isSubmitting
+                              ? l10n.checkoutPlacingOrder
+                              : l10n.checkoutPlaceOrder,
                         ),
-                        SizedBox(width: 10.w),
                       ],
-                      Text(
-                        action.isSubmitting
-                            ? l10n.checkoutPlacingOrder
-                            : l10n.checkoutPlaceOrder,
-                      ),
-                    ],
+                    ),
                   ),
                 ),
         ),
@@ -578,38 +622,53 @@ class _CheckoutHint extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     final child = Row(
       children: [
-        Icon(
-          Icons.info_outline,
-          size: 18.r,
-          color: Theme.of(context).colorScheme.onSurfaceVariant,
+        Container(
+          width: AppHitTargets.min,
+          height: AppHitTargets.min,
+          decoration: BoxDecoration(
+            color: cs.surfaceContainerHigh,
+            borderRadius: BorderRadius.circular(AppRadii.md),
+            border: Border.all(color: cs.outlineVariant.withValues(alpha: 0.3)),
+          ),
+          child: Icon(
+            Icons.info_outline,
+            size: 18.r,
+            color: cs.onSurfaceVariant,
+          ),
         ),
-        SizedBox(width: 10.w),
+        SizedBox(width: AppSpace.md),
         Expanded(
           child: Text(
             message,
-            style: Theme.of(
-              context,
-            ).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w700),
+            style: Theme.of(context).textTheme.labelLarge?.copyWith(
+              fontWeight: FontWeight.w700,
+              height: 1.22,
+            ),
           ),
         ),
       ],
     );
 
     if (useNovaUi) {
-      return NovaSurface(padding: EdgeInsets.all(12.r), child: child);
+      return NovaSurface(
+        padding: AppInsets.cardTight,
+        borderRadius: AppRadii.lg,
+        child: child,
+      );
     }
 
     return Container(
-      padding: EdgeInsets.all(12.r),
+      padding: AppInsets.cardTight,
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(14.r),
+        borderRadius: BorderRadius.circular(AppRadii.lg),
         border: Border.all(
           color: Theme.of(
             context,
-          ).colorScheme.outlineVariant.withValues(alpha: 0.6),
+          ).colorScheme.outlineVariant.withValues(alpha: 0.36),
         ),
       ),
       child: child,
@@ -628,7 +687,10 @@ class _PhoneCountryPrefix extends StatelessWidget {
     return InkWell(
       onTap: onTap,
       child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
+        padding: EdgeInsets.symmetric(
+          horizontal: AppSpace.md,
+          vertical: AppSpace.md,
+        ),
         child: Text(
           dialCode,
           style: Theme.of(
@@ -662,7 +724,7 @@ class _AddressSuggestions extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     if (isLoading) {
       return Padding(
-        padding: EdgeInsets.only(top: 10.h),
+        padding: EdgeInsets.only(top: AppSpace.sm),
         child: Row(
           children: [
             SizedBox(
@@ -670,7 +732,7 @@ class _AddressSuggestions extends StatelessWidget {
               height: 14.r,
               child: const CircularProgressIndicator(strokeWidth: 2),
             ),
-            SizedBox(width: 8.w),
+            SizedBox(width: AppSpace.sm),
             Text(
               l10n.checkoutAddressSearching,
               style: Theme.of(context).textTheme.bodySmall,
@@ -681,7 +743,7 @@ class _AddressSuggestions extends StatelessWidget {
     }
 
     return Padding(
-      padding: EdgeInsets.only(top: 8.h),
+      padding: EdgeInsets.only(top: AppSpace.sm),
       child: ListView.builder(
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
@@ -695,7 +757,7 @@ class _AddressSuggestions extends StatelessWidget {
           if (showUnavailableHint) {
             if (index == cursor) {
               return Padding(
-                padding: EdgeInsets.only(bottom: 6.h),
+                padding: EdgeInsets.only(bottom: AppSpace.xs),
                 child: Text(
                   l10n.checkoutAddressSuggestionsUnavailable,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -714,7 +776,11 @@ class _AddressSuggestions extends StatelessWidget {
             final suggestion = suggestions[index - cursor];
             return ListTile(
               dense: true,
-              contentPadding: EdgeInsets.zero,
+              minVerticalPadding: AppSpace.xs,
+              contentPadding: EdgeInsets.symmetric(horizontal: AppSpace.xs),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppRadii.md),
+              ),
               title: Text(suggestion.description),
               onTap: () => onSelected(suggestion),
             );
@@ -788,7 +854,7 @@ class _Field extends StatelessWidget {
         errorText: errorText,
         prefixIcon: prefix,
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14.r),
+          borderRadius: BorderRadius.circular(AppRadii.lg),
           borderSide: BorderSide.none,
         ),
       ),

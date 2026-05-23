@@ -7,6 +7,7 @@ import 'package:nova_commerce/app/di/app_providers.dart';
 import 'package:nova_commerce/app/config/app_env.dart';
 import 'package:nova_commerce/app/router/app_routes.dart';
 import 'package:nova_commerce/app/theme/app_shadows.dart';
+import 'package:nova_commerce/app/theme/app_tokens.dart';
 import 'package:nova_commerce/core/perf/perf_markers.dart';
 import 'package:nova_commerce/core/widgets/app_cached_network_image.dart';
 import 'package:nova_commerce/core/widgets/error_state.dart';
@@ -136,7 +137,12 @@ class _CartReadyContent extends ConsumerWidget {
     return CustomScrollView(
       slivers: [
         SliverPadding(
-          padding: EdgeInsets.fromLTRB(12.w, 6.h, 12.w, 12.h),
+          padding: EdgeInsets.fromLTRB(
+            AppSpace.xl,
+            AppSpace.sm,
+            AppSpace.xl,
+            AppSpace.md,
+          ),
           sliver: SliverList(
             delegate: SliverChildListDelegate([
               if (currentUid == null)
@@ -146,7 +152,7 @@ class _CartReadyContent extends ConsumerWidget {
           ),
         ),
         SliverPadding(
-          padding: EdgeInsets.fromLTRB(12.w, 0, 12.w, 0),
+          padding: EdgeInsets.symmetric(horizontal: AppSpace.xl),
           sliver: SliverList(
             delegate: SliverChildBuilderDelegate((context, index) {
               final cartKey = orderKeys[index];
@@ -158,35 +164,43 @@ class _CartReadyContent extends ConsumerWidget {
                     thumbSize: thumbSize,
                     memThumb: memThumb,
                   ),
-                  if (index != orderKeys.length - 1) SizedBox(height: 10.h),
+                  if (index != orderKeys.length - 1)
+                    SizedBox(height: AppSpace.md),
                 ],
               );
             }, childCount: orderKeys.length),
           ),
         ),
         SliverPadding(
-          padding: EdgeInsets.fromLTRB(12.w, 0, 12.w, 12.h),
+          padding: EdgeInsets.fromLTRB(
+            AppSpace.xl,
+            0,
+            AppSpace.xl,
+            AppSpace.md,
+          ),
           sliver: SliverList(
             delegate: SliverChildListDelegate([
-              SizedBox(height: 12.h),
-              Divider(color: cs.outlineVariant),
-              SizedBox(height: 12.h),
+              SizedBox(height: AppSpace.lg),
+              Divider(color: cs.outlineVariant.withValues(alpha: 0.6)),
+              SizedBox(height: AppSpace.md),
               Text(
                 l10n.cartYouMightLikeTitle,
-                style: Theme.of(
-                  context,
-                ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w900),
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w800,
+                  height: 1.15,
+                ),
               ),
-              SizedBox(height: 4.h),
+              SizedBox(height: AppSpace.xxs),
               Text(
                 l10n.cartYouMightLikeSubtitle,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: cs.onSurface.withValues(alpha: 0.72),
                 ),
               ),
-              SizedBox(height: 8.h),
+              SizedBox(height: AppSpace.sm),
               Wrap(
-                spacing: 8.w,
+                spacing: AppSpace.sm,
+                runSpacing: AppSpace.sm,
                 children: [
                   _FilterChip(
                     label: l10n.cartFilterAll,
@@ -212,17 +226,22 @@ class _CartReadyContent extends ConsumerWidget {
                   ),
                 ],
               ),
-              SizedBox(height: 10.h),
+              SizedBox(height: AppSpace.md),
             ]),
           ),
         ),
         SliverPadding(
-          padding: EdgeInsets.fromLTRB(12.w, 0, 12.w, 12.h),
+          padding: EdgeInsets.fromLTRB(
+            AppSpace.xl,
+            0,
+            AppSpace.xl,
+            AppSpace.md,
+          ),
           sliver: SliverGrid(
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2,
-              mainAxisSpacing: 8.h,
-              crossAxisSpacing: 8.w,
+              mainAxisSpacing: AppSpace.sm,
+              crossAxisSpacing: AppSpace.sm,
               childAspectRatio: 0.86,
             ),
             delegate: SliverChildBuilderDelegate((context, index) {
@@ -285,18 +304,33 @@ class _InfoBanner extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     return Container(
-      margin: EdgeInsets.only(bottom: 12.h),
-      padding: EdgeInsets.all(12.r),
+      margin: EdgeInsets.only(bottom: AppSpace.md),
+      padding: AppInsets.cardTight,
       decoration: BoxDecoration(
         color: cs.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(14.r),
-        border: Border.all(color: cs.outlineVariant.withValues(alpha: 0.6)),
-        boxShadow: AppShadows.sm(),
+        borderRadius: BorderRadius.circular(AppRadii.lg),
+        border: Border.all(color: cs.outlineVariant.withValues(alpha: 0.36)),
+        boxShadow: AppShadows.sm(color: Colors.black.withValues(alpha: 0.06)),
       ),
       child: Row(
         children: [
-          Icon(icon, color: cs.onSurface.withValues(alpha: 0.75), size: 20.r),
-          SizedBox(width: 10.w),
+          Container(
+            width: AppHitTargets.min,
+            height: AppHitTargets.min,
+            decoration: BoxDecoration(
+              color: cs.surface.withValues(alpha: 0.72),
+              borderRadius: BorderRadius.circular(AppRadii.md),
+              border: Border.all(
+                color: cs.outlineVariant.withValues(alpha: 0.28),
+              ),
+            ),
+            child: Icon(
+              icon,
+              color: cs.onSurface.withValues(alpha: 0.75),
+              size: 20.r,
+            ),
+          ),
+          SizedBox(width: AppSpace.md),
           Expanded(
             child: Text(
               message,
@@ -329,24 +363,43 @@ class _SelectionInfoBanner extends ConsumerWidget {
         : hasSelection
         ? l10n.cartSelectionSomeSelectedMessage
         : l10n.cartSelectionNoneSelectedMessage;
+    final surfaceColor = hasSelection
+        ? cs.primaryContainer.withValues(alpha: 0.18)
+        : cs.surface;
+    final iconColor = hasSelection
+        ? cs.primary
+        : cs.onSurface.withValues(alpha: 0.75);
 
     return Container(
-      margin: EdgeInsets.only(bottom: 12.h),
-      padding: EdgeInsets.all(12.r),
+      margin: EdgeInsets.only(bottom: AppSpace.md),
+      padding: AppInsets.cardTight,
       decoration: BoxDecoration(
-        color: cs.surface,
-        borderRadius: BorderRadius.circular(14.r),
-        border: Border.all(color: cs.outlineVariant.withValues(alpha: 0.6)),
-        boxShadow: AppShadows.sm(),
+        color: surfaceColor,
+        borderRadius: BorderRadius.circular(AppRadii.lg),
+        border: Border.all(
+          color: hasSelection
+              ? cs.primary.withValues(alpha: 0.30)
+              : cs.outlineVariant.withValues(alpha: 0.36),
+        ),
+        boxShadow: AppShadows.sm(color: Colors.black.withValues(alpha: 0.06)),
       ),
       child: Row(
         children: [
-          Icon(
-            Icons.checklist,
-            color: cs.onSurface.withValues(alpha: 0.75),
-            size: 20.r,
+          Container(
+            width: AppHitTargets.min,
+            height: AppHitTargets.min,
+            decoration: BoxDecoration(
+              color: cs.surface.withValues(alpha: 0.74),
+              borderRadius: BorderRadius.circular(AppRadii.md),
+              border: Border.all(
+                color: hasSelection
+                    ? cs.primary.withValues(alpha: 0.22)
+                    : cs.outlineVariant.withValues(alpha: 0.28),
+              ),
+            ),
+            child: Icon(Icons.checklist, color: iconColor, size: 20.r),
           ),
-          SizedBox(width: 10.w),
+          SizedBox(width: AppSpace.md),
           Expanded(
             child: Text(
               message,
@@ -554,9 +607,12 @@ class _PremiumCartItemRow extends ConsumerWidget {
     );
     final selectionVm = ref.read(selectedCartItemIdsProvider.notifier);
     final borderColor = selected
-        ? cs.primary.withValues(alpha: 0.42)
+        ? cs.primary.withValues(alpha: 0.48)
         : cs.outlineVariant.withValues(alpha: 0.48);
-    final cardRadius = BorderRadius.circular(16.r);
+    final cardRadius = BorderRadius.circular(AppRadii.lg);
+    final cardColor = selected
+        ? cs.primaryContainer.withValues(alpha: 0.10)
+        : cs.surface;
     final unitPrice = _formatMoney(item.product.currency, item.product.price);
     final totalPrice = _formatMoney(item.product.currency, item.total);
     final itemKey = _premiumCartItemKey(item);
@@ -565,7 +621,7 @@ class _PremiumCartItemRow extends ConsumerWidget {
       borderRadius: cardRadius,
       onTap: () => context.push('${AppRoutes.product}?id=${item.product.id}'),
       child: Padding(
-        padding: EdgeInsets.all(12.r),
+        padding: AppInsets.cardTight,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -575,15 +631,15 @@ class _PremiumCartItemRow extends ConsumerWidget {
                 GestureDetector(
                   onTap: () => selectionVm.toggle(item.product.id),
                   child: SizedBox(
-                    width: 34.r,
-                    height: 34.r,
+                    width: AppHitTargets.min,
+                    height: AppHitTargets.min,
                     child: Center(
                       child: Container(
-                        width: 18.r,
-                        height: 18.r,
+                        width: 20.r,
+                        height: 20.r,
                         decoration: BoxDecoration(
                           color: selected ? cs.primary : Colors.transparent,
-                          borderRadius: BorderRadius.circular(7.r),
+                          borderRadius: BorderRadius.circular(AppRadii.sm),
                           border: Border.all(
                             color: selected
                                 ? cs.primary
@@ -601,18 +657,18 @@ class _PremiumCartItemRow extends ConsumerWidget {
                     ),
                   ),
                 ),
-                SizedBox(width: 8.w),
+                SizedBox(width: AppSpace.sm),
                 AppCachedNetworkImage(
                   url: item.product.imageUrl,
                   width: thumbSize,
                   height: thumbSize,
                   fit: BoxFit.cover,
-                  borderRadius: BorderRadius.circular(12.r),
+                  borderRadius: BorderRadius.circular(AppRadii.md),
                   memCacheWidth: memThumb,
                   memCacheHeight: memThumb,
                   backgroundColor: cs.surfaceContainerHigh,
                 ),
-                SizedBox(width: 12.w),
+                SizedBox(width: AppSpace.md),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -649,23 +705,28 @@ class _PremiumCartItemRow extends ConsumerWidget {
                               ],
                             ),
                           ),
-                          SizedBox(width: 8.w),
+                          SizedBox(width: AppSpace.sm),
                           Container(
-                            width: 32.r,
-                            height: 32.r,
+                            width: AppHitTargets.min,
+                            height: AppHitTargets.min,
                             decoration: BoxDecoration(
                               color: cs.surfaceContainerHigh.withValues(
                                 alpha: 0.75,
                               ),
-                              borderRadius: BorderRadius.circular(10.r),
+                              borderRadius: BorderRadius.circular(AppRadii.md),
+                              border: Border.all(
+                                color: cs.outlineVariant.withValues(
+                                  alpha: 0.24,
+                                ),
+                              ),
                             ),
                             child: IconButton(
                               onPressed: () => vm.removeByKey(cartKey),
                               visualDensity: VisualDensity.compact,
                               padding: EdgeInsets.zero,
                               constraints: BoxConstraints.tightFor(
-                                width: 32.r,
-                                height: 32.r,
+                                width: AppHitTargets.min,
+                                height: AppHitTargets.min,
                               ),
                               icon: Icon(
                                 Icons.delete_outline_rounded,
@@ -676,10 +737,10 @@ class _PremiumCartItemRow extends ConsumerWidget {
                           ),
                         ],
                       ),
-                      SizedBox(height: 8.h),
+                      SizedBox(height: AppSpace.sm),
                       Wrap(
-                        spacing: 6.w,
-                        runSpacing: 6.h,
+                        spacing: AppSpace.sm,
+                        runSpacing: AppSpace.xs,
                         children: [
                           _PremiumCartMetaPill(
                             icon: Icons.palette_outlined,
@@ -696,7 +757,7 @@ class _PremiumCartItemRow extends ConsumerWidget {
                 ),
               ],
             ),
-            SizedBox(height: 12.h),
+            SizedBox(height: AppSpace.md),
             Row(
               children: [
                 _PremiumCartQuantityStepper(
@@ -715,9 +776,10 @@ class _PremiumCartItemRow extends ConsumerWidget {
                       totalPrice,
                       style: tt.titleSmall?.copyWith(
                         fontWeight: FontWeight.w900,
+                        height: 1.1,
                       ),
                     ),
-                    SizedBox(height: 2.h),
+                    SizedBox(height: AppSpace.xxs),
                     Text(
                       unitPrice,
                       style: tt.labelSmall?.copyWith(
@@ -739,7 +801,8 @@ class _PremiumCartItemRow extends ConsumerWidget {
         child: NovaSurface(
           key: ValueKey(itemKey),
           padding: EdgeInsets.zero,
-          borderRadius: 16.r,
+          color: cardColor,
+          borderRadius: AppRadii.lg,
           elevation: selected ? 2 : 1,
           borderSide: BorderSide(color: borderColor),
           child: row,
@@ -751,10 +814,10 @@ class _PremiumCartItemRow extends ConsumerWidget {
       child: Container(
         key: ValueKey(itemKey),
         decoration: BoxDecoration(
-          color: cs.surface,
+          color: cardColor,
           borderRadius: cardRadius,
           border: Border.all(color: borderColor),
-          boxShadow: AppShadows.sm(),
+          boxShadow: AppShadows.sm(color: Colors.black.withValues(alpha: 0.06)),
         ),
         child: row,
       ),
@@ -772,19 +835,24 @@ class _PremiumCartMetaPill extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 5.h),
+      padding: EdgeInsets.symmetric(
+        horizontal: AppSpace.sm,
+        vertical: AppSpace.xxs,
+      ),
       decoration: BoxDecoration(
         color: cs.surfaceContainerHighest.withValues(alpha: 0.7),
-        borderRadius: BorderRadius.circular(999.r),
+        borderRadius: BorderRadius.circular(AppRadii.pill),
         border: Border.all(color: cs.outlineVariant.withValues(alpha: 0.38)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(icon, size: 12.r, color: cs.onSurface.withValues(alpha: 0.72)),
-          SizedBox(width: 4.w),
+          SizedBox(width: AppSpace.xxs),
           Text(
             label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             style: Theme.of(context).textTheme.labelSmall?.copyWith(
               color: cs.onSurface.withValues(alpha: 0.82),
               fontWeight: FontWeight.w700,
@@ -813,10 +881,13 @@ class _PremiumCartQuantityStepper extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 5.h),
+      padding: EdgeInsets.symmetric(
+        horizontal: AppSpace.xs,
+        vertical: AppSpace.xs,
+      ),
       decoration: BoxDecoration(
         color: cs.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(999.r),
+        borderRadius: BorderRadius.circular(AppRadii.pill),
         border: Border.all(color: cs.outlineVariant.withValues(alpha: 0.45)),
       ),
       child: Row(
@@ -826,7 +897,7 @@ class _PremiumCartQuantityStepper extends StatelessWidget {
             icon: Icons.remove_rounded,
             onPressed: canDecrease ? onDecrease : null,
           ),
-          SizedBox(width: 10.w),
+          SizedBox(width: AppSpace.sm),
           ConstrainedBox(
             constraints: BoxConstraints(minWidth: 20.w),
             child: Text(
@@ -837,7 +908,7 @@ class _PremiumCartQuantityStepper extends StatelessWidget {
               ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w900),
             ),
           ),
-          SizedBox(width: 10.w),
+          SizedBox(width: AppSpace.sm),
           _PremiumCartStepperButton(
             icon: Icons.add_rounded,
             onPressed: onIncrease,
@@ -858,18 +929,18 @@ class _PremiumCartStepperButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     return Container(
-      width: 28.r,
-      height: 28.r,
+      width: 32.r,
+      height: 32.r,
       decoration: BoxDecoration(
         color: cs.surface,
-        borderRadius: BorderRadius.circular(999.r),
+        borderRadius: BorderRadius.circular(AppRadii.pill),
         border: Border.all(color: cs.outlineVariant.withValues(alpha: 0.45)),
       ),
       child: IconButton(
         onPressed: onPressed,
         visualDensity: VisualDensity.compact,
         padding: EdgeInsets.zero,
-        constraints: BoxConstraints.tightFor(width: 28.r, height: 28.r),
+        constraints: BoxConstraints.tightFor(width: 32.r, height: 32.r),
         icon: Icon(icon, size: 15.r),
       ),
     );
@@ -918,19 +989,27 @@ class _FilterChip extends StatelessWidget {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
         curve: Curves.easeOutCubic,
-        padding: EdgeInsets.symmetric(horizontal: 13.w, vertical: 8.h),
+        constraints: BoxConstraints(minHeight: AppHitTargets.min),
+        padding: EdgeInsets.symmetric(
+          horizontal: AppSpace.md,
+          vertical: AppSpace.sm,
+        ),
         decoration: BoxDecoration(
           color: selected ? cs.primary : cs.surface,
-          borderRadius: BorderRadius.circular(999.r),
+          borderRadius: BorderRadius.circular(AppRadii.pill),
           border: Border.all(
             color: selected
                 ? cs.primary
                 : cs.outlineVariant.withValues(alpha: 0.6),
           ),
-          boxShadow: selected ? AppShadows.sm() : null,
+          boxShadow: selected
+              ? AppShadows.sm(color: cs.primary.withValues(alpha: 0.18))
+              : null,
         ),
         child: Text(
           label,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
           style: Theme.of(context).textTheme.labelLarge?.copyWith(
             color: selected ? cs.onPrimary : cs.onSurface,
             fontWeight: FontWeight.w800,
@@ -951,16 +1030,16 @@ class _RecommendedCard extends StatelessWidget {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
     final tt = theme.textTheme;
-    final radius = BorderRadius.circular(14.r);
+    final radius = BorderRadius.circular(AppRadii.lg);
     final priceText = _formatMoney('USD', item.price);
 
     return RepaintBoundary(
       child: Container(
         decoration: BoxDecoration(
           borderRadius: radius,
-          border: Border.all(color: cs.outlineVariant.withValues(alpha: 0.6)),
+          border: Border.all(color: cs.outlineVariant.withValues(alpha: 0.42)),
           color: cs.surface,
-          boxShadow: AppShadows.sm(),
+          boxShadow: AppShadows.sm(color: Colors.black.withValues(alpha: 0.06)),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -978,23 +1057,23 @@ class _RecommendedCard extends StatelessWidget {
                       width: double.infinity,
                       fit: BoxFit.cover,
                       borderRadius: BorderRadius.vertical(
-                        top: Radius.circular(14.r),
+                        top: Radius.circular(AppRadii.lg),
                       ),
                       memCacheWidth: memWidth,
                       memCacheHeight: memHeight,
                     ),
                     if (item.tags.contains('hot'))
                       Positioned(
-                        left: 8.w,
-                        top: 8.h,
+                        left: AppSpace.sm,
+                        top: AppSpace.sm,
                         child: Container(
                           padding: EdgeInsets.symmetric(
-                            horizontal: 7.w,
-                            vertical: 3.h,
+                            horizontal: AppSpace.sm,
+                            vertical: AppSpace.xxs,
                           ),
                           decoration: BoxDecoration(
                             color: cs.primary,
-                            borderRadius: BorderRadius.circular(999.r),
+                            borderRadius: BorderRadius.circular(AppRadii.pill),
                           ),
                           child: Text(
                             'HOT',
@@ -1006,16 +1085,16 @@ class _RecommendedCard extends StatelessWidget {
                         ),
                       ),
                     Positioned(
-                      right: 8.w,
-                      top: 8.h,
+                      right: AppSpace.sm,
+                      top: AppSpace.sm,
                       child: Container(
                         padding: EdgeInsets.symmetric(
-                          horizontal: 7.w,
-                          vertical: 3.h,
+                          horizontal: AppSpace.sm,
+                          vertical: AppSpace.xxs,
                         ),
                         decoration: BoxDecoration(
                           color: Colors.black.withValues(alpha: 0.48),
-                          borderRadius: BorderRadius.circular(999.r),
+                          borderRadius: BorderRadius.circular(AppRadii.pill),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
@@ -1025,7 +1104,7 @@ class _RecommendedCard extends StatelessWidget {
                               size: 12.r,
                               color: Colors.amber.shade300,
                             ),
-                            SizedBox(width: 3.w),
+                            SizedBox(width: AppSpace.xxs),
                             Text(
                               item.rating.toStringAsFixed(1),
                               style: tt.labelSmall?.copyWith(
@@ -1042,7 +1121,7 @@ class _RecommendedCard extends StatelessWidget {
               },
             ),
             Padding(
-              padding: EdgeInsets.fromLTRB(9.w, 8.h, 9.w, 8.h),
+              padding: AppInsets.cardTight.copyWith(top: AppSpace.sm),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -1052,7 +1131,7 @@ class _RecommendedCard extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     style: tt.titleSmall?.copyWith(fontWeight: FontWeight.w800),
                   ),
-                  SizedBox(height: 6.h),
+                  SizedBox(height: AppSpace.xs),
                   Row(
                     children: [
                       Text(
@@ -1102,21 +1181,22 @@ class _CheckoutBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 8.h),
+      padding: EdgeInsets.fromLTRB(AppSpace.xl, 0, AppSpace.xl, AppSpace.md),
       child: (useNovaUi
           ? NovaSurface(
-              padding: EdgeInsets.all(8.r),
+              padding: AppInsets.cardTight,
+              borderRadius: AppRadii.lg,
               child: _checkoutRow(context),
             )
           : Container(
-              padding: EdgeInsets.all(8.r),
+              padding: AppInsets.cardTight,
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.surface,
-                borderRadius: BorderRadius.circular(14.r),
+                borderRadius: BorderRadius.circular(AppRadii.lg),
                 border: Border.all(
                   color: Theme.of(
                     context,
-                  ).colorScheme.outlineVariant.withValues(alpha: 0.6),
+                  ).colorScheme.outlineVariant.withValues(alpha: 0.42),
                 ),
               ),
               child: _checkoutRow(context),
@@ -1142,27 +1222,34 @@ class _CheckoutBar extends StatelessWidget {
                     : l10n.cartSubtotalLabel,
                 style: tt.labelSmall?.copyWith(
                   color: cs.onSurface.withValues(alpha: 0.7),
+                  fontWeight: FontWeight.w700,
+                  height: 1.15,
                 ),
               ),
-              SizedBox(height: 2.h),
+              SizedBox(height: AppSpace.xxs),
               Text(
                 _formatMoney(currency, subtotal),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: tt.titleSmall?.copyWith(fontWeight: FontWeight.w900),
+                style: tt.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w900,
+                  height: 1.1,
+                ),
               ),
               Text(
                 l10n.cartTaxesAndShippingNote,
                 style: tt.labelSmall?.copyWith(
                   color: cs.onSurface.withValues(alpha: 0.6),
+                  height: 1.15,
                 ),
               ),
               if (!hasSelection) ...[
-                SizedBox(height: 4.h),
+                SizedBox(height: AppSpace.xxs),
                 Text(
                   l10n.cartSelectItemsToContinue,
                   style: tt.labelSmall?.copyWith(
                     color: cs.onSurface.withValues(alpha: 0.6),
+                    height: 1.15,
                   ),
                 ),
               ],
@@ -1171,7 +1258,7 @@ class _CheckoutBar extends StatelessWidget {
         ),
         if (useNovaUi)
           SizedBox(
-            height: 34.h,
+            height: AppHitTargets.comfortable,
             child: NovaButton.primary(
               key: const Key('cartProceedToCheckoutCta'),
               onPressed: onCheckout,
@@ -1180,14 +1267,14 @@ class _CheckoutBar extends StatelessWidget {
           )
         else
           SizedBox(
-            height: 40.h,
+            height: AppHitTargets.comfortable,
             child: FilledButton(
               key: const Key('cartProceedToCheckoutCta'),
               onPressed: onCheckout,
               style: FilledButton.styleFrom(
                 padding: EdgeInsets.symmetric(horizontal: 16.w),
                 textStyle: tt.labelLarge,
-                minimumSize: Size(64.w, 40.h),
+                minimumSize: Size(64.w, AppHitTargets.comfortable),
               ),
               child: Text(l10n.cartProceedToCheckout),
             ),
@@ -1208,39 +1295,54 @@ class _EmptyCart extends StatelessWidget {
     final tt = theme.textTheme;
     return Center(
       child: Padding(
-        padding: EdgeInsets.all(20.r),
+        padding: AppInsets.state,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              Icons.shopping_bag_outlined,
-              size: 48.r,
-              color: cs.onSurface.withValues(alpha: 0.6),
+            Container(
+              width: 72.r,
+              height: 72.r,
+              decoration: BoxDecoration(
+                color: cs.surfaceContainerHigh,
+                borderRadius: BorderRadius.circular(AppRadii.pill),
+                border: Border.all(
+                  color: cs.outlineVariant.withValues(alpha: 0.32),
+                ),
+              ),
+              child: Icon(
+                Icons.shopping_bag_outlined,
+                size: 34.r,
+                color: cs.onSurface.withValues(alpha: 0.66),
+              ),
             ),
-            SizedBox(height: 10.h),
+            SizedBox(height: AppSpace.md),
             Text(
               l10n.cartEmptyTitle,
               style: tt.titleLarge?.copyWith(fontWeight: FontWeight.w800),
               textAlign: TextAlign.center,
             ),
-            SizedBox(height: 6.h),
+            SizedBox(height: AppSpace.xs),
             Text(
               l10n.cartEmptySubtitle1,
-              style: tt.bodyMedium,
+              style: tt.bodyMedium?.copyWith(height: 1.3),
               textAlign: TextAlign.center,
             ),
-            SizedBox(height: 6.h),
+            SizedBox(height: AppSpace.xs),
             Text(
               l10n.cartEmptySubtitle2,
               style: tt.bodySmall?.copyWith(
                 color: cs.onSurface.withValues(alpha: 0.75),
+                height: 1.3,
               ),
               textAlign: TextAlign.center,
             ),
-            SizedBox(height: 16.h),
-            FilledButton(
-              onPressed: () => context.go(AppRoutes.home),
-              child: Text(l10n.cartContinueShopping),
+            SizedBox(height: AppSpace.lg),
+            SizedBox(
+              height: AppHitTargets.comfortable,
+              child: FilledButton(
+                onPressed: () => context.go(AppRoutes.home),
+                child: Text(l10n.cartContinueShopping),
+              ),
             ),
           ],
         ),

@@ -190,17 +190,20 @@ class AppTheme {
       textTheme: appText,
       cardTheme: CardThemeData(
         elevation: AppElevation.card,
-        shadowColor: AppShadows.shadowColor.withValues(alpha: 0.10),
+        shadowColor: AppShadows.shadowColor.withValues(alpha: 0.08),
         color: base.colorScheme.surfaceContainerHigh,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16.r),
+          borderRadius: BorderRadius.circular(AppRadii.lg),
         ),
       ),
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
-          padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+          minimumSize: Size(0, AppHitTargets.min),
+          padding: AppInsets.button,
+          tapTargetSize: MaterialTapTargetSize.padded,
+          visualDensity: VisualDensity.standard,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10.r),
+            borderRadius: BorderRadius.circular(AppRadii.md),
           ),
           textStyle: _primaryTextStyle(
             denseText.labelLarge?.copyWith(fontWeight: FontWeight.w600),
@@ -209,11 +212,14 @@ class AppTheme {
       ),
       chipTheme: base.chipTheme.copyWith(
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(999.r),
+          borderRadius: BorderRadius.circular(AppRadii.pill),
         ),
         labelStyle: appText.labelSmall,
-        padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 3.h),
-        labelPadding: EdgeInsets.symmetric(horizontal: 3.w),
+        padding: EdgeInsets.symmetric(
+          horizontal: AppSpace.sm,
+          vertical: AppSpace.xxs,
+        ),
+        labelPadding: EdgeInsets.symmetric(horizontal: AppSpace.xxs),
         selectedColor: base.colorScheme.primary.withValues(alpha: 0.10),
         side: BorderSide(
           color: base.colorScheme.outlineVariant.withValues(alpha: 0.5),
@@ -329,17 +335,20 @@ class AppTheme {
       textTheme: appText,
       cardTheme: CardThemeData(
         elevation: AppElevation.card,
-        shadowColor: AppShadows.shadowColor.withValues(alpha: 0.28),
+        shadowColor: AppShadows.shadowColor.withValues(alpha: 0.18),
         color: base.colorScheme.surfaceContainerHigh,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16.r),
+          borderRadius: BorderRadius.circular(AppRadii.lg),
         ),
       ),
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
-          padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
+          minimumSize: Size(0, AppHitTargets.min),
+          padding: AppInsets.button,
+          tapTargetSize: MaterialTapTargetSize.padded,
+          visualDensity: VisualDensity.standard,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12.r),
+            borderRadius: BorderRadius.circular(AppRadii.md),
           ),
           textStyle: _primaryTextStyle(
             denseText.labelLarge?.copyWith(fontWeight: FontWeight.w600),
@@ -348,11 +357,14 @@ class AppTheme {
       ),
       chipTheme: base.chipTheme.copyWith(
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(999.r),
+          borderRadius: BorderRadius.circular(AppRadii.pill),
         ),
         labelStyle: appText.labelSmall,
-        padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
-        labelPadding: EdgeInsets.symmetric(horizontal: 4.w),
+        padding: EdgeInsets.symmetric(
+          horizontal: AppSpace.sm,
+          vertical: AppSpace.xxs,
+        ),
+        labelPadding: EdgeInsets.symmetric(horizontal: AppSpace.xxs),
         selectedColor: base.colorScheme.primary.withValues(alpha: 0.16),
         side: BorderSide(
           color: base.colorScheme.outlineVariant.withValues(alpha: 0.5),

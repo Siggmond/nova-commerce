@@ -22,39 +22,51 @@ class AppEmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Center(
       child: Padding(
         padding: AppInsets.state,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              icon,
-              size: 52.r,
-              color: Theme.of(
-                context,
-              ).colorScheme.onSurface.withValues(alpha: 0.6),
+            Container(
+              width: 64.r,
+              height: 64.r,
+              decoration: BoxDecoration(
+                color: cs.surfaceContainerHigh,
+                borderRadius: BorderRadius.circular(AppRadii.pill),
+                border: Border.all(
+                  color: cs.outlineVariant.withValues(alpha: 0.32),
+                ),
+              ),
+              child: Icon(
+                icon,
+                size: 30.r,
+                color: cs.onSurface.withValues(alpha: 0.66),
+              ),
             ),
-            SizedBox(height: AppSpace.sm),
+            SizedBox(height: AppSpace.md),
             Text(
               title,
               style: Theme.of(
                 context,
-              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w900),
+              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
               textAlign: TextAlign.center,
             ),
             SizedBox(height: AppSpace.xs),
-            Text(
-              subtitle,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(
-                  context,
-                ).colorScheme.onSurface.withValues(alpha: 0.75),
+            ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: 360.w),
+              child: Text(
+                subtitle,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: cs.onSurface.withValues(alpha: 0.72),
+                  height: 1.3,
+                ),
+                textAlign: TextAlign.center,
               ),
-              textAlign: TextAlign.center,
             ),
             if (actionText != null && onAction != null) ...[
-              SizedBox(height: AppSpace.sm),
+              SizedBox(height: AppSpace.lg),
               AppButton.primary(label: actionText!, onPressed: onAction),
             ],
           ],

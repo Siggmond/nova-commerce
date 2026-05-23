@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 
 import 'app_tokens.dart';
 
@@ -9,8 +9,8 @@ class NovaColors {
 }
 
 class NovaRadii {
-  static double get radius16 => AppRadii.md;
-  static double get radius12 => AppRadii.sm;
+  static double get radius16 => AppRadii.lg;
+  static double get radius12 => AppRadii.md;
   static double get radiusPill => AppRadii.pill;
 }
 
@@ -31,12 +31,13 @@ class NovaText {
 
   static TextStyle? sectionTitle(BuildContext context) => Theme.of(
     context,
-  ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800);
+  ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700);
 
   static TextStyle? bodyMuted(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     return Theme.of(context).textTheme.bodyMedium?.copyWith(
       color: cs.onSurface.withValues(alpha: 0.70),
+      height: 1.25,
     );
   }
 }

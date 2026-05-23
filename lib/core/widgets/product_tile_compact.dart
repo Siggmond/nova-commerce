@@ -23,7 +23,7 @@ class ProductTileCompact extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final radius = BorderRadius.circular(AppRadii.md);
+    final radius = BorderRadius.circular(AppRadii.lg);
     final dpr = MediaQuery.devicePixelRatioOf(context);
 
     final titleStrut = const StrutStyle(forceStrutHeight: true, height: 1.15);
@@ -34,7 +34,8 @@ class ProductTileCompact extends StatelessWidget {
         onTap: onTap,
         child: Card(
           elevation: AppElevation.low,
-          shadowColor: AppShadows.shadowColor.withValues(alpha: 0.10),
+          shadowColor: AppShadows.shadowColor.withValues(alpha: 0.08),
+          surfaceTintColor: Colors.transparent,
           clipBehavior: Clip.none,
           shape: RoundedRectangleBorder(borderRadius: radius),
           child: Column(
@@ -56,8 +57,8 @@ class ProductTileCompact extends StatelessWidget {
                             url: product.imageUrl,
                             fit: BoxFit.cover,
                             borderRadius: BorderRadius.only(
-                              topLeft: Radius.circular(AppRadii.md),
-                              topRight: Radius.circular(AppRadii.md),
+                              topLeft: Radius.circular(AppRadii.lg),
+                              topRight: Radius.circular(AppRadii.lg),
                             ),
                             memCacheWidth: memCacheWidth,
                             memCacheHeight: memCacheHeight,
@@ -163,14 +164,17 @@ class _CompactWishlistHeart extends StatelessWidget {
         boxShadow: AppShadows.sm(),
       ),
       child: IconButton(
-        visualDensity: VisualDensity.compact,
+        visualDensity: VisualDensity.standard,
         padding: EdgeInsets.zero,
-        constraints: BoxConstraints.tightFor(width: 38.r, height: 38.r),
+        constraints: BoxConstraints.tightFor(
+          width: AppHitTargets.min,
+          height: AppHitTargets.min,
+        ),
         onPressed: onPressed,
         icon: Icon(
           isSaved ? Icons.favorite : Icons.favorite_border,
           color: isSaved ? cs.primary : cs.onSurface.withValues(alpha: 0.78),
-          size: 20.r,
+          size: 19.r,
         ),
       ),
     );

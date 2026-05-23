@@ -39,7 +39,7 @@ class ProductCard extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final cs = Theme.of(context).colorScheme;
-        final radius = BorderRadius.circular(16.r);
+        final radius = BorderRadius.circular(AppRadii.lg);
 
         final defaultCardHeight = 184.h;
         final effectiveCardHeight = fillHeight
@@ -153,10 +153,13 @@ class ProductCard extends StatelessWidget {
                   );
 
               final priceChip = Container(
-                padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+                padding: EdgeInsets.symmetric(
+                  horizontal: AppSpace.sm,
+                  vertical: AppSpace.xxs,
+                ),
                 decoration: BoxDecoration(
                   color: cs.surfaceContainerHighest,
-                  borderRadius: BorderRadius.circular(8.r),
+                  borderRadius: BorderRadius.circular(AppRadii.sm),
                 ),
                 child: FittedBox(
                   fit: BoxFit.scaleDown,
@@ -173,7 +176,7 @@ class ProductCard extends StatelessWidget {
               );
 
               return Padding(
-                padding: EdgeInsets.all(8.r),
+                padding: EdgeInsets.all(AppSpace.sm),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -233,8 +236,8 @@ class ProductCard extends StatelessWidget {
               onTap: onTap,
               child: Card(
                 elevation: AppElevation.card,
-                shadowColor: AppShadows.shadowColor.withValues(alpha: 0.10),
-                surfaceTintColor: cs.surface,
+                shadowColor: AppShadows.shadowColor.withValues(alpha: 0.08),
+                surfaceTintColor: Colors.transparent,
                 clipBehavior: Clip.none,
                 shape: RoundedRectangleBorder(borderRadius: radius),
                 child: fillHeight
@@ -254,7 +257,10 @@ class _NewDropBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 3.h),
+      padding: EdgeInsets.symmetric(
+        horizontal: AppSpace.sm,
+        vertical: AppSpace.xxs,
+      ),
       decoration: BoxDecoration(
         color: cs.primary.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(999.r),
@@ -302,9 +308,12 @@ class _WishlistHeart extends StatelessWidget {
 
     return _PillOverlay(
       child: IconButton(
-        visualDensity: VisualDensity.compact,
+        visualDensity: VisualDensity.standard,
         padding: EdgeInsets.zero,
-        constraints: BoxConstraints.tightFor(width: 40.r, height: 40.r),
+        constraints: BoxConstraints.tightFor(
+          width: AppHitTargets.min,
+          height: AppHitTargets.min,
+        ),
         onPressed: () {
           HapticFeedback.selectionClick();
           onPressed();
@@ -315,7 +324,7 @@ class _WishlistHeart extends StatelessWidget {
             key: ValueKey(isSaved),
             isSaved ? Icons.favorite : Icons.favorite_border,
             color: isSaved ? cs.primary : cs.onSurface.withValues(alpha: 0.78),
-            size: 16.r,
+            size: 18.r,
           ),
         ),
       ),

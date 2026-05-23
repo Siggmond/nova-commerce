@@ -19,7 +19,7 @@ class NovaSectionHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     return Padding(
-      padding: EdgeInsets.only(bottom: AppSpace.sm),
+      padding: EdgeInsets.only(bottom: AppSpace.md),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -37,9 +37,12 @@ class NovaSectionHeader extends StatelessWidget {
           ),
           if (trailing != null) ...[
             SizedBox(width: AppSpace.sm),
-            IconTheme(
-              data: IconThemeData(color: cs.primary.withValues(alpha: 0.90)),
-              child: trailing!,
+            Padding(
+              padding: EdgeInsets.only(top: AppSpace.xxs),
+              child: IconTheme(
+                data: IconThemeData(color: cs.primary.withValues(alpha: 0.90)),
+                child: trailing!,
+              ),
             ),
           ],
         ],

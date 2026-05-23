@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../app/theme/app_tokens.dart';
 import '../../app/theme/nova_tokens.dart';
 
 enum NovaFieldDensity { compact, comfortable }
@@ -44,11 +45,12 @@ class NovaTextField extends StatelessWidget {
 
     final isComfortable = density == NovaFieldDensity.comfortable;
     final contentPadding = isComfortable
-        ? EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h)
-        : EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h);
-    final minHeight = isComfortable ? 52.h : 44.h;
+        ? EdgeInsets.symmetric(horizontal: 16.w, vertical: 15.h)
+        : EdgeInsets.symmetric(horizontal: 14.w, vertical: 13.h);
+    final minHeight = isComfortable ? 56.h : AppHitTargets.comfortable;
 
-    final textStyle = isComfortable ? t.bodyMedium : t.bodySmall;
+    final textStyle = t.bodyMedium;
+    final radius = BorderRadius.circular(NovaRadii.radius16);
 
     return ConstrainedBox(
       constraints: BoxConstraints(minHeight: minHeight),
@@ -72,22 +74,42 @@ class NovaTextField extends StatelessWidget {
             color: cs.onSurface.withValues(alpha: 0.6),
           ),
           prefixIcon: prefix,
+          prefixIconConstraints: BoxConstraints(
+            minWidth: AppHitTargets.comfortable,
+            minHeight: AppHitTargets.comfortable,
+          ),
           filled: true,
-          fillColor: NovaColors.sheet(cs),
+          fillColor: enabled
+              ? NovaColors.sheet(cs)
+              : cs.surfaceContainerHighest.withValues(alpha: 0.42),
           contentPadding: contentPadding,
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(NovaRadii.radius16),
+            borderRadius: radius,
             borderSide: BorderSide(color: cs.outlineVariant),
           ),
           enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(NovaRadii.radius16),
+            borderRadius: radius,
             borderSide: BorderSide(
               color: cs.outlineVariant.withValues(alpha: 0.7),
             ),
           ),
+          disabledBorder: OutlineInputBorder(
+            borderRadius: radius,
+            borderSide: BorderSide(
+              color: cs.outlineVariant.withValues(alpha: 0.38),
+            ),
+          ),
           focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(NovaRadii.radius16),
+            borderRadius: radius,
             borderSide: BorderSide(color: cs.primary, width: 1.4),
+          ),
+          errorBorder: OutlineInputBorder(
+            borderRadius: radius,
+            borderSide: BorderSide(color: cs.error.withValues(alpha: 0.78)),
+          ),
+          focusedErrorBorder: OutlineInputBorder(
+            borderRadius: radius,
+            borderSide: BorderSide(color: cs.error, width: 1.4),
           ),
         ),
       ),

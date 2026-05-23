@@ -22,29 +22,32 @@ class NovaChip extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
 
     return ChoiceChip(
-      label: Text(label),
+      label: Text(label, maxLines: 1, overflow: TextOverflow.ellipsis),
       selected: selected,
       onSelected: enabled ? onSelected : null,
       labelStyle: Theme.of(context).textTheme.labelLarge?.copyWith(
-        fontWeight: FontWeight.w700,
-        color: selected ? cs.primary : cs.onSurface.withValues(alpha: 0.85),
+        fontWeight: selected ? FontWeight.w700 : FontWeight.w600,
+        color: enabled
+            ? (selected ? cs.primary : cs.onSurface.withValues(alpha: 0.82))
+            : cs.onSurface.withValues(alpha: 0.42),
       ),
       selectedColor: cs.primary.withValues(alpha: 0.10),
       backgroundColor: NovaColors.sheetStrong(cs),
       side: BorderSide(
         color: selected
             ? cs.primary.withValues(alpha: 0.22)
-            : cs.outlineVariant.withValues(alpha: 0.6),
+            : cs.outlineVariant.withValues(alpha: 0.55),
       ),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(NovaRadii.radiusPill),
       ),
-      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      materialTapTargetSize: MaterialTapTargetSize.padded,
       padding: EdgeInsets.symmetric(
-        horizontal: AppSpace.sm,
+        horizontal: AppSpace.md,
         vertical: AppSpace.xxs,
       ),
-      visualDensity: VisualDensity.compact,
+      visualDensity: VisualDensity.standard,
+      showCheckmark: false,
     );
   }
 }

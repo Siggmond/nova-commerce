@@ -45,26 +45,44 @@ class AppButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final effectiveOnPressed = isLoading ? null : onPressed;
+    final cs = Theme.of(context).colorScheme;
     final content = isLoading
         ? SizedBox(
             width: 18.r,
             height: 18.r,
-            child: CircularProgressIndicator(strokeWidth: 2),
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              color: cs.onPrimary,
+            ),
           )
         : (icon == null
-              ? Text(label)
+              ? Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
+                )
               : Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(icon),
+                    Icon(icon, size: 18.r),
                     SizedBox(width: AppSpace.sm),
-                    Text(label),
+                    Flexible(
+                      child: Text(
+                        label,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
                   ],
                 ));
 
     final style = ButtonStyle(
       minimumSize: WidgetStatePropertyAll(Size(0, AppHitTargets.min)),
       padding: WidgetStatePropertyAll(AppInsets.button),
+      tapTargetSize: MaterialTapTargetSize.padded,
+      visualDensity: VisualDensity.standard,
       shape: WidgetStatePropertyAll(
         RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppRadii.md),

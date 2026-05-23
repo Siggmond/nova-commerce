@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../app/theme/app_shadows.dart';
+import '../../app/theme/app_tokens.dart';
 import '../../app/theme/nova_tokens.dart';
 
 class NovaSurface extends StatelessWidget {
@@ -10,7 +11,7 @@ class NovaSurface extends StatelessWidget {
     this.padding,
     this.color,
     this.borderRadius,
-    this.elevation = 1,
+    this.elevation = 0,
     this.clipBehavior = Clip.antiAlias,
     this.shadowColor,
     this.borderSide,
@@ -32,13 +33,14 @@ class NovaSurface extends StatelessWidget {
       color: color ?? NovaColors.sheet(cs),
       elevation: elevation,
       shadowColor:
-          shadowColor ?? AppShadows.shadowColor.withValues(alpha: 0.12),
+          shadowColor ?? AppShadows.shadowColor.withValues(alpha: 0.08),
+      surfaceTintColor: Colors.transparent,
       clipBehavior: clipBehavior,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(borderRadius ?? NovaRadii.radius16),
+        borderRadius: BorderRadius.circular(borderRadius ?? AppRadii.lg),
         side:
             borderSide ??
-            BorderSide(color: cs.outlineVariant.withValues(alpha: 0.25)),
+            BorderSide(color: cs.outlineVariant.withValues(alpha: 0.36)),
       ),
       child: Padding(padding: padding ?? EdgeInsets.zero, child: child),
     );

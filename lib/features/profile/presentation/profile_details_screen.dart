@@ -6,7 +6,10 @@ import 'package:go_router/go_router.dart';
 import 'package:nova_commerce/gen_l10n/app_localizations.dart';
 
 import '../../../app/router/app_routes.dart';
+import '../../../app/theme/app_tokens.dart';
 import '../../../core/widgets/app_button.dart';
+import '../../../core/widgets/nova_surface.dart';
+import '../../../core/widgets/nova_text_field.dart';
 import 'profile_details_viewmodel.dart';
 
 class ProfileDetailsScreen extends ConsumerStatefulWidget {
@@ -125,7 +128,7 @@ class _ProfileDetailsScreenState extends ConsumerState<ProfileDetailsScreen> {
       body: state.isLoading
           ? const Center(child: CircularProgressIndicator())
           : ListView(
-              padding: EdgeInsets.fromLTRB(12.w, 8.h, 12.w, 14.h),
+              padding: AppInsets.screen,
               children: [
                 if (details == null)
                   _LegacySignInRequiredCard(
@@ -133,47 +136,45 @@ class _ProfileDetailsScreenState extends ConsumerState<ProfileDetailsScreen> {
                   )
                 else ...[
                   _sectionTitle(context, t.profileSectionDisplayName),
-                  Card(
-                    child: Padding(
-                      padding: EdgeInsets.fromLTRB(12.w, 10.h, 12.w, 10.h),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: TextField(
-                              controller: _nameController,
-                              enabled: _editingName && !state.isSavingName,
-                              decoration: InputDecoration(
-                                border: OutlineInputBorder(),
-                                labelText: t.profileFieldNameLabel,
-                              ),
-                            ),
+                  NovaSurface(
+                    color: Theme.of(context).colorScheme.surface,
+                    borderRadius: AppRadii.xl,
+                    padding: EdgeInsets.fromLTRB(14.w, 12.h, 14.w, 12.h),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: NovaTextField(
+                            controller: _nameController,
+                            enabled: _editingName && !state.isSavingName,
+                            density: NovaFieldDensity.comfortable,
+                            labelText: t.profileFieldNameLabel,
                           ),
-                          SizedBox(width: 8.w),
-                          if (!_editingName)
-                            TextButton(
-                              onPressed: details.isAnonymous
-                                  ? null
-                                  : () => setState(() => _editingName = true),
-                              child: Text(t.commonEdit),
-                            )
-                          else
-                            TextButton(
-                              onPressed: state.isSavingName
-                                  ? null
-                                  : () async {
-                                      await vm.saveDisplayName(
-                                        _nameController.text,
-                                      );
-                                      if (mounted) {
-                                        setState(() => _editingName = false);
-                                      }
-                                    },
-                              child: state.isSavingName
-                                  ? Text(t.commonSaving)
-                                  : Text(t.commonSave),
-                            ),
-                        ],
-                      ),
+                        ),
+                        SizedBox(width: AppSpace.sm),
+                        if (!_editingName)
+                          TextButton(
+                            onPressed: details.isAnonymous
+                                ? null
+                                : () => setState(() => _editingName = true),
+                            child: Text(t.commonEdit),
+                          )
+                        else
+                          TextButton(
+                            onPressed: state.isSavingName
+                                ? null
+                                : () async {
+                                    await vm.saveDisplayName(
+                                      _nameController.text,
+                                    );
+                                    if (mounted) {
+                                      setState(() => _editingName = false);
+                                    }
+                                  },
+                            child: state.isSavingName
+                                ? Text(t.commonSaving)
+                                : Text(t.commonSave),
+                          ),
+                      ],
                     ),
                   ),
                   if (details.isAnonymous)
@@ -186,8 +187,16 @@ class _ProfileDetailsScreenState extends ConsumerState<ProfileDetailsScreen> {
                     ),
                   SizedBox(height: 14.h),
                   _sectionTitle(context, t.profileSectionEmail),
-                  Card(
+                  NovaSurface(
+                    color: Theme.of(context).colorScheme.surface,
+                    borderRadius: AppRadii.xl,
                     child: ListTile(
+                      contentPadding: EdgeInsets.fromLTRB(
+                        16.w,
+                        10.h,
+                        14.w,
+                        10.h,
+                      ),
                       title: Text(
                         details.email?.isNotEmpty == true
                             ? details.email!
@@ -224,78 +233,79 @@ class _ProfileDetailsScreenState extends ConsumerState<ProfileDetailsScreen> {
                     ),
                   SizedBox(height: 14.h),
                   _sectionTitle(context, t.profileSectionPhoneNumber),
-                  Card(
-                    child: Padding(
-                      padding: EdgeInsets.fromLTRB(16.w, 14.h, 16.w, 14.h),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            details.phoneNumber?.isNotEmpty == true
-                                ? details.phoneNumber!
-                                : t.profileNoPhoneLinked,
-                            style: Theme.of(context).textTheme.titleMedium,
-                          ),
-                          SizedBox(height: 6.h),
-                          Text(
-                            details.isPhoneVerified
-                                ? t.commonVerified
-                                : t.commonNotVerified,
-                            style: Theme.of(context).textTheme.bodyMedium,
-                          ),
-                          SizedBox(height: 12.h),
-                          if (!details.isPhoneVerified) ...[
-                            TextField(
-                              controller: _phoneController,
-                              enabled:
-                                  !details.isAnonymous &&
-                                  !state.isSendingPhoneCode &&
-                                  !state.isLinkingPhone,
-                              decoration: InputDecoration(
-                                border: OutlineInputBorder(),
-                                labelText: t.profileFieldPhoneLabel,
-                                hintText: t.profileFieldPhoneHint,
+                  NovaSurface(
+                    color: Theme.of(context).colorScheme.surface,
+                    borderRadius: AppRadii.xl,
+                    padding: EdgeInsets.fromLTRB(16.w, 14.h, 16.w, 16.h),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          details.phoneNumber?.isNotEmpty == true
+                              ? details.phoneNumber!
+                              : t.profileNoPhoneLinked,
+                          style: Theme.of(context).textTheme.titleMedium
+                              ?.copyWith(fontWeight: FontWeight.w700),
+                        ),
+                        SizedBox(height: AppSpace.xs),
+                        Text(
+                          details.isPhoneVerified
+                              ? t.commonVerified
+                              : t.commonNotVerified,
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurface.withValues(alpha: 0.70),
                               ),
-                              keyboardType: TextInputType.phone,
+                        ),
+                        SizedBox(height: AppSpace.md),
+                        if (!details.isPhoneVerified) ...[
+                          NovaTextField(
+                            controller: _phoneController,
+                            enabled:
+                                !details.isAnonymous &&
+                                !state.isSendingPhoneCode &&
+                                !state.isLinkingPhone,
+                            density: NovaFieldDensity.comfortable,
+                            labelText: t.profileFieldPhoneLabel,
+                            hintText: t.profileFieldPhoneHint,
+                            keyboardType: TextInputType.phone,
+                          ),
+                          SizedBox(height: AppSpace.sm),
+                          AppButton.primary(
+                            label: t.profileSendCodeCta,
+                            isLoading: state.isSendingPhoneCode,
+                            onPressed:
+                                state.isSendingPhoneCode || details.isAnonymous
+                                ? null
+                                : () => vm.startPhoneVerification(
+                                    _phoneController.text,
+                                  ),
+                          ),
+                          SizedBox(height: AppSpace.sm),
+                          if (state.phoneVerificationId != null) ...[
+                            NovaTextField(
+                              controller: _smsController,
+                              enabled: !state.isLinkingPhone,
+                              density: NovaFieldDensity.comfortable,
+                              labelText: t.profileFieldSmsCodeLabel,
+                              keyboardType: TextInputType.number,
                             ),
-                            SizedBox(height: 10.h),
+                            SizedBox(height: AppSpace.sm),
                             AppButton.primary(
-                              label: t.profileSendCodeCta,
-                              isLoading: state.isSendingPhoneCode,
+                              label: t.profileVerifyPhoneCta,
+                              isLoading: state.isLinkingPhone,
                               onPressed:
-                                  state.isSendingPhoneCode ||
-                                      details.isAnonymous
+                                  state.isLinkingPhone || details.isAnonymous
                                   ? null
-                                  : () => vm.startPhoneVerification(
-                                      _phoneController.text,
+                                  : () => vm.confirmPhoneCode(
+                                      _smsController.text,
                                     ),
                             ),
-                            SizedBox(height: 10.h),
-                            if (state.phoneVerificationId != null) ...[
-                              TextField(
-                                controller: _smsController,
-                                enabled: !state.isLinkingPhone,
-                                decoration: InputDecoration(
-                                  border: OutlineInputBorder(),
-                                  labelText: t.profileFieldSmsCodeLabel,
-                                ),
-                                keyboardType: TextInputType.number,
-                              ),
-                              SizedBox(height: 10.h),
-                              AppButton.primary(
-                                label: t.profileVerifyPhoneCta,
-                                isLoading: state.isLinkingPhone,
-                                onPressed:
-                                    state.isLinkingPhone || details.isAnonymous
-                                    ? null
-                                    : () => vm.confirmPhoneCode(
-                                        _smsController.text,
-                                      ),
-                              ),
-                            ],
                           ],
                         ],
-                      ),
+                      ],
                     ),
                   ),
                   if (details.isAnonymous)
@@ -334,51 +344,51 @@ class _LegacySignInRequiredCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final t = AppLocalizations.of(context)!;
-    return Card(
-      child: Padding(
-        padding: EdgeInsets.fromLTRB(12.w, 12.h, 12.w, 12.h),
-        child: Row(
-          children: [
-            Container(
-              width: 44.r,
-              height: 44.r,
-              decoration: BoxDecoration(
-                color: cs.primary.withValues(alpha: 0.10),
-                borderRadius: BorderRadius.circular(14.r),
-              ),
-              child: Icon(Icons.person_outline, color: cs.primary),
+    return NovaSurface(
+      color: cs.surface,
+      borderRadius: AppRadii.xl,
+      padding: EdgeInsets.fromLTRB(14.w, 14.h, 14.w, 14.h),
+      child: Row(
+        children: [
+          Container(
+            width: 44.r,
+            height: 44.r,
+            decoration: BoxDecoration(
+              color: cs.primary.withValues(alpha: 0.10),
+              borderRadius: BorderRadius.circular(14.r),
             ),
-            SizedBox(width: 12.w),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    t.profileSignInRequiredTitle,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w900,
-                    ),
+            child: Icon(Icons.person_outline, color: cs.primary),
+          ),
+          SizedBox(width: 12.w),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  t.profileSignInRequiredTitle,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w900,
                   ),
-                  SizedBox(height: 2.h),
-                  Text(
-                    t.profileSignInRequiredSubtitle,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: cs.onSurface.withValues(alpha: 0.70),
-                    ),
+                ),
+                SizedBox(height: 2.h),
+                Text(
+                  t.profileSignInRequiredSubtitle,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: cs.onSurface.withValues(alpha: 0.70),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-            SizedBox(width: 10.w),
-            SizedBox(
-              height: 36.h,
-              child: FilledButton(
-                onPressed: onSignIn,
-                child: Text(t.commonSignIn),
-              ),
+          ),
+          SizedBox(width: 10.w),
+          SizedBox(
+            height: AppHitTargets.min,
+            child: FilledButton(
+              onPressed: onSignIn,
+              child: Text(t.commonSignIn),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

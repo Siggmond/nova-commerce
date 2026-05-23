@@ -49,6 +49,9 @@ class _SignInRequiredCard extends StatelessWidget {
     return NovaSurface(
       elevation: 0,
       clipBehavior: Clip.none,
+      color: cs.surface,
+      borderRadius: AppRadii.xl,
+      borderSide: BorderSide(color: cs.outlineVariant.withValues(alpha: 0.28)),
       padding: AppInsets.card,
       child: Row(
         children: [
@@ -84,7 +87,7 @@ class _SignInRequiredCard extends StatelessWidget {
           ),
           SizedBox(width: AppSpace.sm),
           SizedBox(
-            height: 36.h,
+            height: AppHitTargets.min,
             child: NovaButton.primary(
               label: t.commonSignIn,
               onPressed: onSignIn,
@@ -253,7 +256,7 @@ class _ProfileAccountDetailsScreenState
       body: state.isLoading
           ? const Center(child: CircularProgressIndicator())
           : ListView(
-              padding: AppInsets.screen,
+              padding: EdgeInsets.fromLTRB(20.w, 16.h, 20.w, 20.h),
               children: [
                 if (details == null)
                   _SignInRequiredCard(
@@ -301,12 +304,14 @@ class _ProfileAccountDetailsScreenState
     Color? color,
     double? borderRadius,
   }) {
+    final cs = Theme.of(context).colorScheme;
     return NovaSurface(
       padding: padding,
-      color: color,
-      borderRadius: borderRadius,
+      color: color ?? cs.surface,
+      borderRadius: borderRadius ?? AppRadii.xl,
       elevation: 0,
       clipBehavior: Clip.none,
+      borderSide: BorderSide(color: cs.outlineVariant.withValues(alpha: 0.28)),
       child: child,
     );
   }
@@ -317,7 +322,7 @@ class _ProfileAccountDetailsScreenState
     required Widget child,
   }) {
     return _flatSurface(
-      padding: AppInsets.card,
+      padding: EdgeInsets.fromLTRB(16.w, 14.h, 16.w, 16.h),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -335,7 +340,61 @@ class _ProfileAccountDetailsScreenState
       text,
       style: Theme.of(context).textTheme.bodySmall?.copyWith(
         color: cs.onSurface.withValues(alpha: 0.70),
+        height: 1.25,
       ),
+    );
+  }
+
+  Widget _verificationSummary({
+    required IconData icon,
+    required String value,
+    required bool verified,
+  }) {
+    final cs = Theme.of(context).colorScheme;
+    final t = AppLocalizations.of(context)!;
+    final tone = verified ? cs.primary : cs.onSurface;
+
+    return Row(
+      children: [
+        Container(
+          width: 42.r,
+          height: 42.r,
+          decoration: BoxDecoration(
+            color: verified
+                ? cs.primary.withValues(alpha: 0.10)
+                : cs.surfaceContainerHighest.withValues(alpha: 0.44),
+            borderRadius: BorderRadius.circular(AppRadii.lg),
+            border: Border.all(
+              color: verified
+                  ? cs.primary.withValues(alpha: 0.18)
+                  : cs.outlineVariant.withValues(alpha: 0.24),
+            ),
+          ),
+          child: Icon(
+            verified ? Icons.verified_rounded : icon,
+            size: 20.r,
+            color: verified ? cs.primary : tone.withValues(alpha: 0.64),
+          ),
+        ),
+        SizedBox(width: AppSpace.md),
+        Expanded(
+          child: Text(
+            value,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: Theme.of(
+              context,
+            ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700),
+          ),
+        ),
+        SizedBox(width: AppSpace.sm),
+        StatusPill(
+          label: verified ? t.commonVerified : t.commonNotVerified,
+          variant: verified
+              ? StatusPillVariant.success
+              : StatusPillVariant.neutral,
+        ),
+      ],
     );
   }
 
@@ -481,15 +540,12 @@ class _ProfileAccountDetailsScreenState
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _flatSurface(
-          padding: AppInsets.card,
-          child: NovaTextField(
-            controller: _nameController,
-            density: NovaFieldDensity.comfortable,
-            labelText: t.profileFieldNameLabel,
-            hintText: t.profileFieldNameHint,
-            enabled: _editingName && !state.isSavingName,
-          ),
+        NovaTextField(
+          controller: _nameController,
+          density: NovaFieldDensity.comfortable,
+          labelText: t.profileFieldNameLabel,
+          hintText: t.profileFieldNameHint,
+          enabled: _editingName && !state.isSavingName,
         ),
         SizedBox(height: AppSpace.sm),
         _actionsRow(
@@ -550,28 +606,10 @@ class _ProfileAccountDetailsScreenState
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            Expanded(
-              child: Text(
-                emailText,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: Theme.of(
-                  context,
-                ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700),
-              ),
-            ),
-            SizedBox(width: AppSpace.sm),
-            StatusPill(
-              label: details.isEmailVerified
-                  ? t.commonVerified
-                  : t.commonNotVerified,
-              variant: details.isEmailVerified
-                  ? StatusPillVariant.success
-                  : StatusPillVariant.neutral,
-            ),
-          ],
+        _verificationSummary(
+          icon: Icons.alternate_email_rounded,
+          value: emailText,
+          verified: details.isEmailVerified,
         ),
         if (!details.isEmailVerified) ...[
           SizedBox(height: AppSpace.sm),
@@ -622,30 +660,12 @@ class _ProfileAccountDetailsScreenState
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            Expanded(
-              child: Text(
-                details.phoneNumber?.isNotEmpty == true
-                    ? details.phoneNumber!
-                    : t.profileNoPhoneLinked,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: Theme.of(
-                  context,
-                ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700),
-              ),
-            ),
-            SizedBox(width: AppSpace.sm),
-            StatusPill(
-              label: details.isPhoneVerified
-                  ? t.commonVerified
-                  : t.commonNotVerified,
-              variant: details.isPhoneVerified
-                  ? StatusPillVariant.success
-                  : StatusPillVariant.neutral,
-            ),
-          ],
+        _verificationSummary(
+          icon: Icons.phone_iphone_rounded,
+          value: details.phoneNumber?.isNotEmpty == true
+              ? details.phoneNumber!
+              : t.profileNoPhoneLinked,
+          verified: details.isPhoneVerified,
         ),
         if (!details.isPhoneVerified) ...[
           SizedBox(height: AppSpace.sm),

@@ -13,6 +13,7 @@ import '../../../app/theme/app_colors.dart';
 import '../../../app/theme/app_tokens.dart';
 import '../../../core/widgets/nova_app_bar.dart';
 import '../../../core/widgets/nova_button.dart';
+import '../../../core/widgets/status_pill.dart';
 import '../../../app/config/theme_mode_provider.dart';
 import '../../loyalty/gold_controller.dart';
 
@@ -51,6 +52,7 @@ class ProfileScreen extends ConsumerWidget {
               ),
               TextButton(
                 onPressed: () => Navigator.of(context).pop(true),
+                style: TextButton.styleFrom(foregroundColor: cs.error),
                 child: Text(t.commonSignOut),
               ),
             ],
@@ -132,6 +134,7 @@ class ProfileScreen extends ConsumerWidget {
               cs: cs,
               isSignedIn: false,
               isAnonymous: true,
+              isDemo: false,
               email: '',
               gold: gold,
               goldSource: goldSource,
@@ -157,6 +160,7 @@ class ProfileScreen extends ConsumerWidget {
                 cs: cs,
                 isSignedIn: isSignedIn,
                 isAnonymous: user?.isAnonymous ?? true,
+                isDemo: user?.isDemo ?? false,
                 email: email,
                 gold: gold,
                 goldSource: goldSource,
@@ -429,6 +433,7 @@ class ProfileScreen extends ConsumerWidget {
                       title: t.commonSignOut,
                       subtitle: t.profileSignOutSubtitle,
                       enabled: true,
+                      destructive: true,
                       onTap: confirmSignOut,
                     ),
                   ],
@@ -476,6 +481,7 @@ class _AccountHeader extends StatelessWidget {
     required this.cs,
     required this.isSignedIn,
     required this.isAnonymous,
+    required this.isDemo,
     required this.email,
     required this.gold,
     required this.goldSource,
@@ -487,6 +493,7 @@ class _AccountHeader extends StatelessWidget {
   final ColorScheme cs;
   final bool isSignedIn;
   final bool isAnonymous;
+  final bool isDemo;
   final String email;
   final AsyncValue<int> gold;
   final String goldSource;
@@ -526,20 +533,20 @@ class _AccountHeader extends StatelessWidget {
     return DecoratedBox(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(radius),
-        color: reduceEffects ? cs.surfaceContainerLow : null,
+        color: reduceEffects ? cs.surface : null,
         gradient: reduceEffects
             ? null
             : LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
-                  blue.withValues(alpha: 0.18),
-                  cs.primary.withValues(alpha: 0.08),
-                  red.withValues(alpha: 0.16),
+                  blue.withValues(alpha: 0.10),
+                  cs.surface,
+                  red.withValues(alpha: 0.08),
                 ],
                 stops: const [0.0, 0.55, 1.0],
               ),
-        border: Border.all(color: cs.outlineVariant.withValues(alpha: 0.55)),
+        border: Border.all(color: cs.outlineVariant.withValues(alpha: 0.28)),
       ),
       child: Padding(
         padding: EdgeInsets.all(AppSpace.xl),
@@ -577,12 +584,24 @@ class _AccountHeader extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        _displayName(l10n),
-                        style: t.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: -0.2,
-                        ),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              _displayName(l10n),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: t.titleMedium?.copyWith(
+                                fontWeight: FontWeight.w900,
+                                letterSpacing: 0,
+                              ),
+                            ),
+                          ),
+                          if (isDemo) ...[
+                            SizedBox(width: AppSpace.sm),
+                            StatusPill(label: l10n.profileDemoBadgeLabel),
+                          ],
+                        ],
                       ),
                       SizedBox(height: AppSpace.xs),
                       Text(
@@ -591,6 +610,8 @@ class _AccountHeader extends StatelessWidget {
                                   ? email
                                   : l10n.profileAccountConnected)
                             : l10n.profileSignInToUnlockBenefits,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                         style: t.bodyMedium?.copyWith(
                           color: cs.onSurface.withValues(alpha: 0.70),
                         ),
@@ -610,10 +631,10 @@ class _AccountHeader extends StatelessWidget {
               SizedBox(height: AppSpace.md),
               DecoratedBox(
                 decoration: BoxDecoration(
-                  color: cs.surface.withValues(alpha: 0.85),
+                  color: cs.surface.withValues(alpha: 0.92),
                   borderRadius: BorderRadius.circular(AppRadii.lg),
                   border: Border.all(
-                    color: cs.outlineVariant.withValues(alpha: 0.55),
+                    color: cs.outlineVariant.withValues(alpha: 0.30),
                   ),
                 ),
                 child: Padding(
@@ -666,36 +687,45 @@ class _GoldPill extends StatelessWidget {
     final t = Theme.of(context).textTheme;
     final l10n = AppLocalizations.of(context)!;
 
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(AppRadii.pill),
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: cs.surfaceContainerLow.withValues(alpha: 0.92),
-          borderRadius: BorderRadius.circular(AppRadii.pill),
-          border: Border.all(color: cs.outlineVariant.withValues(alpha: 0.55)),
-        ),
-        child: Padding(
-          padding: EdgeInsets.symmetric(
-            horizontal: AppSpace.md,
-            vertical: AppSpace.xs,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(AppRadii.pill),
+        child: Ink(
+          decoration: BoxDecoration(
+            color: cs.surfaceContainerLow.withValues(alpha: 0.92),
+            borderRadius: BorderRadius.circular(AppRadii.pill),
+            border: Border.all(
+              color: cs.outlineVariant.withValues(alpha: 0.30),
+            ),
           ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.card_giftcard_outlined, size: 16.r, color: cs.primary),
-              SizedBox(width: AppSpace.xs),
-              Text(
-                l10n.profileGoldPoints(value),
-                style: t.labelMedium?.copyWith(fontWeight: FontWeight.w900),
-              ),
-              SizedBox(width: AppSpace.xs),
-              Icon(
-                Icons.chevron_right,
-                size: 18,
-                color: cs.onSurface.withValues(alpha: 0.55),
-              ),
-            ],
+          child: Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: AppSpace.md,
+              vertical: AppSpace.xs,
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.card_giftcard_outlined,
+                  size: 16.r,
+                  color: cs.primary,
+                ),
+                SizedBox(width: AppSpace.xs),
+                Text(
+                  l10n.profileGoldPoints(value),
+                  style: t.labelMedium?.copyWith(fontWeight: FontWeight.w900),
+                ),
+                SizedBox(width: AppSpace.xs),
+                Icon(
+                  Icons.chevron_right,
+                  size: 18,
+                  color: cs.onSurface.withValues(alpha: 0.55),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -861,9 +891,9 @@ class _QuickActionTile extends StatelessWidget {
       disableScale: reduceEffects,
       borderRadius: borderRadius,
       decoration: BoxDecoration(
-        color: cs.surfaceContainerLow,
+        color: cs.surface,
         borderRadius: borderRadius,
-        border: Border.all(color: cs.outlineVariant.withValues(alpha: 0.30)),
+        border: Border.all(color: cs.outlineVariant.withValues(alpha: 0.24)),
       ),
       child: Padding(
         padding: EdgeInsets.symmetric(
@@ -995,7 +1025,8 @@ class _SectionLabel extends StatelessWidget {
     return Text(
       title,
       style: t.titleSmall?.copyWith(
-        fontWeight: FontWeight.w900,
+        fontWeight: FontWeight.w800,
+        letterSpacing: 0,
         color: cs.onSurface.withValues(alpha: 0.92),
       ),
     );
@@ -1012,18 +1043,17 @@ class _GroupCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final radius = BorderRadius.circular(AppRadii.xl);
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: cs.surfaceContainerLow,
+    return Material(
+      color: cs.surface,
+      surfaceTintColor: Colors.transparent,
+      clipBehavior: Clip.antiAlias,
+      shape: RoundedRectangleBorder(
         borderRadius: radius,
-        border: Border.all(color: cs.outlineVariant.withValues(alpha: 0.55)),
+        side: BorderSide(color: cs.outlineVariant.withValues(alpha: 0.28)),
       ),
-      child: Material(
-        type: MaterialType.transparency,
-        child: Padding(
-          padding: padding ?? EdgeInsets.zero,
-          child: Column(children: children),
-        ),
+      child: Padding(
+        padding: padding ?? EdgeInsets.zero,
+        child: Column(children: children),
       ),
     );
   }
@@ -1036,6 +1066,7 @@ class _AccountTile extends StatelessWidget {
     required this.subtitle,
     required this.enabled,
     required this.onTap,
+    this.destructive = false,
   });
 
   final IconData leading;
@@ -1043,13 +1074,14 @@ class _AccountTile extends StatelessWidget {
   final String subtitle;
   final bool enabled;
   final VoidCallback onTap;
+  final bool destructive;
 
   static Widget divider(ColorScheme cs) {
     return Divider(
       height: 1,
       thickness: 1,
-      color: cs.outlineVariant.withValues(alpha: 0.35),
-      indent: 64,
+      color: cs.outlineVariant.withValues(alpha: 0.28),
+      indent: 72,
     );
   }
 
@@ -1057,14 +1089,26 @@ class _AccountTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final t = Theme.of(context).textTheme;
-    final iconBg = cs.primary.withValues(alpha: 0.10);
+    final iconBg = destructive
+        ? cs.error.withValues(alpha: 0.10)
+        : cs.primary.withValues(alpha: 0.10);
+    final iconColor = destructive
+        ? cs.error
+        : enabled
+        ? cs.onSurface.withValues(alpha: 0.92)
+        : cs.onSurface.withValues(alpha: 0.45);
+    final titleColor = destructive
+        ? cs.error
+        : enabled
+        ? cs.onSurface.withValues(alpha: 0.92)
+        : cs.onSurface.withValues(alpha: 0.55);
 
     return ListTile(
-      dense: true,
-      visualDensity: const VisualDensity(horizontal: -1, vertical: -1),
+      dense: false,
+      visualDensity: VisualDensity.standard,
       contentPadding: EdgeInsets.symmetric(
-        horizontal: AppSpace.md,
-        vertical: AppSpace.xs,
+        horizontal: AppSpace.lg,
+        vertical: AppSpace.sm,
       ),
       leading: Container(
         width: 40.r,
@@ -1074,27 +1118,25 @@ class _AccountTile extends StatelessWidget {
           borderRadius: BorderRadius.circular(AppRadii.lg),
         ),
         alignment: Alignment.center,
-        child: Icon(
-          leading,
-          size: 20.r,
-          color: enabled
-              ? cs.onSurface.withValues(alpha: 0.92)
-              : cs.onSurface.withValues(alpha: 0.45),
-        ),
+        child: Icon(leading, size: 20.r, color: iconColor),
       ),
-      title: Text(title),
+      title: Text(title, maxLines: 1, overflow: TextOverflow.ellipsis),
       titleTextStyle: t.bodyLarge?.copyWith(
         fontWeight: FontWeight.w700,
-        color: enabled
-            ? cs.onSurface.withValues(alpha: 0.92)
-            : cs.onSurface.withValues(alpha: 0.55),
+        color: titleColor,
       ),
-      subtitle: Text(subtitle),
+      subtitle: Text(subtitle, maxLines: 2, overflow: TextOverflow.ellipsis),
       subtitleTextStyle: t.bodySmall?.copyWith(
-        color: cs.onSurface.withValues(alpha: 0.70),
+        color: cs.onSurface.withValues(alpha: enabled ? 0.70 : 0.52),
+        height: 1.25,
       ),
       trailing: enabled
-          ? const Icon(Icons.chevron_right)
+          ? Icon(
+              Icons.chevron_right,
+              color: destructive
+                  ? cs.error.withValues(alpha: 0.76)
+                  : cs.onSurface.withValues(alpha: 0.48),
+            )
           : Icon(
               Icons.lock_outline,
               color: cs.onSurface.withValues(alpha: 0.45),

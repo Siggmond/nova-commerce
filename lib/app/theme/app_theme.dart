@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import '../config/responsive_text_scale.dart';
 import 'app_shadows.dart';
@@ -21,6 +22,12 @@ class AppTheme {
   static const Color _darkSurfaceHighest = Color(0xFF262D3D);
 
   static const double _defaultLineHeight = 1.15;
+  static const List<String> _localizedFontFallbacks = <String>[
+    'Noto Sans Arabic',
+    'Noto Naskh Arabic',
+    'Roboto',
+    'Arial',
+  ];
 
   static TextStyle? _down(TextStyle? style, double delta) {
     if (style == null) return null;
@@ -39,6 +46,42 @@ class AppTheme {
     final size = style.fontSize;
     if (size == null) return style;
     return style.copyWith(fontSize: size * factor);
+  }
+
+  static TextStyle? _withLocalizedFallbacks(TextStyle? style) {
+    if (style == null) return null;
+    return style.copyWith(fontFamilyFallback: _localizedFontFallbacks);
+  }
+
+  static TextStyle? _primaryTextStyle(TextStyle? style) {
+    if (style == null) return null;
+    return _withLocalizedFallbacks(
+      GoogleFonts.plusJakartaSans(textStyle: style),
+    );
+  }
+
+  static TextTheme _withLocalizedFallbackText(TextTheme t) {
+    return t.copyWith(
+      displayLarge: _withLocalizedFallbacks(t.displayLarge),
+      displayMedium: _withLocalizedFallbacks(t.displayMedium),
+      displaySmall: _withLocalizedFallbacks(t.displaySmall),
+      headlineLarge: _withLocalizedFallbacks(t.headlineLarge),
+      headlineMedium: _withLocalizedFallbacks(t.headlineMedium),
+      headlineSmall: _withLocalizedFallbacks(t.headlineSmall),
+      titleLarge: _withLocalizedFallbacks(t.titleLarge),
+      titleMedium: _withLocalizedFallbacks(t.titleMedium),
+      titleSmall: _withLocalizedFallbacks(t.titleSmall),
+      bodyLarge: _withLocalizedFallbacks(t.bodyLarge),
+      bodyMedium: _withLocalizedFallbacks(t.bodyMedium),
+      bodySmall: _withLocalizedFallbacks(t.bodySmall),
+      labelLarge: _withLocalizedFallbacks(t.labelLarge),
+      labelMedium: _withLocalizedFallbacks(t.labelMedium),
+      labelSmall: _withLocalizedFallbacks(t.labelSmall),
+    );
+  }
+
+  static TextTheme _primaryTextTheme(TextTheme t) {
+    return _withLocalizedFallbackText(GoogleFonts.plusJakartaSansTextTheme(t));
   }
 
   static TextTheme _withDefaultLineHeights(TextTheme t) {
@@ -97,11 +140,7 @@ class AppTheme {
           surfaceContainerHighest: _lightSurfaceHighest,
         );
 
-    final base = ThemeData(
-      useMaterial3: true,
-      fontFamily: 'Inter',
-      colorScheme: scheme,
-    );
+    final base = ThemeData(useMaterial3: true, colorScheme: scheme);
 
     final baseText = _withDefaultLineHeights(base.textTheme);
     final denseBaseText = baseText.copyWith(
@@ -113,20 +152,8 @@ class AppTheme {
       bodyMedium: baseText.bodySmall,
     );
     final denseText = _withResponsiveFontScale(denseBaseText);
-
-    return base.copyWith(
-      scaffoldBackgroundColor: _lightScaffold,
-      appBarTheme: AppBarTheme(
-        backgroundColor: _lightScaffold,
-        surfaceTintColor: _lightScaffold,
-        elevation: 0,
-        centerTitle: false,
-        titleTextStyle: denseText.titleLarge?.copyWith(
-          fontWeight: FontWeight.w600,
-          color: base.colorScheme.onSurface,
-        ),
-      ),
-      textTheme: denseText.copyWith(
+    final appText = _primaryTextTheme(
+      denseText.copyWith(
         headlineSmall: denseText.headlineSmall?.copyWith(
           fontWeight: FontWeight.w700,
           letterSpacing: -0.2,
@@ -144,6 +171,23 @@ class AppTheme {
           letterSpacing: -0.1,
         ),
       ),
+    );
+
+    return base.copyWith(
+      scaffoldBackgroundColor: _lightScaffold,
+      appBarTheme: AppBarTheme(
+        backgroundColor: _lightScaffold,
+        surfaceTintColor: _lightScaffold,
+        elevation: 0,
+        centerTitle: false,
+        titleTextStyle: _primaryTextStyle(
+          denseText.titleLarge?.copyWith(
+            fontWeight: FontWeight.w600,
+            color: base.colorScheme.onSurface,
+          ),
+        ),
+      ),
+      textTheme: appText,
       cardTheme: CardThemeData(
         elevation: AppElevation.card,
         shadowColor: AppShadows.shadowColor.withValues(alpha: 0.10),
@@ -158,8 +202,8 @@ class AppTheme {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10.r),
           ),
-          textStyle: denseText.labelLarge?.copyWith(
-            fontWeight: FontWeight.w600,
+          textStyle: _primaryTextStyle(
+            denseText.labelLarge?.copyWith(fontWeight: FontWeight.w600),
           ),
         ),
       ),
@@ -167,7 +211,7 @@ class AppTheme {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(999.r),
         ),
-        labelStyle: denseText.labelSmall,
+        labelStyle: appText.labelSmall,
         padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 3.h),
         labelPadding: EdgeInsets.symmetric(horizontal: 3.w),
         selectedColor: base.colorScheme.primary.withValues(alpha: 0.10),
@@ -207,7 +251,7 @@ class AppTheme {
         elevation: 1,
         indicatorColor: base.colorScheme.primary.withValues(alpha: 0.12),
         labelTextStyle: WidgetStatePropertyAll(
-          denseText.labelSmall?.copyWith(fontWeight: FontWeight.w500),
+          appText.labelSmall?.copyWith(fontWeight: FontWeight.w500),
         ),
         iconTheme: WidgetStateProperty.resolveWith((states) {
           final selected = states.contains(WidgetState.selected);
@@ -235,11 +279,7 @@ class AppTheme {
           surfaceContainerHighest: _darkSurfaceHighest,
         );
 
-    final base = ThemeData(
-      useMaterial3: true,
-      fontFamily: 'Inter',
-      colorScheme: scheme,
-    );
+    final base = ThemeData(useMaterial3: true, colorScheme: scheme);
 
     final baseText = _withDefaultLineHeights(base.textTheme);
     final denseBaseText = baseText.copyWith(
@@ -251,20 +291,8 @@ class AppTheme {
       bodyMedium: baseText.bodySmall,
     );
     final denseText = _withResponsiveFontScale(denseBaseText);
-
-    return base.copyWith(
-      scaffoldBackgroundColor: _darkScaffold,
-      appBarTheme: AppBarTheme(
-        backgroundColor: _darkScaffold,
-        surfaceTintColor: _darkScaffold,
-        elevation: 0,
-        centerTitle: false,
-        titleTextStyle: denseText.titleLarge?.copyWith(
-          fontWeight: FontWeight.w600,
-          color: base.colorScheme.onSurface,
-        ),
-      ),
-      textTheme: denseText.copyWith(
+    final appText = _primaryTextTheme(
+      denseText.copyWith(
         headlineSmall: denseText.headlineSmall?.copyWith(
           fontWeight: FontWeight.w700,
           letterSpacing: -0.2,
@@ -282,6 +310,23 @@ class AppTheme {
           letterSpacing: -0.1,
         ),
       ),
+    );
+
+    return base.copyWith(
+      scaffoldBackgroundColor: _darkScaffold,
+      appBarTheme: AppBarTheme(
+        backgroundColor: _darkScaffold,
+        surfaceTintColor: _darkScaffold,
+        elevation: 0,
+        centerTitle: false,
+        titleTextStyle: _primaryTextStyle(
+          denseText.titleLarge?.copyWith(
+            fontWeight: FontWeight.w600,
+            color: base.colorScheme.onSurface,
+          ),
+        ),
+      ),
+      textTheme: appText,
       cardTheme: CardThemeData(
         elevation: AppElevation.card,
         shadowColor: AppShadows.shadowColor.withValues(alpha: 0.28),
@@ -296,8 +341,8 @@ class AppTheme {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12.r),
           ),
-          textStyle: denseText.labelLarge?.copyWith(
-            fontWeight: FontWeight.w600,
+          textStyle: _primaryTextStyle(
+            denseText.labelLarge?.copyWith(fontWeight: FontWeight.w600),
           ),
         ),
       ),
@@ -305,7 +350,7 @@ class AppTheme {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(999.r),
         ),
-        labelStyle: denseText.labelSmall,
+        labelStyle: appText.labelSmall,
         padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
         labelPadding: EdgeInsets.symmetric(horizontal: 4.w),
         selectedColor: base.colorScheme.primary.withValues(alpha: 0.16),
@@ -345,7 +390,7 @@ class AppTheme {
         elevation: 1,
         indicatorColor: base.colorScheme.primary.withValues(alpha: 0.14),
         labelTextStyle: WidgetStatePropertyAll(
-          denseText.labelSmall?.copyWith(fontWeight: FontWeight.w500),
+          appText.labelSmall?.copyWith(fontWeight: FontWeight.w500),
         ),
         iconTheme: WidgetStateProperty.resolveWith((states) {
           final selected = states.contains(WidgetState.selected);

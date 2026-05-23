@@ -89,6 +89,7 @@ dependencies:
   cached_network_image: ^3.3.1
 
   flutter_screenutil: ^5.9.3
+  google_fonts: 6.3.2
 
   flutter_svg: ^2.1.0
 
@@ -189,6 +190,8 @@ flutter:
     - assets/images/
 
     - assets/icons/
+
+    - assets/fonts/google_fonts/
 
     - assets/models/ai_nav_model_quant.tflite
 

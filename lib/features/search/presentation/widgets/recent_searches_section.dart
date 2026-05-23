@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:nova_commerce/app/theme/app_shadows.dart';
 import 'package:nova_commerce/app/theme/app_tokens.dart';
 import 'package:nova_commerce/features/search/presentation/recent_searches_viewmodel.dart';
 import 'package:nova_commerce/gen_l10n/app_localizations.dart';
@@ -19,7 +18,7 @@ class RecentSearchesSection extends ConsumerWidget {
 
     return SliverToBoxAdapter(
       child: Padding(
-        padding: EdgeInsets.fromLTRB(12.w, 10.h, 12.w, 10.h),
+        padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 12.h),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -29,8 +28,8 @@ class RecentSearchesSection extends ConsumerWidget {
                 Text(
                   t.searchRecentSearchesTitle,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: -0.2,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0,
                   ),
                 ),
                 if (recent.isNotEmpty)
@@ -41,7 +40,8 @@ class RecentSearchesSection extends ConsumerWidget {
                     style: TextButton.styleFrom(
                       foregroundColor: cs.primary,
                       tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      minimumSize: const Size(0, 0),
+                      minimumSize: Size(AppHitTargets.min, AppHitTargets.min),
+                      padding: EdgeInsets.symmetric(horizontal: 10.w),
                     ),
                     child: Text(
                       t.searchFiltersClearAll,
@@ -53,14 +53,9 @@ class RecentSearchesSection extends ConsumerWidget {
                   ),
               ],
             ),
-            SizedBox(height: 6.h),
+            SizedBox(height: 10.h),
             if (recent.isEmpty)
-              Text(
-                t.searchRecentSearchesEmptyHint,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: cs.onSurface.withValues(alpha: 0.66),
-                ),
-              )
+              _RecentSearchEmptyHint(label: t.searchRecentSearchesEmptyHint)
             else
               Column(
                 children: [
@@ -77,6 +72,47 @@ class RecentSearchesSection extends ConsumerWidget {
                     ),
                 ],
               ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _RecentSearchEmptyHint extends StatelessWidget {
+  const _RecentSearchEmptyHint({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: cs.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(AppRadii.lg),
+        border: Border.all(color: cs.outlineVariant.withValues(alpha: 0.24)),
+      ),
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(14.w, 12.h, 14.w, 12.h),
+        child: Row(
+          children: [
+            Icon(
+              Icons.history_rounded,
+              size: 18.r,
+              color: cs.onSurface.withValues(alpha: 0.56),
+            ),
+            SizedBox(width: 10.w),
+            Expanded(
+              child: Text(
+                label,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: cs.onSurface.withValues(alpha: 0.68),
+                  height: 1.25,
+                ),
+              ),
+            ),
           ],
         ),
       ),
@@ -105,44 +141,53 @@ class _RecentSearchRow extends StatelessWidget {
         borderRadius: BorderRadius.circular(AppRadii.pill),
         onTap: onTap,
         child: Ink(
-          padding: EdgeInsets.fromLTRB(12.w, 8.h, 6.w, 8.h),
+          padding: EdgeInsets.fromLTRB(14.w, 4.h, 4.w, 4.h),
           decoration: BoxDecoration(
-            color: cs.surfaceContainerLow,
+            color: cs.surface,
             borderRadius: BorderRadius.circular(AppRadii.pill),
             border: Border.all(
-              color: cs.outlineVariant.withValues(alpha: 0.26),
+              color: cs.outlineVariant.withValues(alpha: 0.24),
             ),
-            boxShadow: AppShadows.sm(),
           ),
-          child: Row(
-            children: [
-              Icon(
-                Icons.history_rounded,
-                size: 16.r,
-                color: cs.onSurface.withValues(alpha: 0.64),
-              ),
-              SizedBox(width: 8.w),
-              Expanded(
-                child: Text(
-                  label,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                    fontWeight: FontWeight.w700,
-                    color: cs.onSurface.withValues(alpha: 0.86),
-                  ),
-                ),
-              ),
-              IconButton(
-                onPressed: onDelete,
-                tooltip: MaterialLocalizations.of(context).deleteButtonTooltip,
-                icon: Icon(
-                  Icons.close_rounded,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: AppHitTargets.min),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.history_rounded,
                   size: 18.r,
                   color: cs.onSurface.withValues(alpha: 0.62),
                 ),
-              ),
-            ],
+                SizedBox(width: 10.w),
+                Expanded(
+                  child: Text(
+                    label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                      fontWeight: FontWeight.w700,
+                      color: cs.onSurface.withValues(alpha: 0.88),
+                    ),
+                  ),
+                ),
+                IconButton(
+                  onPressed: onDelete,
+                  tooltip: MaterialLocalizations.of(
+                    context,
+                  ).deleteButtonTooltip,
+                  constraints: BoxConstraints.tightFor(
+                    width: AppHitTargets.min,
+                    height: AppHitTargets.min,
+                  ),
+                  padding: EdgeInsets.zero,
+                  icon: Icon(
+                    Icons.close_rounded,
+                    size: 18.r,
+                    color: cs.onSurface.withValues(alpha: 0.62),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

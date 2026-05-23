@@ -48,9 +48,9 @@ class _SearchResultCardState extends State<SearchResultCard> {
             color: cs.surface,
             borderRadius: radius,
             border: Border.all(
-              color: cs.outlineVariant.withValues(alpha: 0.28),
+              color: cs.outlineVariant.withValues(alpha: 0.22),
             ),
-            boxShadow: AppShadows.sm(),
+            boxShadow: AppShadows.sm(color: cs.shadow.withValues(alpha: 0.10)),
           ),
           child: Material(
             color: Colors.transparent,
@@ -96,7 +96,7 @@ class _SearchResultRowBody extends StatelessWidget {
     final tt = Theme.of(context).textTheme;
     final dpr = MediaQuery.devicePixelRatioOf(context);
     final rating = _stableRating(product.id);
-    final imageExtent = 82.r;
+    final imageExtent = 86.r;
     final memCacheExtent = (imageExtent * dpr).round();
 
     return Padding(
@@ -135,8 +135,8 @@ class _SearchResultRowBody extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: tt.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: -0.2,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0,
                   ),
                 ),
                 if (product.brand.trim().isNotEmpty) ...[
@@ -156,8 +156,8 @@ class _SearchResultRowBody extends StatelessWidget {
                   '${product.currency} ${product.price.toStringAsFixed(0)}',
                   style: tt.titleSmall?.copyWith(
                     color: cs.primary,
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: -0.15,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 0,
                   ),
                 ),
               ],
@@ -240,8 +240,8 @@ class _SearchResultGridBody extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: tt.titleSmall?.copyWith(
-              fontWeight: FontWeight.w600,
-              letterSpacing: -0.2,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0,
             ),
           ),
           if (product.brand.trim().isNotEmpty) ...[
@@ -261,8 +261,8 @@ class _SearchResultGridBody extends StatelessWidget {
             '${product.currency} ${product.price.toStringAsFixed(0)}',
             style: tt.titleSmall?.copyWith(
               color: cs.primary,
-              fontWeight: FontWeight.w600,
-              letterSpacing: -0.15,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 0,
             ),
           ),
         ],
@@ -320,7 +320,7 @@ class _WishlistFab extends StatelessWidget {
   Widget build(BuildContext context) {
     final t = AppLocalizations.of(context)!;
     final cs = Theme.of(context).colorScheme;
-    final size = compact ? 34.r : 40.r;
+    final size = compact ? 40.r : AppHitTargets.min;
 
     return DecoratedBox(
       decoration: BoxDecoration(

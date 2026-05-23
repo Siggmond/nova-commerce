@@ -140,7 +140,7 @@ class _CollectionResultsScreenState
           ),
           SliverToBoxAdapter(
             child: Padding(
-              padding: EdgeInsets.fromLTRB(12.w, 8.h, 12.w, 6.h),
+              padding: EdgeInsets.fromLTRB(16.w, 10.h, 16.w, 8.h),
               child: _CollectionHeaderBanner(collection: collection),
             ),
           ),
@@ -177,7 +177,8 @@ class _CollectionHeaderBanner extends StatelessWidget {
       decoration: BoxDecoration(
         color: cs.surface,
         borderRadius: radius,
-        boxShadow: AppShadows.sm(),
+        border: Border.all(color: cs.outlineVariant.withValues(alpha: 0.22)),
+        boxShadow: AppShadows.sm(color: cs.shadow.withValues(alpha: 0.10)),
       ),
       child: SizedBox(
         height: 128.h,
@@ -229,18 +230,18 @@ class _CollectionHeaderBanner extends StatelessWidget {
                     style: Theme.of(context).textTheme.titleSmall?.copyWith(
                       color: Colors.white.withValues(alpha: 0.92),
                       fontWeight: FontWeight.w600,
-                      letterSpacing: -0.2,
+                      letterSpacing: 0,
                     ),
                   ),
                   SizedBox(height: 6.h),
                   Text(
-                    _categoryLabel(t, collection.categoryId).toUpperCase(),
+                    _categoryLabel(t, collection.categoryId),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: Theme.of(context).textTheme.labelSmall?.copyWith(
                       color: Colors.white.withValues(alpha: 0.80),
                       fontWeight: FontWeight.w800,
-                      letterSpacing: 1.1,
+                      letterSpacing: 0,
                     ),
                   ),
                 ],

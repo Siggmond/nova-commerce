@@ -111,14 +111,14 @@ class _PremiumFilterSheetState extends ConsumerState<PremiumFilterSheet> {
                 ),
                 SizedBox(height: 10.h),
                 Padding(
-                  padding: EdgeInsets.fromLTRB(16.w, 2.h, 8.w, 8.h),
+                  padding: EdgeInsets.fromLTRB(20.w, 2.h, 12.w, 10.h),
                   child: Row(
                     children: [
                       Text(
                         t.searchFiltersTitle,
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.w600,
-                          letterSpacing: -0.3,
+                          letterSpacing: 0,
                         ),
                       ),
                       const Spacer(),
@@ -140,7 +140,7 @@ class _PremiumFilterSheetState extends ConsumerState<PremiumFilterSheet> {
                 Expanded(
                   child: ListView(
                     controller: scrollController,
-                    padding: EdgeInsets.fromLTRB(16.w, 14.h, 16.w, 12.h),
+                    padding: EdgeInsets.fromLTRB(20.w, 16.h, 20.w, 14.h),
                     children: [
                       _FilterSurface(
                         title: t.searchFiltersSortByTitle,
@@ -248,7 +248,7 @@ class _PremiumFilterSheetState extends ConsumerState<PremiumFilterSheet> {
                 SafeArea(
                   top: false,
                   child: Padding(
-                    padding: EdgeInsets.fromLTRB(16.w, 10.h, 16.w, 14.h),
+                    padding: EdgeInsets.fromLTRB(20.w, 10.h, 20.w, 14.h),
                     child: SizedBox(
                       width: double.infinity,
                       child: AppButton.primary(
@@ -283,12 +283,12 @@ class _FilterSurface extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: cs.surfaceContainerLow,
+        color: cs.surface,
         borderRadius: radius,
-        border: Border.all(color: cs.outlineVariant.withValues(alpha: 0.28)),
+        border: Border.all(color: cs.outlineVariant.withValues(alpha: 0.24)),
       ),
       child: Padding(
-        padding: EdgeInsets.fromLTRB(12.w, 10.h, 12.w, 12.h),
+        padding: EdgeInsets.fromLTRB(14.w, 12.h, 14.w, 14.h),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -348,22 +348,26 @@ class _CategoryTile extends StatelessWidget {
                     : cs.outlineVariant.withValues(alpha: 0.30),
               ),
             ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(icon, size: 18.r, color: fg),
-                SizedBox(height: 6.h),
-                Text(
-                  label,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                    color: fg,
-                    fontWeight: FontWeight.w800,
+            child: ConstrainedBox(
+              constraints: BoxConstraints(minHeight: 58.h),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(icon, size: 18.r, color: fg),
+                  SizedBox(height: 6.h),
+                  Text(
+                    label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                      color: fg,
+                      fontWeight: FontWeight.w800,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
@@ -375,9 +379,9 @@ class _CategoryTile extends StatelessWidget {
 ButtonStyle _segmentedStyle(BuildContext context) {
   final cs = Theme.of(context).colorScheme;
   return ButtonStyle(
-    visualDensity: VisualDensity.compact,
+    visualDensity: VisualDensity.standard,
     padding: WidgetStatePropertyAll(
-      EdgeInsets.symmetric(horizontal: 10.w, vertical: 10.h),
+      EdgeInsets.symmetric(horizontal: 10.w, vertical: 11.h),
     ),
     side: WidgetStateProperty.resolveWith((states) {
       if (states.contains(WidgetState.selected)) {

@@ -33,9 +33,9 @@ class SearchResultsView extends StatelessWidget {
   final String itemKeyPrefix;
 
   static const double _breakpointCompactList = 430;
-  static const double _rowCardExtent = 104;
-  static const double _rowCardGap = 8;
-  static const double _gridCardExtent = 258;
+  static const double _rowCardExtent = 112;
+  static const double _rowCardGap = 10;
+  static const double _gridCardExtent = 264;
 
   @override
   Widget build(BuildContext context) {
@@ -43,7 +43,7 @@ class SearchResultsView extends StatelessWidget {
 
     if (isLoading) {
       return SliverPadding(
-        padding: EdgeInsets.fromLTRB(12.w, 8.h, 12.w, 12.h),
+        padding: EdgeInsets.fromLTRB(16.w, 10.h, 16.w, 16.h),
         sliver: SliverLayoutBuilder(
           builder: (context, constraints) {
             final width = constraints.crossAxisExtent;
@@ -53,8 +53,9 @@ class SearchResultsView extends StatelessWidget {
                   (context, index) {
                     return Padding(
                       padding: EdgeInsets.only(bottom: _rowCardGap.h),
-                      child: const SearchSkeletonCard(
+                      child: SearchSkeletonCard(
                         variant: SearchSkeletonVariant.row,
+                        height: _rowCardExtent.h,
                       ),
                     );
                   },
@@ -76,8 +77,9 @@ class SearchResultsView extends StatelessWidget {
               ),
               delegate: SliverChildBuilderDelegate(
                 (context, index) {
-                  return const SearchSkeletonCard(
+                  return SearchSkeletonCard(
                     variant: SearchSkeletonVariant.grid,
+                    height: _gridCardExtent.h,
                   );
                 },
                 childCount: crossAxisCount * 3,
@@ -110,7 +112,7 @@ class SearchResultsView extends StatelessWidget {
     }
 
     return SliverPadding(
-      padding: EdgeInsets.fromLTRB(12.w, 8.h, 12.w, 12.h),
+      padding: EdgeInsets.fromLTRB(16.w, 10.h, 16.w, 16.h),
       sliver: SliverLayoutBuilder(
         builder: (context, constraints) {
           final width = constraints.crossAxisExtent;

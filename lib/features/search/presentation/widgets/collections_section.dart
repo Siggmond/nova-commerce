@@ -100,7 +100,7 @@ class _CollectionsSectionState extends State<CollectionsSection> {
             context,
           ).scale(1.0).clamp(1.0, 1.35);
 
-          final baseHeight = (width * 0.52).clamp(188.0, 276.0);
+          final baseHeight = (width * 0.52).clamp(192.0, 276.0);
           final cardHeight = (baseHeight + (textScale - 1.0) * 22.0)
               .clamp(baseHeight, baseHeight + 28.0)
               .toDouble();
@@ -303,9 +303,9 @@ class _CollectionCardState extends State<_CollectionCard> {
     final radius = BorderRadius.circular(AppRadii.xl);
     final titleStyle = tt.titleMedium?.copyWith(
       fontSize: 20.sp,
-      fontWeight: FontWeight.w600,
+      fontWeight: FontWeight.w700,
       color: Colors.white,
-      letterSpacing: -0.2,
+      letterSpacing: 0,
       height: 1.1,
       shadows: [
         Shadow(
@@ -324,7 +324,7 @@ class _CollectionCardState extends State<_CollectionCard> {
     final chipTextStyle = tt.labelMedium?.copyWith(
       color: Colors.white,
       fontWeight: FontWeight.w800,
-      letterSpacing: 0.2,
+      letterSpacing: 0,
     );
 
     return RepaintBoundary(
@@ -344,7 +344,7 @@ class _CollectionCardState extends State<_CollectionCard> {
                 borderRadius: radius,
                 border: Border.all(color: widget.outline),
                 boxShadow: AppShadows.md(
-                  color: cs.shadow.withValues(alpha: 0.20),
+                  color: cs.shadow.withValues(alpha: 0.14),
                 ),
               ),
               child: Stack(
@@ -376,8 +376,8 @@ class _CollectionCardState extends State<_CollectionCard> {
                           end: Alignment.bottomCenter,
                           colors: [
                             Colors.black.withValues(alpha: 0.04),
-                            Colors.black.withValues(alpha: 0.20),
-                            Colors.black.withValues(alpha: 0.70),
+                            Colors.black.withValues(alpha: 0.18),
+                            Colors.black.withValues(alpha: 0.64),
                           ],
                           stops: const [0.0, 0.48, 1.0],
                         ),
@@ -389,7 +389,7 @@ class _CollectionCardState extends State<_CollectionCard> {
                     top: 14.h,
                     child: DecoratedBox(
                       decoration: BoxDecoration(
-                        color: Colors.black.withValues(alpha: 0.30),
+                        color: Colors.black.withValues(alpha: 0.26),
                         borderRadius: BorderRadius.circular(AppRadii.pill),
                         border: Border.all(
                           color: Colors.white.withValues(alpha: 0.18),

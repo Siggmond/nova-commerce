@@ -59,10 +59,10 @@ class FilterChipBar extends StatelessWidget {
 
     return SliverToBoxAdapter(
       child: SizedBox(
-        height: 54.h,
+        height: 60.h,
         child: ListView(
           scrollDirection: Axis.horizontal,
-          padding: EdgeInsets.fromLTRB(12.w, 8.h, 12.w, 2.h),
+          padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 6.h),
           children: [
             _PrimaryFilterChip(onTap: onOpenFilters),
             if (chips.isEmpty) ...[
@@ -76,16 +76,18 @@ class FilterChipBar extends StatelessWidget {
             ],
             if (chips.length > 1 && onClearAll != null) ...[
               SizedBox(width: 8.w),
-              GestureDetector(
-                onTap: onClearAll,
-                child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 8.h),
-                  child: Text(
-                    t.searchFiltersClearAll,
-                    style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                      color: cs.primary,
-                      fontWeight: FontWeight.w800,
-                    ),
+              TextButton(
+                onPressed: onClearAll,
+                style: TextButton.styleFrom(
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  minimumSize: Size(AppHitTargets.min, AppHitTargets.min),
+                  padding: EdgeInsets.symmetric(horizontal: 10.w),
+                ),
+                child: Text(
+                  t.searchFiltersClearAll,
+                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                    color: cs.primary,
+                    fontWeight: FontWeight.w800,
                   ),
                 ),
               ),
@@ -112,11 +114,12 @@ class _PrimaryFilterChip extends StatelessWidget {
         borderRadius: BorderRadius.circular(AppRadii.pill),
         onTap: onTap,
         child: Ink(
-          padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 9.h),
+          height: AppHitTargets.min,
+          padding: EdgeInsets.symmetric(horizontal: 14.w),
           decoration: BoxDecoration(
-            color: cs.primary.withValues(alpha: 0.10),
+            color: cs.primary.withValues(alpha: 0.09),
             borderRadius: BorderRadius.circular(AppRadii.pill),
-            border: Border.all(color: cs.primary.withValues(alpha: 0.32)),
+            border: Border.all(color: cs.primary.withValues(alpha: 0.26)),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -150,11 +153,12 @@ class _ActiveFilterChip extends StatelessWidget {
     return Material(
       color: Colors.transparent,
       child: Ink(
-        padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
+        height: AppHitTargets.min,
+        padding: EdgeInsets.fromLTRB(12.w, 0, 5.w, 0),
         decoration: BoxDecoration(
-          color: cs.surfaceContainerLow,
+          color: cs.surface,
           borderRadius: BorderRadius.circular(AppRadii.pill),
-          border: Border.all(color: cs.outlineVariant.withValues(alpha: 0.28)),
+          border: Border.all(color: cs.outlineVariant.withValues(alpha: 0.30)),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -166,9 +170,12 @@ class _ActiveFilterChip extends StatelessWidget {
               ).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w700),
             ),
             SizedBox(width: 6.w),
-            GestureDetector(
-              onTap: onRemove,
-              child: Icon(
+            IconButton(
+              onPressed: onRemove,
+              padding: EdgeInsets.zero,
+              constraints: BoxConstraints.tightFor(width: 34.r, height: 34.r),
+              visualDensity: VisualDensity.compact,
+              icon: Icon(
                 Icons.close_rounded,
                 size: 16.r,
                 color: cs.onSurface.withValues(alpha: 0.72),
@@ -196,11 +203,16 @@ class _NeutralChip extends StatelessWidget {
         border: Border.all(color: cs.outlineVariant.withValues(alpha: 0.24)),
       ),
       child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 9.h),
-        child: Text(
-          label,
-          style: Theme.of(context).textTheme.labelLarge?.copyWith(
-            color: cs.onSurface.withValues(alpha: 0.65),
+        padding: EdgeInsets.symmetric(horizontal: 14.w),
+        child: SizedBox(
+          height: AppHitTargets.min,
+          child: Center(
+            child: Text(
+              label,
+              style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                color: cs.onSurface.withValues(alpha: 0.65),
+              ),
+            ),
           ),
         ),
       ),

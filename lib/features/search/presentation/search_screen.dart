@@ -112,8 +112,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
               searchTooltip: t.searchTooltipSearch,
               filterTooltip: t.searchTooltipFilters,
               hasActiveFilters: hasNonQueryFilters,
-              expandedHeight: 126,
-              collapsedHeight: 60,
+              expandedHeight: 132,
+              collapsedHeight: 64,
               onChanged: (value) => ref
                   .read(searchFiltersProvider.notifier)
                   .setQueryDebounced(value),

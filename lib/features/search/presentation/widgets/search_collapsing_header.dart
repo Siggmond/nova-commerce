@@ -125,19 +125,19 @@ class _SearchCollapsingHeaderDelegate extends SliverPersistentHeaderDelegate {
 
     double lerp(double a, double b) => lerpDouble(a, b, t) ?? b;
 
-    final surfaceAlpha = lerp(0.88, 0.97);
-    final shadowAlpha = lerp(0.03, 0.12);
-    final shadowBlur = lerp(8, 18);
+    final surfaceAlpha = lerp(0.94, 0.99);
+    final shadowAlpha = lerp(0.00, 0.08);
+    final shadowBlur = lerp(0, 16);
     final titleOpacity = (1 - Curves.easeOut.transform(t)).clamp(0.0, 1.0);
 
-    final topPadding = lerp(12.h, 6.h);
-    final bottomPadding = lerp(12.h, 8.h);
-    final titleBottomSpacing = lerp(10.h, 2.h);
-    final sidePadding = 12.w;
+    final topPadding = lerp(14.h, 8.h);
+    final bottomPadding = lerp(14.h, 10.h);
+    final titleBottomSpacing = lerp(12.h, 4.h);
+    final sidePadding = 16.w;
 
-    final fieldHeight = lerp(52.h, 40.h);
-    final fieldRadius = lerp(20.r, 16.r);
-    final fieldVerticalPadding = lerp(12.h, 8.h);
+    final fieldHeight = lerp(54.h, AppHitTargets.min);
+    final fieldRadius = lerp(20.r, 18.r);
+    final fieldVerticalPadding = lerp(12.h, 9.h);
 
     final iconSize = lerp(22.r, 18.r);
     final filterIconSize = lerp(16.r, 13.r);
@@ -185,7 +185,7 @@ class _SearchCollapsingHeaderDelegate extends SliverPersistentHeaderDelegate {
                       style: tt.titleLarge?.copyWith(
                         color: cs.onSurface.withValues(alpha: titleOpacity),
                         fontWeight: FontWeight.w600,
-                        letterSpacing: -0.25,
+                        letterSpacing: 0,
                       ),
                     ),
                   ),
@@ -203,9 +203,11 @@ class _SearchCollapsingHeaderDelegate extends SliverPersistentHeaderDelegate {
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.06),
-                          blurRadius: lerp(6, 12),
-                          offset: const Offset(0, 5),
+                          color: Colors.black.withValues(
+                            alpha: lerp(0.02, 0.04),
+                          ),
+                          blurRadius: lerp(4, 10),
+                          offset: const Offset(0, 4),
                         ),
                       ],
                     ),
@@ -228,7 +230,7 @@ class _SearchCollapsingHeaderDelegate extends SliverPersistentHeaderDelegate {
                             icon: Icon(Icons.search_rounded, size: iconSize),
                           ),
                           prefixIconConstraints: BoxConstraints(
-                            minWidth: 44.w,
+                            minWidth: AppHitTargets.min,
                             minHeight: fieldHeight,
                           ),
                           contentPadding: EdgeInsets.fromLTRB(
@@ -237,9 +239,9 @@ class _SearchCollapsingHeaderDelegate extends SliverPersistentHeaderDelegate {
                             8.w,
                             fieldVerticalPadding,
                           ),
-                          suffixIconConstraints: const BoxConstraints(
-                            minHeight: 0,
-                            minWidth: 0,
+                          suffixIconConstraints: BoxConstraints(
+                            minHeight: fieldHeight,
+                            minWidth: AppHitTargets.min,
                           ),
                           suffixIcon: query.trim().isNotEmpty
                               ? IconButton(
@@ -319,61 +321,71 @@ class _FilterActionButton extends StatelessWidget {
       child: InkWell(
         onTap: onPressed,
         borderRadius: BorderRadius.circular(AppRadii.pill),
-        child: Ink(
-          height: height,
-          padding: EdgeInsets.symmetric(
-            horizontal: showLabel ? 12.w : 10.w,
-            vertical: 0,
-          ),
-          decoration: BoxDecoration(
-            color: bgColor,
-            borderRadius: BorderRadius.circular(AppRadii.pill),
-            border: Border.all(
-              color: cs.outlineVariant.withValues(alpha: 0.30),
+        child: ConstrainedBox(
+          constraints: BoxConstraints(minWidth: height, minHeight: height),
+          child: Ink(
+            height: height,
+            padding: EdgeInsets.symmetric(
+              horizontal: showLabel ? 14.w : 11.w,
+              vertical: 0,
             ),
-          ),
-          child: Center(
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                SizedBox(
-                  width: iconSize + 6.r,
-                  height: iconSize + 6.r,
-                  child: Stack(
-                    alignment: Alignment.center,
-                    clipBehavior: Clip.none,
-                    children: [
-                      Icon(Icons.tune_rounded, size: iconSize, color: fgColor),
-                      if (hasActiveFilters)
-                        Positioned(
-                          right: -2,
-                          top: -2,
-                          child: DecoratedBox(
-                            decoration: BoxDecoration(
-                              color: cs.primary,
-                              shape: BoxShape.circle,
-                              border: Border.all(color: cs.surface, width: 1.2),
-                            ),
-                            child: SizedBox(width: 8.r, height: 8.r),
-                          ),
+            decoration: BoxDecoration(
+              color: bgColor,
+              borderRadius: BorderRadius.circular(AppRadii.pill),
+              border: Border.all(
+                color: cs.outlineVariant.withValues(alpha: 0.30),
+              ),
+            ),
+            child: Center(
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SizedBox(
+                    width: iconSize + 6.r,
+                    height: iconSize + 6.r,
+                    child: Stack(
+                      alignment: Alignment.center,
+                      clipBehavior: Clip.none,
+                      children: [
+                        Icon(
+                          Icons.tune_rounded,
+                          size: iconSize,
+                          color: fgColor,
                         ),
-                    ],
-                  ),
-                ),
-                if (showLabel) ...[
-                  SizedBox(width: 6.w),
-                  Text(
-                    tooltip,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                      color: fgColor,
-                      fontWeight: FontWeight.w800,
+                        if (hasActiveFilters)
+                          Positioned(
+                            right: -2,
+                            top: -2,
+                            child: DecoratedBox(
+                              decoration: BoxDecoration(
+                                color: cs.primary,
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: cs.surface,
+                                  width: 1.2,
+                                ),
+                              ),
+                              child: SizedBox(width: 8.r, height: 8.r),
+                            ),
+                          ),
+                      ],
                     ),
                   ),
+                  if (showLabel) ...[
+                    SizedBox(width: 6.w),
+                    Text(
+                      tooltip,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                        color: fgColor,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ],
                 ],
-              ],
+              ),
             ),
           ),
         ),

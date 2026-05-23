@@ -54,26 +54,22 @@ class DiscoveryView extends StatelessWidget {
       slivers: [
         SliverToBoxAdapter(
           child: Padding(
-            padding: EdgeInsets.fromLTRB(12.w, 12.h, 12.w, 10.h),
-            child: Text(
-              'Popular right now',
-              style: Theme.of(
-                context,
-              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
-            ),
+            padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 10.h),
+            child: const _DiscoverySectionTitle(title: 'Popular right now'),
           ),
         ),
         SliverToBoxAdapter(
           child: SizedBox(
-            height: 174.h,
+            height: 184.h,
             child: switch ((catalogIsLoading, popular.isEmpty)) {
               (true, true) => ListView.separated(
                 scrollDirection: Axis.horizontal,
-                padding: EdgeInsets.fromLTRB(12.w, 0, 12.w, 0),
+                padding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 0),
                 itemBuilder: (context, index) => SizedBox(
-                  width: 220.w,
-                  child: const SearchSkeletonCard(
+                  width: 216.w,
+                  child: SearchSkeletonCard(
                     variant: SearchSkeletonVariant.grid,
+                    height: 184.h,
                   ),
                 ),
                 separatorBuilder: (_, __) => SizedBox(width: 10.w),
@@ -81,7 +77,7 @@ class DiscoveryView extends StatelessWidget {
               ),
               _ => ListView.separated(
                 scrollDirection: Axis.horizontal,
-                padding: EdgeInsets.fromLTRB(12.w, 0, 12.w, 2.h),
+                padding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 2.h),
                 itemBuilder: (context, index) {
                   return _PopularProductCard(product: popular[index]);
                 },
@@ -94,18 +90,13 @@ class DiscoveryView extends StatelessWidget {
         RecentSearchesSection(onSelectQuery: onSelectQuery),
         SliverToBoxAdapter(
           child: Padding(
-            padding: EdgeInsets.fromLTRB(12.w, 8.h, 12.w, 8.h),
-            child: Text(
-              'Smart suggestions',
-              style: Theme.of(
-                context,
-              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
-            ),
+            padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 10.h),
+            child: const _DiscoverySectionTitle(title: 'Smart suggestions'),
           ),
         ),
         SliverToBoxAdapter(
           child: Padding(
-            padding: EdgeInsets.fromLTRB(12.w, 0, 12.w, 8.h),
+            padding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 10.h),
             child: Wrap(
               spacing: 10.w,
               runSpacing: 10.h,
@@ -123,17 +114,31 @@ class DiscoveryView extends StatelessWidget {
         ),
         SliverToBoxAdapter(
           child: Padding(
-            padding: EdgeInsets.fromLTRB(12.w, 10.h, 12.w, 0),
-            child: Text(
-              t.searchCollectionsTitle,
-              style: Theme.of(
-                context,
-              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
-            ),
+            padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 0),
+            child: _DiscoverySectionTitle(title: t.searchCollectionsTitle),
           ),
         ),
         const CollectionsSection(),
       ],
+    );
+  }
+}
+
+class _DiscoverySectionTitle extends StatelessWidget {
+  const _DiscoverySectionTitle({required this.title});
+
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      title,
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+        fontWeight: FontWeight.w700,
+        letterSpacing: 0,
+      ),
     );
   }
 }
@@ -161,7 +166,7 @@ class _PopularProductCardState extends State<_PopularProductCard> {
       duration: const Duration(milliseconds: 140),
       curve: Curves.easeOutCubic,
       child: SizedBox(
-        width: 220.w,
+        width: 216.w,
         child: Material(
           color: Colors.transparent,
           child: InkWell(
@@ -174,9 +179,11 @@ class _PopularProductCardState extends State<_PopularProductCard> {
                 color: cs.surface,
                 borderRadius: radius,
                 border: Border.all(
-                  color: cs.outlineVariant.withValues(alpha: 0.24),
+                  color: cs.outlineVariant.withValues(alpha: 0.22),
                 ),
-                boxShadow: AppShadows.sm(),
+                boxShadow: AppShadows.sm(
+                  color: cs.shadow.withValues(alpha: 0.10),
+                ),
               ),
               child: Stack(
                 children: [
@@ -207,8 +214,8 @@ class _PopularProductCardState extends State<_PopularProductCard> {
                           end: Alignment.bottomCenter,
                           colors: [
                             Colors.black.withValues(alpha: 0.04),
-                            Colors.black.withValues(alpha: 0.24),
-                            Colors.black.withValues(alpha: 0.70),
+                            Colors.black.withValues(alpha: 0.18),
+                            Colors.black.withValues(alpha: 0.62),
                           ],
                         ),
                       ),
@@ -223,13 +230,14 @@ class _PopularProductCardState extends State<_PopularProductCard> {
                       children: [
                         Text(
                           widget.product.title,
-                          maxLines: 1,
+                          maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: Theme.of(context).textTheme.titleSmall
                               ?.copyWith(
                                 color: Colors.white,
-                                fontWeight: FontWeight.w600,
-                                letterSpacing: -0.2,
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: 0,
+                                height: 1.12,
                               ),
                         ),
                         SizedBox(height: 4.h),
@@ -272,9 +280,9 @@ class _SmartSuggestionCardState extends State<_SmartSuggestionCard> {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final width = (MediaQuery.sizeOf(context).width - 34.w) / 2;
+    final width = (MediaQuery.sizeOf(context).width - 42.w) / 2;
     final radius = BorderRadius.circular(AppRadii.lg);
-    final iconSize = 30.r;
+    final iconSize = 24.r;
 
     return AnimatedScale(
       scale: _pressed ? 0.985 : 1,
@@ -288,42 +296,53 @@ class _SmartSuggestionCardState extends State<_SmartSuggestionCard> {
             onTap: widget.onTap,
             onHighlightChanged: (value) => setState(() => _pressed = value),
             child: Ink(
-              padding: EdgeInsets.fromLTRB(12.w, 12.h, 12.w, 12.h),
+              padding: EdgeInsets.fromLTRB(12.w, 10.h, 12.w, 10.h),
               decoration: BoxDecoration(
                 borderRadius: radius,
-                gradient: LinearGradient(
-                  colors: [cs.surfaceContainerLow, cs.surfaceContainerHigh],
-                ),
+                color: cs.surface,
                 border: Border.all(
-                  color: cs.outlineVariant.withValues(alpha: 0.28),
+                  color: cs.outlineVariant.withValues(alpha: 0.24),
                 ),
               ),
-              child: Row(
-                children: [
-                  SizedBox(
-                    width: iconSize,
-                    height: iconSize,
-                    child: SvgPicture.asset(
-                      widget.suggestion.iconAsset,
-                      fit: BoxFit.contain,
-                      colorFilter: ColorFilter.mode(
-                        cs.primary,
-                        BlendMode.srcIn,
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minHeight: AppHitTargets.min),
+                child: Row(
+                  children: [
+                    DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: cs.primary.withValues(alpha: 0.10),
+                        borderRadius: BorderRadius.circular(AppRadii.md),
+                      ),
+                      child: Padding(
+                        padding: EdgeInsets.all(8.r),
+                        child: SizedBox(
+                          width: iconSize,
+                          height: iconSize,
+                          child: SvgPicture.asset(
+                            widget.suggestion.iconAsset,
+                            fit: BoxFit.contain,
+                            colorFilter: ColorFilter.mode(
+                              cs.primary,
+                              BlendMode.srcIn,
+                            ),
+                          ),
+                        ),
                       ),
                     ),
-                  ),
-                  SizedBox(width: 10.w),
-                  Expanded(
-                    child: Text(
-                      widget.suggestion.query,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                        fontWeight: FontWeight.w700,
+                    SizedBox(width: 10.w),
+                    Expanded(
+                      child: Text(
+                        widget.suggestion.query,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                          fontWeight: FontWeight.w700,
+                          height: 1.1,
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),

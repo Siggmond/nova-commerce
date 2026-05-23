@@ -43,18 +43,29 @@ class SearchSkeletonCard extends StatelessWidget {
           ),
           SearchSkeletonVariant.grid => SizedBox(
             height: height ?? 252.h,
-            child: Padding(
-              padding: AppInsets.cardTight,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SkeletonBox(height: 136.h, radius: 16.r),
-                  SizedBox(height: 12.h),
-                  const _SkeletonTextBlock(compact: false),
-                  SizedBox(height: 8.h),
-                  SkeletonBox(height: 16.h, radius: 8.r),
-                ],
-              ),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final maxHeight = constraints.maxHeight.isFinite
+                    ? constraints.maxHeight
+                    : (height ?? 252.h);
+                final compact = maxHeight < 220.h;
+                final imageHeight =
+                    (maxHeight - 24.r - (compact ? 10.h : 12.h) - 60.h)
+                        .clamp(88.h, 142.h)
+                        .toDouble();
+
+                return Padding(
+                  padding: AppInsets.cardTight,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SkeletonBox(height: imageHeight, radius: 16.r),
+                      SizedBox(height: compact ? 10.h : 12.h),
+                      _SkeletonTextBlock(compact: compact),
+                    ],
+                  ),
+                );
+              },
             ),
           ),
         },
@@ -84,7 +95,7 @@ class SearchEmptyState extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     return Center(
       child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 24.w),
+        padding: AppInsets.state,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -95,7 +106,7 @@ class SearchEmptyState extends StatelessWidget {
                 shape: BoxShape.circle,
                 color: cs.surfaceContainerHigh,
                 border: Border.all(
-                  color: cs.outlineVariant.withValues(alpha: 0.3),
+                  color: cs.outlineVariant.withValues(alpha: 0.28),
                 ),
               ),
               child: Icon(
@@ -110,17 +121,21 @@ class SearchEmptyState extends StatelessWidget {
               textAlign: TextAlign.center,
               style: Theme.of(
                 context,
-              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
             ),
             SizedBox(height: 6.h),
-            Text(
-              subtitle,
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: cs.onSurface.withValues(alpha: 0.66),
+            ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: 340.w),
+              child: Text(
+                subtitle,
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: cs.onSurface.withValues(alpha: 0.68),
+                  height: 1.3,
+                ),
               ),
             ),
-            SizedBox(height: 12.h),
+            SizedBox(height: 14.h),
             Wrap(
               spacing: 8.w,
               runSpacing: 8.h,
@@ -129,10 +144,10 @@ class SearchEmptyState extends StatelessWidget {
                 for (final tip in suggestions)
                   DecoratedBox(
                     decoration: BoxDecoration(
-                      color: cs.surfaceContainerLow,
+                      color: cs.surface,
                       borderRadius: BorderRadius.circular(AppRadii.pill),
                       border: Border.all(
-                        color: cs.outlineVariant.withValues(alpha: 0.26),
+                        color: cs.outlineVariant.withValues(alpha: 0.24),
                       ),
                     ),
                     child: Padding(
@@ -144,7 +159,7 @@ class SearchEmptyState extends StatelessWidget {
                         tip,
                         style: Theme.of(context).textTheme.labelLarge?.copyWith(
                           fontWeight: FontWeight.w700,
-                          color: cs.onSurface.withValues(alpha: 0.78),
+                          color: cs.onSurface.withValues(alpha: 0.80),
                         ),
                       ),
                     ),
@@ -177,28 +192,45 @@ class SearchErrorState extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     return Center(
       child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 24.w),
+        padding: AppInsets.state,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.error_outline_rounded, size: 44.r, color: cs.outline),
-            SizedBox(height: 10.h),
+            Container(
+              width: 72.r,
+              height: 72.r,
+              decoration: BoxDecoration(
+                color: cs.errorContainer.withValues(alpha: 0.50),
+                shape: BoxShape.circle,
+                border: Border.all(color: cs.error.withValues(alpha: 0.20)),
+              ),
+              child: Icon(
+                Icons.error_outline_rounded,
+                size: 34.r,
+                color: cs.error,
+              ),
+            ),
+            SizedBox(height: 12.h),
             Text(
               title,
               textAlign: TextAlign.center,
               style: Theme.of(
                 context,
-              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
             ),
-            SizedBox(height: 5.h),
-            Text(
-              subtitle,
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: cs.onSurface.withValues(alpha: 0.66),
+            SizedBox(height: 6.h),
+            ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: 340.w),
+              child: Text(
+                subtitle,
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: cs.onSurface.withValues(alpha: 0.68),
+                  height: 1.3,
+                ),
               ),
             ),
-            SizedBox(height: 14.h),
+            SizedBox(height: 16.h),
             AppButton.primary(label: retryLabel, onPressed: onRetry),
           ],
         ),

@@ -5,7 +5,7 @@
 - Architecture: Feature-first with layers
 - State management: Riverpod (StateNotifier-based controllers; migrate incrementally to Riverpod Notifier/AsyncNotifier only when needed)
 - Routing: go_router
-- Dependency injection (DI): Riverpod providers (composition root in `lib/core/config/providers.dart`)
+- Dependency injection (DI): Riverpod providers (composition root in `lib/app/di/app_providers.dart`)
 
 ## Goals
 
@@ -14,28 +14,36 @@
 - Separate domain from data: domain entities are used by the app; Firestore/SharedPrefs DTOs are mapped in `data` layer.
 - Keep features modular: each feature owns its `presentation`, `application`, `data`, and `domain` subfolders.
 
-## Target folder structure
+## Current folder structure
 
-- `lib/app.dart` / `lib/main.dart`
+- `lib/main.dart`
+- `lib/app/`
+  - `bootstrap.dart` / `main_common.dart` (startup and shared app entry)
+  - `di/app_providers.dart` (repository and service composition root)
+  - `router/` (GoRouter routes, route names, tab definitions)
+  - `config/` (environment flags, locale/theme/performance mode)
+  - `theme/` (theme and design tokens)
+  - `perf/` and `startup/` (runtime performance and feature init helpers)
 - `lib/core/`
-  - `config/` (env, DI providers, router, routes)
   - `errors/` (error mapping, app exceptions)
-  - `theme/` (theme + design tokens)
   - `widgets/` (shared UI building blocks)
-  - `utils/` (formatting, helpers)
+  - `domain/` (shared domain types and repository interfaces)
+  - `services/`, `security/`, `device/`, `perf/`, `images/`, `telemetry/`, `ai_nav/`
 - `lib/features/<feature>/`
   - `presentation/` (screens, widgets)
-  - `application/` (controllers, state objects)
+  - `presentation/state/` where a feature owns view models/controllers
   - `domain/` (entities/value objects, repository interfaces)
   - `data/` (datasources, DTOs, mappers, repository implementations)
 
-## Current reality (starting point)
+## Current reality
 
-- Riverpod providers live in `lib/core/config/providers.dart` and expose repository implementations.
-- Many features already exist under `lib/features/*/presentation`.
-- Some shared `domain/` and `data/` types currently live at `lib/domain` and `lib/data`.
+- Riverpod providers live in `lib/app/di/app_providers.dart` and expose fake, local, syncing, Firestore, Firebase Auth, payment, AI, and utility implementations.
+- Compile-time environment flags live in `lib/app/config/app_env.dart`.
+- GoRouter setup lives in `lib/app/router/app_router.dart`, with route names in `lib/app/router/app_routes.dart`.
+- Feature modules already exist under `lib/features/*` and generally use `presentation`, `domain`, and `data` boundaries.
+- Some shared ecommerce types live under `lib/core/domain` because they are used across multiple features.
 
-Migration will be incremental to avoid breaking behavior.
+Migration should remain incremental to avoid breaking behavior.
 
 ## Layer responsibilities
 
@@ -93,11 +101,11 @@ Migration will be incremental to avoid breaking behavior.
 
 ## Routing
 
-- Define route paths in `lib/core/config/app_routes.dart`.
-- Configure routes in `lib/core/config/app_router.dart`.
+- Define route paths in `lib/app/router/app_routes.dart`.
+- Configure routes in `lib/app/router/app_router.dart`.
 - For bottom navigation tabs, prefer a shell/branch-per-tab approach so each tab has its own navigation stack.
 
 ## Environment configuration
 
-- Use compile-time environment flags (see `lib/core/config/app_env.dart`).
+- Use compile-time environment flags (see `lib/app/config/app_env.dart`).
 - Keep dev/stage/prod separated via flavors and environment variables.

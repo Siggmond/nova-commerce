@@ -11,17 +11,49 @@
 ![AI](https://img.shields.io/badge/AI-Demo%20concierge%20%2B%20TFLite-FF6F00)
 ![CI](https://img.shields.io/badge/CI-format%20%7C%20analyze%20%7C%20tests-2EA44F)
 
-NovaCommerce is a Flutter and Firebase portfolio project that demonstrates a modern mobile commerce experience: storefront browsing, product discovery, product details, cart, checkout, payment flow architecture, orders, offers, loyalty, wishlist, profile, localization, performance tooling, and demo AI surfaces.
+NovaCommerce is a mobile commerce portfolio project built with Flutter and Firebase-oriented architecture. It demonstrates production-style app structure for storefront browsing, product discovery, product details, cart, checkout, payments, orders, offers, loyalty, wishlist, profile, localization, performance tooling, UI systems, and demo AI surfaces.
 
-The project is designed to show product thinking, Flutter architecture, Firebase integration points, UI systems, and practical engineering tradeoffs. It is not presented as a finished launch build.
+This repository is designed for portfolio review and technical evaluation. It contains real Flutter app architecture, Firebase integration points, and Firebase Functions payment/order code, but it is not a finished production launch build or deployed ecommerce platform.
 
-## Portfolio Note
+## Quick Reviewer Path
 
-This repository is provided for portfolio review and technical evaluation only. It includes real app architecture, modular feature boundaries, Firebase integration points, and payment backend architecture, but live services still require project-specific setup before they can be used in a production environment.
+If you have five minutes, review the project in this order:
+
+1. Run the app without Firebase:
+
+```bash
+flutter pub get
+flutter run --dart-define=USE_FAKE_REPOS=true
+```
+
+2. Scan the app architecture:
+   - [Project Structure](#project-structure)
+   - [Architecture](#architecture)
+   - [Firebase And Backend](#firebase-and-backend)
+   - [Payments](#payments)
+   - [AI Surfaces](#ai-surfaces)
+   - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
+   - [docs/BUILD_FLAVORS.md](docs/BUILD_FLAVORS.md)
+
+3. Inspect the most relevant implementation entry points:
+   - `lib/app/di/app_providers.dart` for Riverpod dependency boundaries and fake/Firebase repository switching.
+   - `lib/app/router/app_router.dart` and `lib/app/router/app_routes.dart` for GoRouter tab shell and flow routing.
+   - `lib/features/*` for feature-first presentation/domain/data modules.
+   - `lib/features/payments/` and `functions/src/index.ts` for Stripe/Firebase Functions payment architecture.
+   - `lib/l10n/`, `lib/gen_l10n/`, and `l10n.yaml` for localization.
+
+4. Check screenshots in `assets/screenshots/`. They are current emulator captures covering storefront, search/discovery, Nova Concierge, offers, cart, account, Arabic RTL, French, and dark mode surfaces. They prove the app is not just scaffolding, while the timestamp filenames make clear they are captured artifacts rather than designed marketing images.
+
+5. Treat integrations honestly:
+   - Firebase-backed flows require a Firebase project, client config, data, auth providers, and security rule validation.
+   - Stripe has client and Firebase Functions architecture, but real use requires deployed Functions, secrets, webhook setup, publishable key configuration, and Firestore/Auth validation.
+   - PayPal is demo/stub behavior only.
+   - Nova AI concierge is deterministic fake/demo behavior unless a real service is connected.
+   - The TFLite AI navigation path is represented as local model/controller architecture, not a cloud AI product.
 
 ## Screenshots
 
-Current screenshots are stored in `assets/screenshots/`.
+Current screenshots are stored in `assets/screenshots/` and are included in `pubspec.yaml`.
 
 <p align="center">
   <img src="assets/screenshots/Screenshot_20260523_140630.png" width="180" alt="NovaCommerce screenshot 01" />
@@ -48,6 +80,62 @@ Current screenshots are stored in `assets/screenshots/`.
   <img src="assets/screenshots/Screenshot_20260523_140909.png" width="180" alt="NovaCommerce screenshot 13" />
 </p>
 
+These captures show that the current demo UI covers storefront browsing, category/product discovery, search, AI concierge, offers, cart/checkout entry, account/profile, localization, RTL layout, and dark mode. They should be refreshed whenever the visual system changes materially.
+
+## What This Project Proves
+
+- Flutter mobile product architecture for a commerce app with multiple real user flows.
+- Feature-first organization across `presentation`, `domain`, and `data` layers.
+- Riverpod state management and dependency injection boundaries that swap fake/local/Firebase implementations.
+- GoRouter navigation with tab shell structure and routed checkout, payment, product, profile, orders, offers, and loyalty flows.
+- Firebase integration points for Auth, Firestore, Functions, emulator use, and Firestore rules.
+- Demo/fake repository mode for technical review without Firebase setup.
+- Ecommerce flows including storefront, product discovery, product details, cart, checkout, orders, wishlist, offers, and loyalty.
+- Localization architecture using ARB sources for English, Arabic, French, and Spanish.
+- Payment flow architecture with Stripe/Firebase Functions integration points and safe client/server separation.
+- Honest handling of fake/demo AI surfaces through repository boundaries.
+- Performance and resilience considerations such as cached images, decode-size policy, retry/empty states, pagination/deduping, performance markers, and profile tooling.
+
+## Current Scope / Honest Limitations
+
+- Firebase-backed flows require project-specific Firebase setup, generated platform config, seeded or real Firestore data, enabled auth providers, and rule validation.
+- Stripe requires Firebase Functions deployment, Functions secrets, webhook endpoint setup, webhook secret validation, Stripe publishable key configuration, and Firestore/Auth validation.
+- PayPal is represented as demo/stub behavior only; real PayPal checkout is not configured.
+- Nova AI / AI concierge uses deterministic demo behavior unless a real AI service is connected behind the existing repository boundary.
+- Production launch work is outside the current scope: final app identifiers, signing, privacy/legal pages, real catalog data, monitoring, refund/admin tooling, fulfillment operations, and broader operational setup are not completed here.
+- Some routes and catalog-style entry points intentionally show placeholder or demo behavior while the architecture is being demonstrated.
+- Android debug builds may show an NDK version recommendation related to `integration_test`; the current debug build still completes.
+
+## Demo Mode
+
+Demo mode uses fake/local repositories so reviewers can run the app without a Firebase project:
+
+```bash
+flutter pub get
+flutter run --dart-define=USE_FAKE_REPOS=true
+```
+
+Useful demo/payment flags:
+
+```bash
+flutter run \
+  --dart-define=USE_FAKE_REPOS=true \
+  --dart-define=PAYMENTS_DEMO_OUTCOME=success
+```
+
+`PAYMENTS_DEMO_OUTCOME` also accepts failure-style values used by the fake payment repository, such as `failure` or `cancel`.
+
+Verification commands used by this repo:
+
+```bash
+dart format --set-exit-if-changed .
+flutter analyze
+flutter test --exclude-tags=golden
+flutter build apk --debug
+```
+
+Golden tests are excluded from the main non-golden test command until stable baselines are committed.
+
 ## Features
 
 - Storefront-style home feed with curated sections, categories, search entry points, product cards, pull-to-refresh, and load-more behavior.
@@ -66,15 +154,23 @@ Current screenshots are stored in `assets/screenshots/`.
 
 ## Architecture
 
-NovaCommerce follows a feature-first Flutter structure with clear boundaries:
+NovaCommerce follows a feature-first Flutter structure with explicit boundaries:
 
 - Presentation layers own screens, widgets, and view models.
 - Domain layers define entities, repository contracts, and use cases.
 - Data layers implement fake, local, Firestore, syncing, and provider-specific behavior.
 - Riverpod is used for dependency injection and state management.
-- GoRouter owns the route map and tab shell navigation.
+- GoRouter owns the route map, tab shell navigation, and flow screens.
 - Firebase and payment dependencies sit behind repository/provider boundaries so demo and configured modes can coexist.
 - Shared tokens and widgets keep typography, spacing, surfaces, cards, buttons, chips, states, and product UI consistent across the app.
+
+Key files:
+
+- `lib/app/bootstrap.dart` and `lib/app/main_common.dart` initialize runtime behavior.
+- `lib/app/di/app_providers.dart` is the composition root for repositories, Firebase clients, payment providers, secure storage, and AI/navigation services.
+- `lib/app/config/app_env.dart` defines compile-time flags such as `USE_FAKE_REPOS`, payment provider/mode, emulator ports, and feature flags.
+- `lib/app/router/app_router.dart` defines the GoRouter shell branches and full-screen flows.
+- `docs/ARCHITECTURE.md` captures the intended layering and conventions.
 
 ## Firebase And Backend
 
@@ -83,47 +179,58 @@ The app uses Firebase client services and includes Firebase Functions architectu
 Firebase areas represented in the project:
 
 - Firebase Core initialization.
-- Firebase Auth for anonymous, email/password, and Google-oriented auth flows.
-- Cloud Firestore integration points for products, carts, orders, home config, offers, and related app data.
-- Firestore security rules.
-- Firebase Emulator configuration for local development.
-- Cloud Functions source for Stripe payment intent creation, webhook handling, and order finalization.
+- Firebase Auth repository boundary for anonymous, email/password, and Google-oriented auth flows.
+- Cloud Firestore repositories/datasources for products, carts, orders, home config, offers, and related app data.
+- Firestore security rules in `firestore.rules`.
+- Firebase Emulator flags for local development.
+- Cloud Functions source for Stripe payment intent creation, webhook handling, demo payment sessions, and order finalization.
 
 Project-specific Firebase client files are intentionally not committed for public review. Generate your own config with FlutterFire before running Firebase-backed flows.
 
 ## Payments
 
-NovaCommerce includes a payment architecture rather than a drop-in configured payment account.
+NovaCommerce includes payment architecture rather than a preconfigured payment account.
 
-- Stripe-oriented flow exists through Flutter code and Firebase Functions.
-- Stripe requires Firebase Functions deployment, Stripe secret configuration, webhook secret configuration, webhook endpoint setup, and project-specific Firebase/Auth/Firestore configuration.
-- Demo/fake payment behavior exists for local walkthroughs.
-- PayPal is represented as demo/stub behavior only; a real PayPal integration is not configured.
+- Fake payment mode supports local reviewer walkthroughs.
+- Stripe-oriented flow exists through Flutter payment screens, `StripePaymentRepository`, and Firebase callable/webhook functions.
+- Stripe real mode requires deployed Functions, Stripe secrets, webhook secret, webhook endpoint configuration, publishable key configuration, Firebase Auth, Firestore cart/product data, and rule validation.
+- PayPal is represented by `PaypalPaymentRepository`, but real mode returns a not-configured failure; treat PayPal as demo/stub only.
+- Stripe secret keys must stay in Firebase Functions secrets, not Flutter client code.
+
+Representative Stripe run flags:
+
+```bash
+flutter run \
+  --dart-define=PAYMENTS_PROVIDER=stripe \
+  --dart-define=PAYMENTS_MODE=real \
+  --dart-define=STRIPE_PUBLISHABLE_KEY=your_publishable_key
+```
 
 ## AI Surfaces
 
 NovaCommerce has two AI-oriented areas:
 
-- Nova AI / AI concierge: a chat-style UI backed by deterministic fake/demo behavior unless a real service is connected later.
-- AI navigation model architecture: a TFLite navigation-intent model path with controller logic, confidence thresholds, margin checks, cooldowns, and fail-safe behavior.
+- Nova AI / AI concierge: a chat-style UI backed by deterministic fake/demo behavior in `FakeAiRepository` unless a real service is connected later.
+- AI navigation model architecture: a local TFLite navigation-intent model path with controller logic, confidence thresholds, margin checks, cooldowns, and fail-safe behavior.
 
-The concierge should be treated as a demo surface, not a connected LLM or production recommendation backend.
+The concierge should be treated as a demo surface, not a connected LLM, recommendation backend, or production AI assistant.
 
 ## Localization And Design System
 
 - Material 3 UI foundation.
-- Plus Jakarta Sans typography foundation.
+- Plus Jakarta Sans typography foundation with bundled font assets; legacy Inter assets also remain in the repository.
 - Light/dark theme architecture.
 - Shared tokens for spacing, radius, surfaces, shadows, and interaction rhythm.
 - Shared UI components for buttons, chips, surfaces, product cards, skeletons, empty states, error states, and status labels.
 - Localized ARB sources for English, Arabic, French, and Spanish.
 - Generated localization output is configured through `l10n.yaml`.
+- Screenshots include Arabic RTL and French/dark-mode examples.
 
 ## Performance And Resilience
 
 - Cached network images and decode-size policies.
 - Home feed pagination and deduplication.
-- Skeleton and retry states for key flows.
+- Skeleton, empty, and retry states for key flows.
 - Performance markers for app start, first frame, home product loading, route flows, and memory samples.
 - Profile-mode performance tooling under `tool/` and `integration_test/`.
 - Fake/local repositories help the app remain demonstrable without external services.
@@ -155,8 +262,8 @@ The concierge should be treated as a demo surface, not a connected LLM or produc
 ```text
 lib/
   main.dart
-  app/                 # app bootstrap, routing, DI, theme, config, perf runtime
-  core/                # shared widgets, shared domain types, services, perf helpers
+  app/                 # bootstrap, routing, DI, theme, config, perf runtime
+  core/                # shared widgets, domain types, services, perf helpers
   features/            # feature-first modules
     ai_assistant/
     auth/
@@ -189,50 +296,8 @@ assets/
 test/                  # unit, widget, and golden-oriented test files
 integration_test/      # performance flow
 tool/                  # performance capture and analysis scripts
-docs/                  # design, architecture, and performance notes
+docs/                  # architecture, build, design, and release notes
 ```
-
-## Getting Started
-
-Install Flutter dependencies:
-
-```bash
-flutter pub get
-```
-
-Run the app in local demo mode:
-
-```bash
-flutter run --dart-define=USE_FAKE_REPOS=true
-```
-
-Run static analysis:
-
-```bash
-flutter analyze
-```
-
-Run the verified non-golden test suite:
-
-```bash
-flutter test --exclude-tags=golden
-```
-
-Build a debug APK:
-
-```bash
-flutter build apk --debug
-```
-
-## Demo Mode
-
-Demo mode uses fake/local repositories so the app can be reviewed without a Firebase project:
-
-```bash
-flutter run --dart-define=USE_FAKE_REPOS=true
-```
-
-Payment behavior can also run in fake/demo mode depending on payment provider flags.
 
 ## Firebase Setup
 
@@ -271,27 +336,6 @@ flutter run \
   --dart-define=AUTH_PORT=9099
 ```
 
-## Stripe Setup
-
-Stripe-backed flows require app, Firebase, and Stripe configuration:
-
-1. Deploy the Firebase Functions in `functions/`.
-2. Configure Firebase Functions secrets for Stripe secret key and webhook secret.
-3. Configure the Stripe webhook endpoint to call the deployed webhook function.
-4. Provide a Stripe publishable key to the Flutter app through build-time configuration.
-5. Confirm Firestore rules, cart data, product data, auth state, and order finalization behavior in your Firebase project.
-
-Representative run flags:
-
-```bash
-flutter run \
-  --dart-define=PAYMENTS_PROVIDER=stripe \
-  --dart-define=PAYMENTS_MODE=real \
-  --dart-define=STRIPE_PUBLISHABLE_KEY=your_publishable_key
-```
-
-Do not put Stripe secret keys in Flutter client code.
-
 ## Firebase Functions
 
 Install and build Functions dependencies:
@@ -313,38 +357,29 @@ Current verified status:
 - `flutter test --exclude-tags=golden` passes: 58 passed, 1 skipped.
 - `flutter build apk --debug` passes.
 
-Golden screenshots/baselines are not currently required by CI. They should be refreshed only after the UI is stable and current baselines are intentionally committed.
+The public CI workflow in `.github/workflows/ci.yml` runs:
 
-Public CI currently runs:
-
-- Dart format check.
-- Flutter analyzer.
-- Non-golden Flutter tests.
+- `flutter pub get`
+- `dart format --set-exit-if-changed .`
+- `flutter analyze`
+- `flutter test --exclude-tags=golden`
 
 Public CI intentionally does not require:
 
 - Golden tests without committed stable baselines.
 - Release APK builds that require private Firebase config/signing files.
 
-## Known Limitations
-
-- Firebase project configuration is required for Firebase-backed flows.
-- Stripe requires project-specific Functions deployment, secrets, webhook setup, and data validation.
-- PayPal behavior is demo/stub only.
-- Nova AI concierge uses deterministic fake/demo behavior unless connected to a real service later.
-- Release signing, app identifiers, privacy/legal docs, catalog data, and release-specific setup are not included as finished deployment work.
-- Admin tooling, fulfillment, carrier rates, refunds, and operational dashboards are outside the current app scope.
-- Android debug builds may show an NDK version recommendation related to `integration_test`; the current debug build still completes.
-
 ## Roadmap
 
-- Capture and curate a final screenshot set for the project gallery.
+- Keep CI status aligned with the repository state.
+- Refresh screenshots after major visual changes.
 - Add stable golden baselines after the UI is finalized.
 - Review the Android NDK version warning and decide whether to update local/project Android configuration.
 - Optionally remove unused legacy Inter font assets after confirming no downstream assumptions.
-- Harden Stripe/Functions setup documentation.
+- Harden Stripe/Functions setup documentation as the backend evolves.
 - Expand Firebase/local setup documentation with clearer emulator seed guidance.
 - Move any remaining client-sensitive checkout assumptions into trusted backend paths.
+- Expand admin, refund, fulfillment, and operational flows if this project evolves beyond portfolio review.
 - Add production privacy/legal pages if this project evolves beyond portfolio review.
 - Add real AI service integration behind the existing repository boundary if desired.
 
